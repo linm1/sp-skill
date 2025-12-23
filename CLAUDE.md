@@ -10,9 +10,11 @@ The system functions as a **Data Warehouse for code logic** - ingesting unstruct
 
 - **Frontend**: React 19 with TypeScript
 - **Build Tool**: Vite 6
-- **AI Integration**: Google Gemini API (`@google/genai`)
+- **Backend**: Vercel Serverless Functions (Node.js)
+- **AI Integration**: Google Gemini API (`@google/genai`) - server-side only
 - **Styling**: Tailwind CSS (inline classes)
 - **Icons**: Font Awesome (CDN)
+- **Deployment**: Vercel (https://sp-skill.vercel.app/)
 
 ## Quick Start
 
@@ -22,7 +24,14 @@ npm run dev    # Starts dev server on http://localhost:3000
 npm run build  # Production build
 ```
 
-**Environment**: Set `GEMINI_API_KEY` in `.env.local` for AI-powered Smart ETL features.
+### Environment Setup
+
+**Local Development**: Create `.env.local` (not committed to git):
+```
+GEMINI_API_KEY=your_api_key_here
+```
+
+**Production (Vercel)**: Set `GEMINI_API_KEY` in Vercel Dashboard → Settings → Environment Variables
 
 ## Project Structure
 
@@ -34,8 +43,44 @@ sp-skill/
 ├── package.json        # Dependencies and scripts
 ├── tsconfig.json       # TypeScript configuration
 ├── vite.config.ts      # Vite build configuration
-└── metadata.json       # App metadata
+├── vercel.json         # Vercel deployment configuration
+├── metadata.json       # App metadata
+└── api/
+    └── analyze.ts      # Serverless function for Gemini API calls
 ```
+
+## Security
+
+### API Key Protection
+
+The Gemini API key is **never exposed to the client**. All AI operations are handled server-side:
+
+1. **Frontend** (`index.tsx`): Calls `/api/analyze` endpoint
+2. **Serverless Function** (`api/analyze.ts`): Reads `GEMINI_API_KEY` from server environment
+3. **Vercel Dashboard**: Store the API key in Environment Variables (Settings → Environment Variables)
+
+### Secure API Architecture
+
+```
+┌─────────────────┐     POST /api/analyze      ┌──────────────────┐
+│   Frontend      │ ─────────────────────────► │  Vercel Function │
+│   (Browser)     │                            │  (Server-side)   │
+│                 │ ◄───────────────────────── │                  │
+│   No API Key    │     JSON response          │  GEMINI_API_KEY  │
+└─────────────────┘                            └──────────────────┘
+                                                        │
+                                                        ▼
+                                               ┌──────────────────┐
+                                               │   Gemini API     │
+                                               └──────────────────┘
+```
+
+### Security Best Practices
+
+- **NEVER** expose API keys in client-side code or vite.config.ts
+- **NEVER** commit `.env.local` or any file containing secrets
+- Set `GEMINI_API_KEY` only in Vercel Dashboard for production
+- The API endpoint validates input and limits request size (50KB max)
 
 ## Core Domain Concepts
 

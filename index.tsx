@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useMemo } from "react";
 import { createRoot } from "react-dom/client";
-import { GoogleGenAI, Type } from "@google/genai";
 
 // --- Types & Constants ---
 
@@ -491,52 +490,29 @@ const SmartEtlForm = ({
 
   const analyzeWithGemini = async () => {
     if (!rawInput.trim()) return;
-    if (!process.env.API_KEY) {
-      alert("API Key missing. Cannot use Smart ETL.");
-      return;
-    }
 
     setIsAnalyzing(true);
     try {
-      const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
-      
-      const prompt = `
-        You are an expert Clinical Statistical Programmer. 
-        Extract code implementation details for the pattern: "${definition.title}".
-        
-        The Output must be a valid JSON object matching this schema:
-        {
-            "sasCode": "The SAS code implementation (clean up indentation)",
-            "rCode": "The R code implementation (clean up indentation)",
-            "considerations": ["List of strings", "warnings or dependencies"],
-            "variations": ["List of related pattern names"]
-        }
-
-        Input Text:
-        ${rawInput}
-      `;
-
-      const response = await ai.models.generateContent({
-        model: "gemini-3-flash-preview",
-        contents: prompt,
-        config: {
-            responseMimeType: "application/json",
-            responseSchema: {
-                type: Type.OBJECT,
-                properties: {
-                    sasCode: { type: Type.STRING },
-                    rCode: { type: Type.STRING },
-                    considerations: { type: Type.ARRAY, items: { type: Type.STRING } },
-                    variations: { type: Type.ARRAY, items: { type: Type.STRING } },
-                }
-            }
-        }
+      const response = await fetch('/api/analyze', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          patternTitle: definition.title,
+          rawInput: rawInput,
+        }),
       });
 
-      const extracted = JSON.parse(response.text || "{}");
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.error || 'API request failed');
+      }
+
+      const extracted = await response.json();
       setFormData((prev) => ({ ...prev, ...extracted }));
     } catch (e) {
-      console.error("Gemini Error:", e);
+      console.error("Analysis Error:", e);
       alert("Failed to analyze text. Please fill manually.");
     } finally {
       setIsAnalyzing(false);
