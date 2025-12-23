@@ -606,7 +606,7 @@ const SmartEtlForm = ({
 }: {
   definition: PatternDefinition;
   initialImpl?: PatternImplementation;
-  onSave: (impl: PatternImplementation) => void;
+  onSave: (impl: PatternImplementation, updatedDef?: Partial<PatternDefinition>) => void;
   onCancel: () => void;
 }) => {
   const isEditMode = !!initialImpl;
@@ -619,6 +619,13 @@ const SmartEtlForm = ({
     variations: [],
     author: CURRENT_USER,
     ...initialImpl
+  });
+
+  // State for pattern definition fields
+  const [defData, setDefData] = useState<Partial<PatternDefinition>>({
+    title: definition.title,
+    problem: definition.problem,
+    whenToUse: definition.whenToUse,
   });
 
   const analyzeWithGemini = async () => {
@@ -654,7 +661,7 @@ const SmartEtlForm = ({
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     const newImpl: PatternImplementation = {
       uuid: isEditMode && initialImpl ? initialImpl.uuid : crypto.randomUUID(),
       patternId: definition.id,
@@ -667,7 +674,14 @@ const SmartEtlForm = ({
       isPremium: isEditMode && initialImpl ? initialImpl.isPremium : false,
       timestamp: Date.now()
     };
-    onSave(newImpl);
+
+    // Check if any definition fields have changed
+    const hasDefChanges =
+      defData.title !== definition.title ||
+      defData.problem !== definition.problem ||
+      defData.whenToUse !== definition.whenToUse;
+
+    onSave(newImpl, hasDefChanges ? defData : undefined);
   };
 
   const handleArrayChange = (field: "considerations" | "variations", value: string) => {
@@ -710,7 +724,51 @@ const SmartEtlForm = ({
       )}
 
       <form onSubmit={handleSubmit} className="p-6 space-y-6">
-        
+
+        {/* Pattern Definition Fields */}
+        <div className="bg-slate-50 border border-slate-200 rounded-lg p-4 space-y-4">
+          <h3 className="text-sm font-semibold text-slate-700 uppercase tracking-wide mb-2">
+            <i className="fas fa-info-circle mr-2"></i>Pattern Definition
+          </h3>
+
+          <div>
+            <label className="block text-sm font-medium text-slate-700 mb-1">Pattern Title</label>
+            <input
+              type="text"
+              required
+              value={defData.title}
+              onChange={(e) => setDefData({ ...defData, title: e.target.value })}
+              className="w-full p-2 border border-slate-300 rounded-md text-sm"
+              placeholder="e.g., Last Observation Carried Forward (LOCF)"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-slate-700 mb-1">Problem Statement</label>
+            <textarea
+              required
+              rows={2}
+              value={defData.problem}
+              onChange={(e) => setDefData({ ...defData, problem: e.target.value })}
+              className="w-full p-2 border border-slate-300 rounded-md text-sm"
+              placeholder="Describe what problem this pattern solves..."
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-slate-700 mb-1">When to Use</label>
+            <textarea
+              required
+              rows={2}
+              value={defData.whenToUse}
+              onChange={(e) => setDefData({ ...defData, whenToUse: e.target.value })}
+              className="w-full p-2 border border-slate-300 rounded-md text-sm"
+              placeholder="Specify scenarios and triggers for using this pattern..."
+            />
+          </div>
+        </div>
+
+        {/* Implementation Fields */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div>
             <label className="block text-sm font-medium text-slate-700 mb-1">SAS Implementation</label>
@@ -1100,7 +1158,7 @@ const App = () => {
   const [view, setView] = useState("catalog");
   
   // Data State
-  const [definitions] = useState<PatternDefinition[]>(INITIAL_DEFS);
+  const [definitions, setDefinitions] = useState<PatternDefinition[]>(INITIAL_DEFS);
   const [implementations, setImplementations] = useState<PatternImplementation[]>(INITIAL_IMPLS);
   
   // Selection State
@@ -1151,7 +1209,7 @@ const App = () => {
       setView("contribute");
   };
 
-  const handleSaveImplementation = (newImpl: PatternImplementation) => {
+  const handleSaveImplementation = (newImpl: PatternImplementation, updatedDef?: Partial<PatternDefinition>) => {
       setImplementations(prev => {
           const index = prev.findIndex(i => i.uuid === newImpl.uuid);
           if (index >= 0) {
@@ -1161,6 +1219,22 @@ const App = () => {
           }
           return [...prev, newImpl];
       });
+
+      // Update definition if provided
+      if (updatedDef && selectedDef) {
+          setDefinitions(prev => {
+              const index = prev.findIndex(d => d.id === selectedDef.id);
+              if (index >= 0) {
+                  const updated = [...prev];
+                  updated[index] = { ...updated[index], ...updatedDef };
+                  return updated;
+              }
+              return prev;
+          });
+          // Update the selectedDef to reflect changes
+          setSelectedDef(prev => prev ? { ...prev, ...updatedDef } : prev);
+      }
+
       // Auto-select the new contribution in basket? Optional. Let's not for now.
       setView("detail");
   };
