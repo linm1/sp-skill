@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useMemo } from "react";
 import { createRoot } from "react-dom/client";
 import { GoogleGenAI, Type } from "@google/genai";
+import JSZip from "jszip";
 
 // --- Types & Constants ---
 
@@ -172,6 +173,137 @@ ${impl.considerations.map((c) => `- ${c}`).join("\n")}
 
 ## Common Variations
 ${impl.variations.map((v) => `- ${v}`).join("\n")}
+`;
+};
+
+// Helper to generate filename from pattern ID
+const getPatternFilename = (def: PatternDefinition): string => {
+  const slug = MANIFEST_DATA[def.category as keyof typeof MANIFEST_DATA].find((_, idx) => {
+    const id = `${def.category}-${String(idx + 1).padStart(3, "0")}`;
+    return id === def.id;
+  });
+  return slug ? `${def.id}_${slug}.md` : `${def.id}.md`;
+};
+
+// Generate individual pattern markdown file content
+const generatePatternMarkdown = (def: PatternDefinition, impl: PatternImplementation): string => {
+  return `# ${def.title}
+
+**Pattern ID:** ${def.id}
+**Category:** ${def.category}
+**Author:** ${impl.author}
+
+## Problem Statement
+
+${def.problem}
+
+## When to Use This Pattern
+
+${def.whenToUse}
+
+## SAS Implementation
+
+\`\`\`sas
+${impl.sasCode}
+\`\`\`
+
+## R Implementation
+
+\`\`\`r
+${impl.rCode}
+\`\`\`
+
+## Key Considerations
+
+${impl.considerations.length > 0 ? impl.considerations.map((c) => `- ${c}`).join("\n") : "No specific considerations documented."}
+
+## Common Variations
+
+${impl.variations.length > 0 ? impl.variations.map((v) => `- ${v}`).join("\n") : "No variations documented."}
+
+---
+
+*Last updated: ${new Date(impl.timestamp).toISOString().split('T')[0]}*
+`;
+};
+
+// Generate customized SKILL.md based on selected patterns
+const generateSkillMd = (enrichedItems: { def: PatternDefinition, impl: PatternImplementation }[]): string => {
+  // Group patterns by category
+  const categorizedPatterns = CATEGORIES.map(cat => {
+    const patternsInCat = enrichedItems.filter(item => item.def.category === cat.code);
+    return {
+      ...cat,
+      patterns: patternsInCat
+    };
+  }).filter(cat => cat.patterns.length > 0);
+
+  // Generate category sections
+  const categorySections = categorizedPatterns.map(cat => {
+    const categoryTable = cat.patterns.map(({ def }) => {
+      const filename = getPatternFilename(def);
+      return `| ${def.id} | ${def.title} | [${cat.path}${filename}](${cat.path}${filename}) |`;
+    }).join("\n");
+
+    return `### ${cat.name} (${cat.patterns.length} patterns)
+
+| Pattern | Description | Reference |
+|---------|-------------|-----------|
+${categoryTable}`;
+  }).join("\n\n");
+
+  const totalPatterns = enrichedItems.length;
+
+  return `---
+name: stat-programming
+description: >
+  Clinical programming pattern library for generating SAS and R code snippets.
+  Provides ${totalPatterns} patterns covering SDTM, ADaM, and TLF development. Use when user
+  asks "how do I...", needs derivation logic, imputation code, data manipulation,
+  statistical analysis, or is stuck on a clinical programming problem. Patterns
+  include: missing data imputation (LOCF, BOCF, MI, zero-count categories),
+  variable derivations (TRTEMFL, CHG, PCHG, baseline, analysis flags), date
+  handling (ISO 8601, partial dates, study day), data reshaping (wide/long,
+  transpose), aggregation (frequency, descriptive stats, Big N), merging
+  (one-to-one, closest date, range-based), categorization (binning, CTC grades),
+  flagging (population flags, analysis flags), sorting (treatment, visit order),
+  output formatting (N%, Mean SD, p-values), validation (range checks, DP compare),
+  CDISC compliance (SDTM, ADaM, SUPPQUAL, traceability), statistical methods
+  (t-test, ANOVA, ANCOVA, Kaplan-Meier, Cox PH, logistic regression, MMRM),
+  and performance optimization (hash lookup, format lookup). Generates
+  contextually-adapted code snippets for mid-development challenges.
+---
+
+# Clinical Programming Patterns
+
+Generate SAS and R code snippets for common clinical programming challenges.
+
+## How to Use This Skill
+
+This is a **pattern library**, not a script repository. Patterns are templates
+that Claude adapts to user's specific context.
+
+**Workflow:**
+1. Identify the pattern type from user's question
+2. Read the relevant pattern file from \`references/\`
+3. Adapt the template to user's context (variable names, data structure, language)
+4. Generate contextual code snippet with inline comments
+
+**Key principle:** Never output patterns verbatim. Always adapt to user's specific
+variable names, data structure, and requirements.
+
+## Pattern Quick Reference
+
+${categorySections}
+
+## Code Generation Rules
+
+1. **Always ask or infer**: SAS or R? What are the actual variable names?
+2. **Adapt, don't copy**: Replace template placeholders with user's context
+3. **Include comments**: Explain non-obvious logic inline
+4. **Note dependencies**: Mention required macros, packages, or prior datasets
+5. **Specify CDISC version**: Note IG version compatibility when relevant
+6. **Warn about edge cases**: Flag potential issues (missing data, date comparisons)
 `;
 };
 
@@ -721,14 +853,48 @@ const BasketView = ({
           : enrichedItems.filter(i => i.def.category === activeCategory);
   }, [activeCategory, enrichedItems]);
 
-  const exportData = () => {
-      const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(enrichedItems, null, 2));
-      const downloadAnchorNode = document.createElement('a');
-      downloadAnchorNode.setAttribute("href",     dataStr);
-      downloadAnchorNode.setAttribute("download", "agent_skills_export.json");
-      document.body.appendChild(downloadAnchorNode); // required for firefox
-      downloadAnchorNode.click();
-      downloadAnchorNode.remove();
+  const exportData = async () => {
+      try {
+        const zip = new JSZip();
+
+        // 1. Generate and add SKILL.md to root
+        const skillMdContent = generateSkillMd(enrichedItems);
+        zip.file("SKILL.md", skillMdContent);
+
+        // 2. Create references folder structure and add pattern files
+        const categoryFolders: Record<string, JSZip | null> = {};
+
+        // Initialize category folders
+        CATEGORIES.forEach(cat => {
+          categoryFolders[cat.code] = zip.folder(cat.path);
+        });
+
+        // Add each pattern file to its category folder
+        enrichedItems.forEach(({ def, impl }) => {
+          const filename = getPatternFilename(def);
+          const patternContent = generatePatternMarkdown(def, impl);
+          const folder = categoryFolders[def.category];
+          if (folder) {
+            folder.file(filename, patternContent);
+          }
+        });
+
+        // 3. Generate ZIP file
+        const blob = await zip.generateAsync({ type: "blob" });
+
+        // 4. Trigger download
+        const url = URL.createObjectURL(blob);
+        const downloadAnchorNode = document.createElement('a');
+        downloadAnchorNode.setAttribute("href", url);
+        downloadAnchorNode.setAttribute("download", "stat-programming.zip");
+        document.body.appendChild(downloadAnchorNode);
+        downloadAnchorNode.click();
+        downloadAnchorNode.remove();
+        URL.revokeObjectURL(url);
+      } catch (error) {
+        console.error("Error generating ZIP:", error);
+        alert("Failed to generate export. Please try again.");
+      }
   }
 
   return (
