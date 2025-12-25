@@ -2,34 +2,98 @@
 
 ## Local Development Setup
 
-### Quick Start
+### Prerequisites
 
 ```bash
-# Make sure you've already run:
-# vercel login
-# vercel link
-# vercel env pull .env.local
+# 1. Login to Vercel
+vercel login
 
-# Start development server (runs both Vite + API endpoints)
-vercel dev
+# 2. Link your local project
+vercel link
+
+# 3. Pull environment variables
+vercel env pull .env.local
 ```
 
-This will start the development server at **http://localhost:3000**
+---
+
+## Running the Development Server
+
+### Two-Terminal Approach (Recommended)
+
+You need to run **two separate servers** for local development:
+
+#### **Terminal 1: Frontend (Vite)**
+```bash
+npm run dev
+```
+→ Runs on **http://localhost:3000**
+- Serves React frontend with fast HMR
+- Proxies `/api/*` requests to port 3001
+
+#### **Terminal 2: API (Vercel Functions)**
+```bash
+npm run dev:api
+```
+→ Runs on **http://localhost:3001**
+- Executes serverless functions in `/api/*`
+- Loads environment variables from `.env.local`
+
+### Access Your App
 
 - **Frontend**: http://localhost:3000
-- **API endpoints**: http://localhost:3000/api/*
+- **API (via proxy)**: http://localhost:3000/api/*
+- **API (direct)**: http://localhost:3001/api/*
 
 ---
 
 ## How It Works
 
-`vercel dev` does two things:
-1. Runs `vite --port 3000` (your React frontend)
-2. Runs serverless functions in `/api/*` folder
+### Architecture
 
-The `devCommand` in `vercel.json` tells Vercel to start Vite:
+```
+┌─────────────────────────────────────────────────────────┐
+│  Browser: http://localhost:3000                         │
+└────────────┬────────────────────────────────────────────┘
+             │
+             ▼
+┌────────────────────────────────────────────────────────┐
+│  Vite Dev Server (Port 3000)                           │
+│  - Serves React app (index.tsx)                        │
+│  - Hot Module Replacement (HMR)                        │
+│  - Proxies /api/* → http://localhost:3001              │
+└────────────┬───────────────────────────────────────────┘
+             │ (API requests only)
+             ▼
+┌────────────────────────────────────────────────────────┐
+│  Vercel Dev Server (Port 3001)                         │
+│  - Runs serverless functions (/api/*.ts)               │
+│  - Connects to Vercel Postgres                         │
+│  - Loads .env.local variables                          │
+└────────────────────────────────────────────────────────┘
+```
+
+### Configuration Files
+
+**`vite.config.ts`** - Proxy API requests:
+```typescript
+server: {
+  port: 3000,
+  proxy: {
+    '/api': {
+      target: 'http://localhost:3001',
+      changeOrigin: true,
+    },
+  },
+}
+```
+
+**`package.json`** - NPM scripts:
 ```json
-"devCommand": "vite --port 3000"
+{
+  "dev": "vite",
+  "dev:api": "vercel dev --listen 3001"
+}
 ```
 
 ---
@@ -41,6 +105,10 @@ The `devCommand` in `vercel.json` tells Vercel to start Vite:
 Check that `.env.local` contains database credentials:
 
 ```bash
+# Windows PowerShell
+Get-Content .env.local | Select-String "POSTGRES"
+
+# macOS/Linux/Git Bash
 cat .env.local | grep POSTGRES
 ```
 
@@ -49,31 +117,39 @@ You should see:
 POSTGRES_URL=postgres://...
 POSTGRES_HOST=...
 POSTGRES_USER=...
+POSTGRES_DATABASE=...
 ```
 
-If not, run:
+If missing, run:
 ```bash
 vercel env pull .env.local
 ```
 
-### Step 2: Start Development Server
+### Step 2: Start Both Servers
 
+**Terminal 1:**
 ```bash
-vercel dev
+npm run dev
 ```
 
-Wait for:
+**Terminal 2:**
+```bash
+npm run dev:api
 ```
-> Ready! Available at http://localhost:3000
-```
+
+Wait for both to show "Ready" messages.
 
 ### Step 3: Test Database Connection
 
-In a new terminal:
+Open a **third terminal** or use your browser:
 
+**Option A: cURL (from terminal)**
 ```bash
 curl http://localhost:3000/api/db-test
 ```
+
+**Option B: Browser**
+Open: http://localhost:3000/api/db-test
 
 Expected response:
 ```json
@@ -100,15 +176,33 @@ Expected response:
 ### Step 1: Add Migration Token
 
 Add to `.env.local`:
-```bash
+```env
 MIGRATION_TOKEN=your-secret-token-12345
 ```
 
-### Step 2: Run Migration
+Choose any random string (e.g., `my-secret-migration-key`).
+
+### Step 2: Restart API Server
+
+Stop Terminal 2 (`Ctrl+C`) and restart:
+```bash
+npm run dev:api
+```
+
+This reloads the new environment variable.
+
+### Step 3: Run Migration
 
 ```bash
 curl -X POST http://localhost:3000/api/migrate \
   -H "x-migration-token: your-secret-token-12345"
+```
+
+**Windows PowerShell:**
+```powershell
+Invoke-RestMethod -Uri http://localhost:3000/api/migrate `
+  -Method POST `
+  -Headers @{"x-migration-token"="your-secret-token-12345"}
 ```
 
 Expected response:
@@ -125,38 +219,48 @@ This creates:
 - `pattern_definitions` table
 - `pattern_implementations` table
 
+### Step 4: Verify Tables in Vercel Dashboard
+
+1. Go to https://vercel.com/dashboard
+2. Select `sp-skill` project
+3. Go to **Storage** → Your database
+4. Click **Data** tab
+5. You should see 3 tables listed
+
 ---
 
 ## Common Issues & Solutions
 
 ### Issue: `vercel: command not found`
 
-**Solution**:
+**Solution:**
 ```bash
 npm install -g vercel
 ```
 
 ### Issue: "No existing credentials found"
 
-**Solution**:
+**Solution:**
 ```bash
 vercel login
 vercel link
 vercel env pull .env.local
 ```
 
-### Issue: API endpoints return 404
+### Issue: API returns raw JavaScript code (not JSON)
 
-**Problem**: `vercel dev` not running or crashed
+**Problem**: Vite is serving API files as static assets instead of proxying to Vercel
 
-**Solution**:
-1. Stop `vercel dev` (Ctrl+C)
-2. Restart: `vercel dev`
-3. Wait for "Ready! Available at http://localhost:3000"
+**Solution:**
+1. Make sure **both** servers are running:
+   - Terminal 1: `npm run dev` (Vite on port 3000)
+   - Terminal 2: `npm run dev:api` (Vercel on port 3001)
+2. Verify `vite.config.ts` has proxy configuration
+3. Access via port 3000, not 3001: `http://localhost:3000/api/db-test`
 
 ### Issue: "Database connection failed"
 
-**Solutions**:
+**Solutions:**
 
 1. **Check environment variables**:
    ```bash
@@ -172,26 +276,35 @@ vercel env pull .env.local
    - https://vercel.com/dashboard → sp-skill → Storage
    - Should see your database listed
 
-4. **Restart dev server**:
+4. **Restart API server** (Terminal 2):
    ```bash
-   # Stop vercel dev (Ctrl+C)
-   vercel dev
+   # Ctrl+C to stop
+   npm run dev:api
    ```
 
-### Issue: Port 3000 already in use
+### Issue: Port 3000 or 3001 already in use
 
-**Solution**:
-```bash
-# Stop process on port 3000
-# Windows:
+**Windows:**
+```powershell
+# Find process
 netstat -ano | findstr :3000
+
+# Kill process (replace PID with actual number)
 taskkill /PID <PID> /F
+```
 
-# macOS/Linux:
+**macOS/Linux:**
+```bash
+# Find and kill process
 lsof -ti:3000 | xargs kill -9
+```
 
-# Then restart
-vercel dev
+### Issue: Changes to API code not reflecting
+
+**Solution**: API functions have caching. Restart the API server (Terminal 2):
+```bash
+# Stop (Ctrl+C)
+npm run dev:api
 ```
 
 ---
@@ -201,49 +314,36 @@ vercel dev
 ### 1. Start Development
 
 ```bash
-vercel dev
+# Terminal 1
+npm run dev
+
+# Terminal 2
+npm run dev:api
 ```
 
 ### 2. Make Code Changes
 
-- **Frontend**: Edit `index.tsx` → Auto-reloads
-- **API**: Edit `api/*.ts` → Auto-reloads
-- **Database**: Edit `db/schema.ts` → Restart `vercel dev`
+- **Frontend** (`index.tsx`): Auto-reloads instantly via HMR
+- **API** (`api/*.ts`): Restart Terminal 2 (`Ctrl+C` → `npm run dev:api`)
+- **Database** (`db/schema.ts`): Restart Terminal 2
 
 ### 3. Test API Endpoints
 
 ```bash
-# Test connection
+# Test database connection
 curl http://localhost:3000/api/db-test
 
-# Test other endpoints
-curl http://localhost:3000/api/analyze -X POST -H "Content-Type: application/json" -d '{"content":"test"}'
+# Test Gemini AI endpoint (existing)
+curl http://localhost:3000/api/analyze \
+  -X POST \
+  -H "Content-Type: application/json" \
+  -d "{\"content\":\"test\"}"
 ```
 
 ### 4. View Logs
 
-- **Browser console**: Frontend logs
-- **Terminal**: API logs appear in `vercel dev` output
-
----
-
-## Alternative: Run Frontend and API Separately
-
-If `vercel dev` has issues, you can run them separately:
-
-### Terminal 1: Frontend (Vite)
-```bash
-npm run dev
-# Runs on http://localhost:5173
-```
-
-### Terminal 2: API (Vercel)
-```bash
-vercel dev --listen 3000
-# Runs on http://localhost:3000
-```
-
-Then update frontend API calls to point to `http://localhost:3000/api/*`
+- **Frontend logs**: Browser Developer Tools → Console
+- **API logs**: Terminal 2 output (Vercel Dev)
 
 ---
 
@@ -252,11 +352,11 @@ Then update frontend API calls to point to `http://localhost:3000/api/*`
 ### Deploy to Vercel
 
 ```bash
-# Deploy to production
-vercel --prod
-
 # Deploy preview
 vercel
+
+# Deploy to production
+vercel --prod
 ```
 
 ### Environment Variables for Production
@@ -268,9 +368,7 @@ Set in Vercel Dashboard (Settings → Environment Variables):
 
 ---
 
-## Next Steps
-
-After successful local setup:
+## Next Steps After Setup
 
 1. ✅ Test database connection (`/api/db-test`)
 2. ✅ Run migration (`/api/migrate`)
@@ -280,9 +378,38 @@ After successful local setup:
 
 ---
 
+## Quick Reference
+
+### NPM Scripts
+
+| Command | Description |
+|---------|-------------|
+| `npm run dev` | Start Vite frontend (port 3000) |
+| `npm run dev:api` | Start Vercel API server (port 3001) |
+| `npm run build` | Build for production |
+| `npm run preview` | Preview production build |
+
+### API Endpoints
+
+| Endpoint | Method | Description |
+|----------|--------|-------------|
+| `/api/db-test` | GET | Test database connection |
+| `/api/migrate` | POST | Create database tables (requires token) |
+| `/api/analyze` | POST | AI extraction with Gemini (existing) |
+
+### Ports
+
+| Port | Service |
+|------|---------|
+| 3000 | Vite Dev Server (frontend + API proxy) |
+| 3001 | Vercel Dev Server (serverless functions) |
+
+---
+
 ## Resources
 
 - [Vercel CLI Docs](https://vercel.com/docs/cli)
 - [Vercel Dev Command](https://vercel.com/docs/cli/dev)
 - [Vercel Postgres Docs](https://vercel.com/docs/storage/vercel-postgres)
+- [Vite Proxy Config](https://vitejs.dev/config/server-options.html#server-proxy)
 - [Drizzle ORM Docs](https://orm.drizzle.team/)
