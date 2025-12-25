@@ -1,0 +1,2768 @@
+{
+  "version": "1.0.0",
+  "lastUpdated": "2025-12-25",
+  "definitions": [
+    {
+      "id": "IMP-001",
+      "category": "IMP",
+      "title": "Missing Category",
+      "problem": "Content to be added.",
+      "whenToUse": "To be defined."
+    },
+    {
+      "id": "IMP-002",
+      "category": "IMP",
+      "title": "Last Observation Carried Forward (LOCF)",
+      "problem": "Missing values in longitudinal data need to be filled with the last known value.",
+      "whenToUse": "When the analysis plan specifies LOCF for missing data handling in safety datasets."
+    },
+    {
+      "id": "IMP-003",
+      "category": "IMP",
+      "title": "Bocf",
+      "problem": "Content to be added.",
+      "whenToUse": "To be defined."
+    },
+    {
+      "id": "IMP-004",
+      "category": "IMP",
+      "title": "Wocf",
+      "problem": "Content to be added.",
+      "whenToUse": "To be defined."
+    },
+    {
+      "id": "IMP-005",
+      "category": "IMP",
+      "title": "Linear Interpolation",
+      "problem": "Content to be added.",
+      "whenToUse": "To be defined."
+    },
+    {
+      "id": "IMP-006",
+      "category": "IMP",
+      "title": "Mean Median",
+      "problem": "Content to be added.",
+      "whenToUse": "To be defined."
+    },
+    {
+      "id": "IMP-007",
+      "category": "IMP",
+      "title": "Mi Continuous",
+      "problem": "Content to be added.",
+      "whenToUse": "To be defined."
+    },
+    {
+      "id": "IMP-008",
+      "category": "IMP",
+      "title": "Mi Categorical",
+      "problem": "Content to be added.",
+      "whenToUse": "To be defined."
+    },
+    {
+      "id": "IMP-009",
+      "category": "IMP",
+      "title": "Pattern Mixture",
+      "problem": "Content to be added.",
+      "whenToUse": "To be defined."
+    },
+    {
+      "id": "IMP-010",
+      "category": "IMP",
+      "title": "Tipping Point",
+      "problem": "Content to be added.",
+      "whenToUse": "To be defined."
+    },
+    {
+      "id": "IMP-011",
+      "category": "IMP",
+      "title": "Visit Window",
+      "problem": "Content to be added.",
+      "whenToUse": "To be defined."
+    },
+    {
+      "id": "IMP-012",
+      "category": "IMP",
+      "title": "Partial Date",
+      "problem": "Content to be added.",
+      "whenToUse": "To be defined."
+    },
+    {
+      "id": "IMP-013",
+      "category": "IMP",
+      "title": "Baseline Extension",
+      "problem": "Content to be added.",
+      "whenToUse": "To be defined."
+    },
+    {
+      "id": "IMP-014",
+      "category": "IMP",
+      "title": "Control Based",
+      "problem": "Content to be added.",
+      "whenToUse": "To be defined."
+    },
+    {
+      "id": "DER-001",
+      "category": "DER",
+      "title": "Trtemfl",
+      "problem": "Content to be added.",
+      "whenToUse": "To be defined."
+    },
+    {
+      "id": "DER-002",
+      "category": "DER",
+      "title": "Anlfl",
+      "problem": "Content to be added.",
+      "whenToUse": "To be defined."
+    },
+    {
+      "id": "DER-003",
+      "category": "DER",
+      "title": "Aval",
+      "problem": "Content to be added.",
+      "whenToUse": "To be defined."
+    },
+    {
+      "id": "DER-004",
+      "category": "DER",
+      "title": "Avalc",
+      "problem": "Content to be added.",
+      "whenToUse": "To be defined."
+    },
+    {
+      "id": "DER-005",
+      "category": "DER",
+      "title": "Ady",
+      "problem": "Content to be added.",
+      "whenToUse": "To be defined."
+    },
+    {
+      "id": "DER-006",
+      "category": "DER",
+      "title": "Avisit",
+      "problem": "Content to be added.",
+      "whenToUse": "To be defined."
+    },
+    {
+      "id": "DER-007",
+      "category": "DER",
+      "title": "Ablfl",
+      "problem": "Content to be added.",
+      "whenToUse": "To be defined."
+    },
+    {
+      "id": "DER-008",
+      "category": "DER",
+      "title": "Base",
+      "problem": "Content to be added.",
+      "whenToUse": "To be defined."
+    },
+    {
+      "id": "DER-009",
+      "category": "DER",
+      "title": "Chg",
+      "problem": "Content to be added.",
+      "whenToUse": "To be defined."
+    },
+    {
+      "id": "DER-010",
+      "category": "DER",
+      "title": "Pchg",
+      "problem": "Content to be added.",
+      "whenToUse": "To be defined."
+    },
+    {
+      "id": "DER-011",
+      "category": "DER",
+      "title": "Shift",
+      "problem": "Content to be added.",
+      "whenToUse": "To be defined."
+    },
+    {
+      "id": "DER-012",
+      "category": "DER",
+      "title": "Locfl",
+      "problem": "Content to be added.",
+      "whenToUse": "To be defined."
+    },
+    {
+      "id": "DER-013",
+      "category": "DER",
+      "title": "Focfl",
+      "problem": "Content to be added.",
+      "whenToUse": "To be defined."
+    },
+    {
+      "id": "DER-014",
+      "category": "DER",
+      "title": "Wocfl",
+      "problem": "Content to be added.",
+      "whenToUse": "To be defined."
+    },
+    {
+      "id": "DER-015",
+      "category": "DER",
+      "title": "Bocfl",
+      "problem": "Content to be added.",
+      "whenToUse": "To be defined."
+    },
+    {
+      "id": "DER-016",
+      "category": "DER",
+      "title": "Tte",
+      "problem": "Content to be added.",
+      "whenToUse": "To be defined."
+    },
+    {
+      "id": "DER-017",
+      "category": "DER",
+      "title": "Cnsr",
+      "problem": "Content to be added.",
+      "whenToUse": "To be defined."
+    },
+    {
+      "id": "DER-018",
+      "category": "DER",
+      "title": "Duration",
+      "problem": "Content to be added.",
+      "whenToUse": "To be defined."
+    },
+    {
+      "id": "DER-019",
+      "category": "DER",
+      "title": "Dose Norm",
+      "problem": "Content to be added.",
+      "whenToUse": "To be defined."
+    },
+    {
+      "id": "DER-020",
+      "category": "DER",
+      "title": "Calculate BMI from Height and Weight",
+      "problem": "Need to derive Body Mass Index (BMI) from raw height and weight variables.",
+      "whenToUse": "Vital signs domain derivation."
+    },
+    {
+      "id": "DER-021",
+      "category": "DER",
+      "title": "Age",
+      "problem": "Content to be added.",
+      "whenToUse": "To be defined."
+    },
+    {
+      "id": "DER-022",
+      "category": "DER",
+      "title": "Relative Day",
+      "problem": "Content to be added.",
+      "whenToUse": "To be defined."
+    },
+    {
+      "id": "DER-023",
+      "category": "DER",
+      "title": "Period",
+      "problem": "Content to be added.",
+      "whenToUse": "To be defined."
+    },
+    {
+      "id": "DER-024",
+      "category": "DER",
+      "title": "Criterion",
+      "problem": "Content to be added.",
+      "whenToUse": "To be defined."
+    },
+    {
+      "id": "DER-025",
+      "category": "DER",
+      "title": "Derived Param",
+      "problem": "Content to be added.",
+      "whenToUse": "To be defined."
+    },
+    {
+      "id": "DAT-001",
+      "category": "DAT",
+      "title": "Iso8601",
+      "problem": "Content to be added.",
+      "whenToUse": "To be defined."
+    },
+    {
+      "id": "DAT-002",
+      "category": "DAT",
+      "title": "Partial Date",
+      "problem": "Content to be added.",
+      "whenToUse": "To be defined."
+    },
+    {
+      "id": "DAT-003",
+      "category": "DAT",
+      "title": "Date Imputation",
+      "problem": "Content to be added.",
+      "whenToUse": "To be defined."
+    },
+    {
+      "id": "DAT-004",
+      "category": "DAT",
+      "title": "Datetime Combine",
+      "problem": "Content to be added.",
+      "whenToUse": "To be defined."
+    },
+    {
+      "id": "DAT-005",
+      "category": "DAT",
+      "title": "Date Compare",
+      "problem": "Content to be added.",
+      "whenToUse": "To be defined."
+    },
+    {
+      "id": "DAT-006",
+      "category": "DAT",
+      "title": "Study Day",
+      "problem": "Content to be added.",
+      "whenToUse": "To be defined."
+    },
+    {
+      "id": "DAT-007",
+      "category": "DAT",
+      "title": "Duration",
+      "problem": "Content to be added.",
+      "whenToUse": "To be defined."
+    },
+    {
+      "id": "DAT-008",
+      "category": "DAT",
+      "title": "Visit Window",
+      "problem": "Content to be added.",
+      "whenToUse": "To be defined."
+    },
+    {
+      "id": "DAT-009",
+      "category": "DAT",
+      "title": "Period Map",
+      "problem": "Content to be added.",
+      "whenToUse": "To be defined."
+    },
+    {
+      "id": "DAT-010",
+      "category": "DAT",
+      "title": "Time Imputation",
+      "problem": "Content to be added.",
+      "whenToUse": "To be defined."
+    },
+    {
+      "id": "DAT-011",
+      "category": "DAT",
+      "title": "Relative Time",
+      "problem": "Content to be added.",
+      "whenToUse": "To be defined."
+    },
+    {
+      "id": "DAT-012",
+      "category": "DAT",
+      "title": "Overlap",
+      "problem": "Content to be added.",
+      "whenToUse": "To be defined."
+    },
+    {
+      "id": "RSH-001",
+      "category": "RSH",
+      "title": "Wide To Long",
+      "problem": "Content to be added.",
+      "whenToUse": "To be defined."
+    },
+    {
+      "id": "RSH-002",
+      "category": "RSH",
+      "title": "Long To Wide",
+      "problem": "Content to be added.",
+      "whenToUse": "To be defined."
+    },
+    {
+      "id": "RSH-003",
+      "category": "RSH",
+      "title": "Normalize",
+      "problem": "Content to be added.",
+      "whenToUse": "To be defined."
+    },
+    {
+      "id": "RSH-004",
+      "category": "RSH",
+      "title": "Denormalize",
+      "problem": "Content to be added.",
+      "whenToUse": "To be defined."
+    },
+    {
+      "id": "RSH-005",
+      "category": "RSH",
+      "title": "Param Transpose",
+      "problem": "Content to be added.",
+      "whenToUse": "To be defined."
+    },
+    {
+      "id": "RSH-006",
+      "category": "RSH",
+      "title": "Stack",
+      "problem": "Content to be added.",
+      "whenToUse": "To be defined."
+    },
+    {
+      "id": "RSH-007",
+      "category": "RSH",
+      "title": "Rename",
+      "problem": "Content to be added.",
+      "whenToUse": "To be defined."
+    },
+    {
+      "id": "RSH-008",
+      "category": "RSH",
+      "title": "Split",
+      "problem": "Content to be added.",
+      "whenToUse": "To be defined."
+    },
+    {
+      "id": "RSH-009",
+      "category": "RSH",
+      "title": "Combine",
+      "problem": "Content to be added.",
+      "whenToUse": "To be defined."
+    },
+    {
+      "id": "RSH-010",
+      "category": "RSH",
+      "title": "Crosstab Shell",
+      "problem": "Content to be added.",
+      "whenToUse": "To be defined."
+    },
+    {
+      "id": "AGG-001",
+      "category": "AGG",
+      "title": "Frequency",
+      "problem": "Content to be added.",
+      "whenToUse": "To be defined."
+    },
+    {
+      "id": "AGG-002",
+      "category": "AGG",
+      "title": "Descriptive",
+      "problem": "Content to be added.",
+      "whenToUse": "To be defined."
+    },
+    {
+      "id": "AGG-003",
+      "category": "AGG",
+      "title": "Big N",
+      "problem": "Content to be added.",
+      "whenToUse": "To be defined."
+    },
+    {
+      "id": "AGG-004",
+      "category": "AGG",
+      "title": "Nested Counts",
+      "problem": "Content to be added.",
+      "whenToUse": "To be defined."
+    },
+    {
+      "id": "AGG-005",
+      "category": "AGG",
+      "title": "Cumulative",
+      "problem": "Content to be added.",
+      "whenToUse": "To be defined."
+    },
+    {
+      "id": "AGG-006",
+      "category": "AGG",
+      "title": "Weighted",
+      "problem": "Content to be added.",
+      "whenToUse": "To be defined."
+    },
+    {
+      "id": "AGG-007",
+      "category": "AGG",
+      "title": "Percentile",
+      "problem": "Content to be added.",
+      "whenToUse": "To be defined."
+    },
+    {
+      "id": "AGG-008",
+      "category": "AGG",
+      "title": "Geometric",
+      "problem": "Content to be added.",
+      "whenToUse": "To be defined."
+    },
+    {
+      "id": "AGG-009",
+      "category": "AGG",
+      "title": "Rates",
+      "problem": "Content to be added.",
+      "whenToUse": "To be defined."
+    },
+    {
+      "id": "AGG-010",
+      "category": "AGG",
+      "title": "Ci",
+      "problem": "Content to be added.",
+      "whenToUse": "To be defined."
+    },
+    {
+      "id": "AGG-011",
+      "category": "AGG",
+      "title": "Pooled",
+      "problem": "Content to be added.",
+      "whenToUse": "To be defined."
+    },
+    {
+      "id": "AGG-012",
+      "category": "AGG",
+      "title": "Within Subject",
+      "problem": "Content to be added.",
+      "whenToUse": "To be defined."
+    },
+    {
+      "id": "MRG-001",
+      "category": "MRG",
+      "title": "One To One",
+      "problem": "Content to be added.",
+      "whenToUse": "To be defined."
+    },
+    {
+      "id": "MRG-002",
+      "category": "MRG",
+      "title": "One To Many",
+      "problem": "Content to be added.",
+      "whenToUse": "To be defined."
+    },
+    {
+      "id": "MRG-003",
+      "category": "MRG",
+      "title": "Many To Many",
+      "problem": "Content to be added.",
+      "whenToUse": "To be defined."
+    },
+    {
+      "id": "MRG-004",
+      "category": "MRG",
+      "title": "Join Types",
+      "problem": "Content to be added.",
+      "whenToUse": "To be defined."
+    },
+    {
+      "id": "MRG-005",
+      "category": "MRG",
+      "title": "Conditional",
+      "problem": "Content to be added.",
+      "whenToUse": "To be defined."
+    },
+    {
+      "id": "MRG-006",
+      "category": "MRG",
+      "title": "Closest Date",
+      "problem": "Content to be added.",
+      "whenToUse": "To be defined."
+    },
+    {
+      "id": "MRG-007",
+      "category": "MRG",
+      "title": "Range Based",
+      "problem": "Content to be added.",
+      "whenToUse": "To be defined."
+    },
+    {
+      "id": "MRG-008",
+      "category": "MRG",
+      "title": "Self Join",
+      "problem": "Content to be added.",
+      "whenToUse": "To be defined."
+    },
+    {
+      "id": "MRG-009",
+      "category": "MRG",
+      "title": "Update",
+      "problem": "Content to be added.",
+      "whenToUse": "To be defined."
+    },
+    {
+      "id": "MRG-010",
+      "category": "MRG",
+      "title": "Coalesce",
+      "problem": "Content to be added.",
+      "whenToUse": "To be defined."
+    },
+    {
+      "id": "MRG-011",
+      "category": "MRG",
+      "title": "Anti Join",
+      "problem": "Content to be added.",
+      "whenToUse": "To be defined."
+    },
+    {
+      "id": "MRG-012",
+      "category": "MRG",
+      "title": "Cross Join",
+      "problem": "Content to be added.",
+      "whenToUse": "To be defined."
+    },
+    {
+      "id": "CAT-001",
+      "category": "CAT",
+      "title": "Binning",
+      "problem": "Content to be added.",
+      "whenToUse": "To be defined."
+    },
+    {
+      "id": "CAT-002",
+      "category": "CAT",
+      "title": "Consolidation",
+      "problem": "Content to be added.",
+      "whenToUse": "To be defined."
+    },
+    {
+      "id": "CAT-003",
+      "category": "CAT",
+      "title": "Ct Mapping",
+      "problem": "Content to be added.",
+      "whenToUse": "To be defined."
+    },
+    {
+      "id": "CAT-004",
+      "category": "CAT",
+      "title": "Decode",
+      "problem": "Content to be added.",
+      "whenToUse": "To be defined."
+    },
+    {
+      "id": "CAT-005",
+      "category": "CAT",
+      "title": "Severity",
+      "problem": "Content to be added.",
+      "whenToUse": "To be defined."
+    },
+    {
+      "id": "CAT-006",
+      "category": "CAT",
+      "title": "Ctc Grade",
+      "problem": "Content to be added.",
+      "whenToUse": "To be defined."
+    },
+    {
+      "id": "CAT-007",
+      "category": "CAT",
+      "title": "Ref Range",
+      "problem": "Content to be added.",
+      "whenToUse": "To be defined."
+    },
+    {
+      "id": "CAT-008",
+      "category": "CAT",
+      "title": "Custom",
+      "problem": "Content to be added.",
+      "whenToUse": "To be defined."
+    },
+    {
+      "id": "CAT-009",
+      "category": "CAT",
+      "title": "Hierarchical",
+      "problem": "Content to be added.",
+      "whenToUse": "To be defined."
+    },
+    {
+      "id": "CAT-010",
+      "category": "CAT",
+      "title": "Order",
+      "problem": "Content to be added.",
+      "whenToUse": "To be defined."
+    },
+    {
+      "id": "FLG-001",
+      "category": "FLG",
+      "title": "Population",
+      "problem": "Content to be added.",
+      "whenToUse": "To be defined."
+    },
+    {
+      "id": "FLG-002",
+      "category": "FLG",
+      "title": "Record Selection",
+      "problem": "Content to be added.",
+      "whenToUse": "To be defined."
+    },
+    {
+      "id": "FLG-003",
+      "category": "FLG",
+      "title": "Subgroup",
+      "problem": "Content to be added.",
+      "whenToUse": "To be defined."
+    },
+    {
+      "id": "FLG-004",
+      "category": "FLG",
+      "title": "Deviation",
+      "problem": "Content to be added.",
+      "whenToUse": "To be defined."
+    },
+    {
+      "id": "FLG-005",
+      "category": "FLG",
+      "title": "Exclusion",
+      "problem": "Content to be added.",
+      "whenToUse": "To be defined."
+    },
+    {
+      "id": "FLG-006",
+      "category": "FLG",
+      "title": "Outlier",
+      "problem": "Content to be added.",
+      "whenToUse": "To be defined."
+    },
+    {
+      "id": "FLG-007",
+      "category": "FLG",
+      "title": "Quality",
+      "problem": "Content to be added.",
+      "whenToUse": "To be defined."
+    },
+    {
+      "id": "FLG-008",
+      "category": "FLG",
+      "title": "Selection",
+      "problem": "Content to be added.",
+      "whenToUse": "To be defined."
+    },
+    {
+      "id": "FLG-009",
+      "category": "FLG",
+      "title": "Subsetting",
+      "problem": "Content to be added.",
+      "whenToUse": "To be defined."
+    },
+    {
+      "id": "FLG-010",
+      "category": "FLG",
+      "title": "Distinct",
+      "problem": "Content to be added.",
+      "whenToUse": "To be defined."
+    },
+    {
+      "id": "SRT-001",
+      "category": "SRT",
+      "title": "Treatment",
+      "problem": "Content to be added.",
+      "whenToUse": "To be defined."
+    },
+    {
+      "id": "SRT-002",
+      "category": "SRT",
+      "title": "Visit",
+      "problem": "Content to be added.",
+      "whenToUse": "To be defined."
+    },
+    {
+      "id": "SRT-003",
+      "category": "SRT",
+      "title": "Parameter",
+      "problem": "Content to be added.",
+      "whenToUse": "To be defined."
+    },
+    {
+      "id": "SRT-004",
+      "category": "SRT",
+      "title": "Category",
+      "problem": "Content to be added.",
+      "whenToUse": "To be defined."
+    },
+    {
+      "id": "SRT-005",
+      "category": "SRT",
+      "title": "Alpha Exception",
+      "problem": "Content to be added.",
+      "whenToUse": "To be defined."
+    },
+    {
+      "id": "SRT-006",
+      "category": "SRT",
+      "title": "Hierarchical",
+      "problem": "Content to be added.",
+      "whenToUse": "To be defined."
+    },
+    {
+      "id": "SRT-007",
+      "category": "SRT",
+      "title": "Frequency",
+      "problem": "Content to be added.",
+      "whenToUse": "To be defined."
+    },
+    {
+      "id": "SRT-008",
+      "category": "SRT",
+      "title": "Subject",
+      "problem": "Content to be added.",
+      "whenToUse": "To be defined."
+    },
+    {
+      "id": "SRT-009",
+      "category": "SRT",
+      "title": "Pagebreak",
+      "problem": "Content to be added.",
+      "whenToUse": "To be defined."
+    },
+    {
+      "id": "FMT-001",
+      "category": "FMT",
+      "title": "N Percent",
+      "problem": "Content to be added.",
+      "whenToUse": "To be defined."
+    },
+    {
+      "id": "FMT-002",
+      "category": "FMT",
+      "title": "Mean Sd",
+      "problem": "Content to be added.",
+      "whenToUse": "To be defined."
+    },
+    {
+      "id": "FMT-003",
+      "category": "FMT",
+      "title": "Median Iqr",
+      "problem": "Content to be added.",
+      "whenToUse": "To be defined."
+    },
+    {
+      "id": "FMT-004",
+      "category": "FMT",
+      "title": "Min Max",
+      "problem": "Content to be added.",
+      "whenToUse": "To be defined."
+    },
+    {
+      "id": "FMT-005",
+      "category": "FMT",
+      "title": "Ci",
+      "problem": "Content to be added.",
+      "whenToUse": "To be defined."
+    },
+    {
+      "id": "FMT-006",
+      "category": "FMT",
+      "title": "Pvalue",
+      "problem": "Content to be added.",
+      "whenToUse": "To be defined."
+    },
+    {
+      "id": "FMT-007",
+      "category": "FMT",
+      "title": "Decimal",
+      "problem": "Content to be added.",
+      "whenToUse": "To be defined."
+    },
+    {
+      "id": "FMT-008",
+      "category": "FMT",
+      "title": "Missing",
+      "problem": "Content to be added.",
+      "whenToUse": "To be defined."
+    },
+    {
+      "id": "FMT-009",
+      "category": "FMT",
+      "title": "Indent",
+      "problem": "Content to be added.",
+      "whenToUse": "To be defined."
+    },
+    {
+      "id": "FMT-010",
+      "category": "FMT",
+      "title": "Headers",
+      "problem": "Content to be added.",
+      "whenToUse": "To be defined."
+    },
+    {
+      "id": "FMT-011",
+      "category": "FMT",
+      "title": "Footnotes",
+      "problem": "Content to be added.",
+      "whenToUse": "To be defined."
+    },
+    {
+      "id": "FMT-012",
+      "category": "FMT",
+      "title": "Bypage",
+      "problem": "Content to be added.",
+      "whenToUse": "To be defined."
+    },
+    {
+      "id": "FMT-013",
+      "category": "FMT",
+      "title": "Continued",
+      "problem": "Content to be added.",
+      "whenToUse": "To be defined."
+    },
+    {
+      "id": "FMT-014",
+      "category": "FMT",
+      "title": "Empty Row",
+      "problem": "Content to be added.",
+      "whenToUse": "To be defined."
+    },
+    {
+      "id": "FMT-015",
+      "category": "FMT",
+      "title": "Date Display",
+      "problem": "Content to be added.",
+      "whenToUse": "To be defined."
+    },
+    {
+      "id": "VAL-001",
+      "category": "VAL",
+      "title": "Range",
+      "problem": "Content to be added.",
+      "whenToUse": "To be defined."
+    },
+    {
+      "id": "VAL-002",
+      "category": "VAL",
+      "title": "Cross Var",
+      "problem": "Content to be added.",
+      "whenToUse": "To be defined."
+    },
+    {
+      "id": "VAL-003",
+      "category": "VAL",
+      "title": "Uniqueness",
+      "problem": "Content to be added.",
+      "whenToUse": "To be defined."
+    },
+    {
+      "id": "VAL-004",
+      "category": "VAL",
+      "title": "Referential",
+      "problem": "Content to be added.",
+      "whenToUse": "To be defined."
+    },
+    {
+      "id": "VAL-005",
+      "category": "VAL",
+      "title": "Conformance",
+      "problem": "Content to be added.",
+      "whenToUse": "To be defined."
+    },
+    {
+      "id": "VAL-006",
+      "category": "VAL",
+      "title": "Dp Compare",
+      "problem": "Content to be added.",
+      "whenToUse": "To be defined."
+    },
+    {
+      "id": "VAL-007",
+      "category": "VAL",
+      "title": "Reconciliation",
+      "problem": "Content to be added.",
+      "whenToUse": "To be defined."
+    },
+    {
+      "id": "VAL-008",
+      "category": "VAL",
+      "title": "Missing Assess",
+      "problem": "Content to be added.",
+      "whenToUse": "To be defined."
+    },
+    {
+      "id": "VAL-009",
+      "category": "VAL",
+      "title": "Ct Validation",
+      "problem": "Content to be added.",
+      "whenToUse": "To be defined."
+    },
+    {
+      "id": "VAL-010",
+      "category": "VAL",
+      "title": "Type Check",
+      "problem": "Content to be added.",
+      "whenToUse": "To be defined."
+    },
+    {
+      "id": "CDS-001",
+      "category": "CDS",
+      "title": "Sdtm Structure",
+      "problem": "Content to be added.",
+      "whenToUse": "To be defined."
+    },
+    {
+      "id": "CDS-002",
+      "category": "CDS",
+      "title": "Suppqual",
+      "problem": "Content to be added.",
+      "whenToUse": "To be defined."
+    },
+    {
+      "id": "CDS-003",
+      "category": "CDS",
+      "title": "Relrec",
+      "problem": "Content to be added.",
+      "whenToUse": "To be defined."
+    },
+    {
+      "id": "CDS-004",
+      "category": "CDS",
+      "title": "Bds Structure",
+      "problem": "Content to be added.",
+      "whenToUse": "To be defined."
+    },
+    {
+      "id": "CDS-005",
+      "category": "CDS",
+      "title": "Adsl Structure",
+      "problem": "Content to be added.",
+      "whenToUse": "To be defined."
+    },
+    {
+      "id": "CDS-006",
+      "category": "CDS",
+      "title": "Occds Structure",
+      "problem": "Content to be added.",
+      "whenToUse": "To be defined."
+    },
+    {
+      "id": "CDS-007",
+      "category": "CDS",
+      "title": "Paramcd",
+      "problem": "Content to be added.",
+      "whenToUse": "To be defined."
+    },
+    {
+      "id": "CDS-008",
+      "category": "CDS",
+      "title": "Traceability",
+      "problem": "Content to be added.",
+      "whenToUse": "To be defined."
+    },
+    {
+      "id": "CDS-009",
+      "category": "CDS",
+      "title": "Ct",
+      "problem": "Content to be added.",
+      "whenToUse": "To be defined."
+    },
+    {
+      "id": "CDS-010",
+      "category": "CDS",
+      "title": "Define",
+      "problem": "Content to be added.",
+      "whenToUse": "To be defined."
+    },
+    {
+      "id": "STA-001",
+      "category": "STA",
+      "title": "Ttest Two",
+      "problem": "Content to be added.",
+      "whenToUse": "To be defined."
+    },
+    {
+      "id": "STA-002",
+      "category": "STA",
+      "title": "Ttest Paired",
+      "problem": "Content to be added.",
+      "whenToUse": "To be defined."
+    },
+    {
+      "id": "STA-003",
+      "category": "STA",
+      "title": "Anova",
+      "problem": "Content to be added.",
+      "whenToUse": "To be defined."
+    },
+    {
+      "id": "STA-004",
+      "category": "STA",
+      "title": "Ancova",
+      "problem": "Content to be added.",
+      "whenToUse": "To be defined."
+    },
+    {
+      "id": "STA-005",
+      "category": "STA",
+      "title": "Chisq",
+      "problem": "Content to be added.",
+      "whenToUse": "To be defined."
+    },
+    {
+      "id": "STA-006",
+      "category": "STA",
+      "title": "Fisher",
+      "problem": "Content to be added.",
+      "whenToUse": "To be defined."
+    },
+    {
+      "id": "STA-007",
+      "category": "STA",
+      "title": "Wilcoxon Rs",
+      "problem": "Content to be added.",
+      "whenToUse": "To be defined."
+    },
+    {
+      "id": "STA-008",
+      "category": "STA",
+      "title": "Wilcoxon Sr",
+      "problem": "Content to be added.",
+      "whenToUse": "To be defined."
+    },
+    {
+      "id": "STA-009",
+      "category": "STA",
+      "title": "Kruskal",
+      "problem": "Content to be added.",
+      "whenToUse": "To be defined."
+    },
+    {
+      "id": "STA-010",
+      "category": "STA",
+      "title": "Logrank",
+      "problem": "Content to be added.",
+      "whenToUse": "To be defined."
+    },
+    {
+      "id": "STA-011",
+      "category": "STA",
+      "title": "Km",
+      "problem": "Content to be added.",
+      "whenToUse": "To be defined."
+    },
+    {
+      "id": "STA-012",
+      "category": "STA",
+      "title": "Cox",
+      "problem": "Content to be added.",
+      "whenToUse": "To be defined."
+    },
+    {
+      "id": "STA-013",
+      "category": "STA",
+      "title": "Logistic",
+      "problem": "Content to be added.",
+      "whenToUse": "To be defined."
+    },
+    {
+      "id": "STA-014",
+      "category": "STA",
+      "title": "Mmrm",
+      "problem": "Content to be added.",
+      "whenToUse": "To be defined."
+    },
+    {
+      "id": "STA-015",
+      "category": "STA",
+      "title": "Cmh",
+      "problem": "Content to be added.",
+      "whenToUse": "To be defined."
+    },
+    {
+      "id": "OPT-001",
+      "category": "OPT",
+      "title": "Index Sort",
+      "problem": "Content to be added.",
+      "whenToUse": "To be defined."
+    },
+    {
+      "id": "OPT-002",
+      "category": "OPT",
+      "title": "Hash",
+      "problem": "Content to be added.",
+      "whenToUse": "To be defined."
+    },
+    {
+      "id": "OPT-003",
+      "category": "OPT",
+      "title": "Format Lookup",
+      "problem": "Content to be added.",
+      "whenToUse": "To be defined."
+    },
+    {
+      "id": "OPT-004",
+      "category": "OPT",
+      "title": "Subset First",
+      "problem": "Content to be added.",
+      "whenToUse": "To be defined."
+    },
+    {
+      "id": "OPT-005",
+      "category": "OPT",
+      "title": "Avoid Sort",
+      "problem": "Content to be added.",
+      "whenToUse": "To be defined."
+    },
+    {
+      "id": "OPT-006",
+      "category": "OPT",
+      "title": "Bygroup",
+      "problem": "Content to be added.",
+      "whenToUse": "To be defined."
+    },
+    {
+      "id": "OPT-007",
+      "category": "OPT",
+      "title": "Temp Mgmt",
+      "problem": "Content to be added.",
+      "whenToUse": "To be defined."
+    },
+    {
+      "id": "OPT-008",
+      "category": "OPT",
+      "title": "Macro Vs Data",
+      "problem": "Content to be added.",
+      "whenToUse": "To be defined."
+    }
+  ],
+  "implementations": [
+    {
+      "patternId": "IMP-001",
+      "authorName": "System",
+      "sasCode": "/* SAS implementation pending */",
+      "rCode": "# R implementation pending",
+      "considerations": [],
+      "variations": [],
+      "isPremium": false
+    },
+    {
+      "patternId": "IMP-002",
+      "authorName": "System",
+      "sasCode": "data locf;\n  set source;\n  by usubjid;\n  retain last_val;\n  if not missing(aval) then last_val = aval;\n  else aval = last_val;\nrun;",
+      "rCode": "library(dplyr)\nlibrary(tidyr)\n\ndf_locf <- df %>%\n  group_by(usubjid) %>%\n  fill(aval, .direction = \"down\")",
+      "considerations": [
+        "Ensure data is sorted by subject and time before applying.",
+        "Do not use for baseline imputation if baseline is missing."
+      ],
+      "variations": [
+        "Baseline Observation Carried Forward (BOCF)",
+        "Worst Observation Carried Forward"
+      ],
+      "isPremium": false
+    },
+    {
+      "patternId": "IMP-003",
+      "authorName": "System",
+      "sasCode": "/* SAS implementation pending */",
+      "rCode": "# R implementation pending",
+      "considerations": [],
+      "variations": [],
+      "isPremium": false
+    },
+    {
+      "patternId": "IMP-004",
+      "authorName": "System",
+      "sasCode": "/* SAS implementation pending */",
+      "rCode": "# R implementation pending",
+      "considerations": [],
+      "variations": [],
+      "isPremium": false
+    },
+    {
+      "patternId": "IMP-005",
+      "authorName": "System",
+      "sasCode": "/* SAS implementation pending */",
+      "rCode": "# R implementation pending",
+      "considerations": [],
+      "variations": [],
+      "isPremium": false
+    },
+    {
+      "patternId": "IMP-006",
+      "authorName": "System",
+      "sasCode": "/* SAS implementation pending */",
+      "rCode": "# R implementation pending",
+      "considerations": [],
+      "variations": [],
+      "isPremium": false
+    },
+    {
+      "patternId": "IMP-007",
+      "authorName": "System",
+      "sasCode": "/* SAS implementation pending */",
+      "rCode": "# R implementation pending",
+      "considerations": [],
+      "variations": [],
+      "isPremium": false
+    },
+    {
+      "patternId": "IMP-008",
+      "authorName": "System",
+      "sasCode": "/* SAS implementation pending */",
+      "rCode": "# R implementation pending",
+      "considerations": [],
+      "variations": [],
+      "isPremium": false
+    },
+    {
+      "patternId": "IMP-009",
+      "authorName": "System",
+      "sasCode": "/* SAS implementation pending */",
+      "rCode": "# R implementation pending",
+      "considerations": [],
+      "variations": [],
+      "isPremium": false
+    },
+    {
+      "patternId": "IMP-010",
+      "authorName": "System",
+      "sasCode": "/* SAS implementation pending */",
+      "rCode": "# R implementation pending",
+      "considerations": [],
+      "variations": [],
+      "isPremium": false
+    },
+    {
+      "patternId": "IMP-011",
+      "authorName": "System",
+      "sasCode": "/* SAS implementation pending */",
+      "rCode": "# R implementation pending",
+      "considerations": [],
+      "variations": [],
+      "isPremium": false
+    },
+    {
+      "patternId": "IMP-012",
+      "authorName": "System",
+      "sasCode": "/* SAS implementation pending */",
+      "rCode": "# R implementation pending",
+      "considerations": [],
+      "variations": [],
+      "isPremium": false
+    },
+    {
+      "patternId": "IMP-013",
+      "authorName": "System",
+      "sasCode": "/* SAS implementation pending */",
+      "rCode": "# R implementation pending",
+      "considerations": [],
+      "variations": [],
+      "isPremium": false
+    },
+    {
+      "patternId": "IMP-014",
+      "authorName": "System",
+      "sasCode": "/* SAS implementation pending */",
+      "rCode": "# R implementation pending",
+      "considerations": [],
+      "variations": [],
+      "isPremium": false
+    },
+    {
+      "patternId": "DER-001",
+      "authorName": "System",
+      "sasCode": "/* SAS implementation pending */",
+      "rCode": "# R implementation pending",
+      "considerations": [],
+      "variations": [],
+      "isPremium": false
+    },
+    {
+      "patternId": "DER-002",
+      "authorName": "System",
+      "sasCode": "/* SAS implementation pending */",
+      "rCode": "# R implementation pending",
+      "considerations": [],
+      "variations": [],
+      "isPremium": false
+    },
+    {
+      "patternId": "DER-003",
+      "authorName": "System",
+      "sasCode": "/* SAS implementation pending */",
+      "rCode": "# R implementation pending",
+      "considerations": [],
+      "variations": [],
+      "isPremium": false
+    },
+    {
+      "patternId": "DER-004",
+      "authorName": "System",
+      "sasCode": "/* SAS implementation pending */",
+      "rCode": "# R implementation pending",
+      "considerations": [],
+      "variations": [],
+      "isPremium": false
+    },
+    {
+      "patternId": "DER-005",
+      "authorName": "System",
+      "sasCode": "/* SAS implementation pending */",
+      "rCode": "# R implementation pending",
+      "considerations": [],
+      "variations": [],
+      "isPremium": false
+    },
+    {
+      "patternId": "DER-006",
+      "authorName": "System",
+      "sasCode": "/* SAS implementation pending */",
+      "rCode": "# R implementation pending",
+      "considerations": [],
+      "variations": [],
+      "isPremium": false
+    },
+    {
+      "patternId": "DER-007",
+      "authorName": "System",
+      "sasCode": "/* SAS implementation pending */",
+      "rCode": "# R implementation pending",
+      "considerations": [],
+      "variations": [],
+      "isPremium": false
+    },
+    {
+      "patternId": "DER-008",
+      "authorName": "System",
+      "sasCode": "/* SAS implementation pending */",
+      "rCode": "# R implementation pending",
+      "considerations": [],
+      "variations": [],
+      "isPremium": false
+    },
+    {
+      "patternId": "DER-009",
+      "authorName": "System",
+      "sasCode": "/* SAS implementation pending */",
+      "rCode": "# R implementation pending",
+      "considerations": [],
+      "variations": [],
+      "isPremium": false
+    },
+    {
+      "patternId": "DER-010",
+      "authorName": "System",
+      "sasCode": "/* SAS implementation pending */",
+      "rCode": "# R implementation pending",
+      "considerations": [],
+      "variations": [],
+      "isPremium": false
+    },
+    {
+      "patternId": "DER-011",
+      "authorName": "System",
+      "sasCode": "/* SAS implementation pending */",
+      "rCode": "# R implementation pending",
+      "considerations": [],
+      "variations": [],
+      "isPremium": false
+    },
+    {
+      "patternId": "DER-012",
+      "authorName": "System",
+      "sasCode": "/* SAS implementation pending */",
+      "rCode": "# R implementation pending",
+      "considerations": [],
+      "variations": [],
+      "isPremium": false
+    },
+    {
+      "patternId": "DER-013",
+      "authorName": "System",
+      "sasCode": "/* SAS implementation pending */",
+      "rCode": "# R implementation pending",
+      "considerations": [],
+      "variations": [],
+      "isPremium": false
+    },
+    {
+      "patternId": "DER-014",
+      "authorName": "System",
+      "sasCode": "/* SAS implementation pending */",
+      "rCode": "# R implementation pending",
+      "considerations": [],
+      "variations": [],
+      "isPremium": false
+    },
+    {
+      "patternId": "DER-015",
+      "authorName": "System",
+      "sasCode": "/* SAS implementation pending */",
+      "rCode": "# R implementation pending",
+      "considerations": [],
+      "variations": [],
+      "isPremium": false
+    },
+    {
+      "patternId": "DER-016",
+      "authorName": "System",
+      "sasCode": "/* SAS implementation pending */",
+      "rCode": "# R implementation pending",
+      "considerations": [],
+      "variations": [],
+      "isPremium": false
+    },
+    {
+      "patternId": "DER-017",
+      "authorName": "System",
+      "sasCode": "/* SAS implementation pending */",
+      "rCode": "# R implementation pending",
+      "considerations": [],
+      "variations": [],
+      "isPremium": false
+    },
+    {
+      "patternId": "DER-018",
+      "authorName": "System",
+      "sasCode": "/* SAS implementation pending */",
+      "rCode": "# R implementation pending",
+      "considerations": [],
+      "variations": [],
+      "isPremium": false
+    },
+    {
+      "patternId": "DER-019",
+      "authorName": "System",
+      "sasCode": "/* SAS implementation pending */",
+      "rCode": "# R implementation pending",
+      "considerations": [],
+      "variations": [],
+      "isPremium": false
+    },
+    {
+      "patternId": "DER-020",
+      "authorName": "System",
+      "sasCode": "if not missing(weight) and not missing(height) then \n  bmi = weight / ((height/100)**2);",
+      "rCode": "df <- df %>%\n  mutate(bmi = weight / ((height/100)^2))",
+      "considerations": [
+        "Check units! Height is usually cm, weight kg."
+      ],
+      "variations": [],
+      "isPremium": false
+    },
+    {
+      "patternId": "DER-021",
+      "authorName": "System",
+      "sasCode": "/* SAS implementation pending */",
+      "rCode": "# R implementation pending",
+      "considerations": [],
+      "variations": [],
+      "isPremium": false
+    },
+    {
+      "patternId": "DER-022",
+      "authorName": "System",
+      "sasCode": "/* SAS implementation pending */",
+      "rCode": "# R implementation pending",
+      "considerations": [],
+      "variations": [],
+      "isPremium": false
+    },
+    {
+      "patternId": "DER-023",
+      "authorName": "System",
+      "sasCode": "/* SAS implementation pending */",
+      "rCode": "# R implementation pending",
+      "considerations": [],
+      "variations": [],
+      "isPremium": false
+    },
+    {
+      "patternId": "DER-024",
+      "authorName": "System",
+      "sasCode": "/* SAS implementation pending */",
+      "rCode": "# R implementation pending",
+      "considerations": [],
+      "variations": [],
+      "isPremium": false
+    },
+    {
+      "patternId": "DER-025",
+      "authorName": "System",
+      "sasCode": "/* SAS implementation pending */",
+      "rCode": "# R implementation pending",
+      "considerations": [],
+      "variations": [],
+      "isPremium": false
+    },
+    {
+      "patternId": "DAT-001",
+      "authorName": "System",
+      "sasCode": "/* SAS implementation pending */",
+      "rCode": "# R implementation pending",
+      "considerations": [],
+      "variations": [],
+      "isPremium": false
+    },
+    {
+      "patternId": "DAT-002",
+      "authorName": "System",
+      "sasCode": "/* SAS implementation pending */",
+      "rCode": "# R implementation pending",
+      "considerations": [],
+      "variations": [],
+      "isPremium": false
+    },
+    {
+      "patternId": "DAT-003",
+      "authorName": "System",
+      "sasCode": "/* SAS implementation pending */",
+      "rCode": "# R implementation pending",
+      "considerations": [],
+      "variations": [],
+      "isPremium": false
+    },
+    {
+      "patternId": "DAT-004",
+      "authorName": "System",
+      "sasCode": "/* SAS implementation pending */",
+      "rCode": "# R implementation pending",
+      "considerations": [],
+      "variations": [],
+      "isPremium": false
+    },
+    {
+      "patternId": "DAT-005",
+      "authorName": "System",
+      "sasCode": "/* SAS implementation pending */",
+      "rCode": "# R implementation pending",
+      "considerations": [],
+      "variations": [],
+      "isPremium": false
+    },
+    {
+      "patternId": "DAT-006",
+      "authorName": "System",
+      "sasCode": "/* SAS implementation pending */",
+      "rCode": "# R implementation pending",
+      "considerations": [],
+      "variations": [],
+      "isPremium": false
+    },
+    {
+      "patternId": "DAT-007",
+      "authorName": "System",
+      "sasCode": "/* SAS implementation pending */",
+      "rCode": "# R implementation pending",
+      "considerations": [],
+      "variations": [],
+      "isPremium": false
+    },
+    {
+      "patternId": "DAT-008",
+      "authorName": "System",
+      "sasCode": "/* SAS implementation pending */",
+      "rCode": "# R implementation pending",
+      "considerations": [],
+      "variations": [],
+      "isPremium": false
+    },
+    {
+      "patternId": "DAT-009",
+      "authorName": "System",
+      "sasCode": "/* SAS implementation pending */",
+      "rCode": "# R implementation pending",
+      "considerations": [],
+      "variations": [],
+      "isPremium": false
+    },
+    {
+      "patternId": "DAT-010",
+      "authorName": "System",
+      "sasCode": "/* SAS implementation pending */",
+      "rCode": "# R implementation pending",
+      "considerations": [],
+      "variations": [],
+      "isPremium": false
+    },
+    {
+      "patternId": "DAT-011",
+      "authorName": "System",
+      "sasCode": "/* SAS implementation pending */",
+      "rCode": "# R implementation pending",
+      "considerations": [],
+      "variations": [],
+      "isPremium": false
+    },
+    {
+      "patternId": "DAT-012",
+      "authorName": "System",
+      "sasCode": "/* SAS implementation pending */",
+      "rCode": "# R implementation pending",
+      "considerations": [],
+      "variations": [],
+      "isPremium": false
+    },
+    {
+      "patternId": "RSH-001",
+      "authorName": "System",
+      "sasCode": "/* SAS implementation pending */",
+      "rCode": "# R implementation pending",
+      "considerations": [],
+      "variations": [],
+      "isPremium": false
+    },
+    {
+      "patternId": "RSH-002",
+      "authorName": "System",
+      "sasCode": "/* SAS implementation pending */",
+      "rCode": "# R implementation pending",
+      "considerations": [],
+      "variations": [],
+      "isPremium": false
+    },
+    {
+      "patternId": "RSH-003",
+      "authorName": "System",
+      "sasCode": "/* SAS implementation pending */",
+      "rCode": "# R implementation pending",
+      "considerations": [],
+      "variations": [],
+      "isPremium": false
+    },
+    {
+      "patternId": "RSH-004",
+      "authorName": "System",
+      "sasCode": "/* SAS implementation pending */",
+      "rCode": "# R implementation pending",
+      "considerations": [],
+      "variations": [],
+      "isPremium": false
+    },
+    {
+      "patternId": "RSH-005",
+      "authorName": "System",
+      "sasCode": "/* SAS implementation pending */",
+      "rCode": "# R implementation pending",
+      "considerations": [],
+      "variations": [],
+      "isPremium": false
+    },
+    {
+      "patternId": "RSH-006",
+      "authorName": "System",
+      "sasCode": "/* SAS implementation pending */",
+      "rCode": "# R implementation pending",
+      "considerations": [],
+      "variations": [],
+      "isPremium": false
+    },
+    {
+      "patternId": "RSH-007",
+      "authorName": "System",
+      "sasCode": "/* SAS implementation pending */",
+      "rCode": "# R implementation pending",
+      "considerations": [],
+      "variations": [],
+      "isPremium": false
+    },
+    {
+      "patternId": "RSH-008",
+      "authorName": "System",
+      "sasCode": "/* SAS implementation pending */",
+      "rCode": "# R implementation pending",
+      "considerations": [],
+      "variations": [],
+      "isPremium": false
+    },
+    {
+      "patternId": "RSH-009",
+      "authorName": "System",
+      "sasCode": "/* SAS implementation pending */",
+      "rCode": "# R implementation pending",
+      "considerations": [],
+      "variations": [],
+      "isPremium": false
+    },
+    {
+      "patternId": "RSH-010",
+      "authorName": "System",
+      "sasCode": "/* SAS implementation pending */",
+      "rCode": "# R implementation pending",
+      "considerations": [],
+      "variations": [],
+      "isPremium": false
+    },
+    {
+      "patternId": "AGG-001",
+      "authorName": "System",
+      "sasCode": "/* SAS implementation pending */",
+      "rCode": "# R implementation pending",
+      "considerations": [],
+      "variations": [],
+      "isPremium": false
+    },
+    {
+      "patternId": "AGG-002",
+      "authorName": "System",
+      "sasCode": "/* SAS implementation pending */",
+      "rCode": "# R implementation pending",
+      "considerations": [],
+      "variations": [],
+      "isPremium": false
+    },
+    {
+      "patternId": "AGG-003",
+      "authorName": "System",
+      "sasCode": "/* SAS implementation pending */",
+      "rCode": "# R implementation pending",
+      "considerations": [],
+      "variations": [],
+      "isPremium": false
+    },
+    {
+      "patternId": "AGG-004",
+      "authorName": "System",
+      "sasCode": "/* SAS implementation pending */",
+      "rCode": "# R implementation pending",
+      "considerations": [],
+      "variations": [],
+      "isPremium": false
+    },
+    {
+      "patternId": "AGG-005",
+      "authorName": "System",
+      "sasCode": "/* SAS implementation pending */",
+      "rCode": "# R implementation pending",
+      "considerations": [],
+      "variations": [],
+      "isPremium": false
+    },
+    {
+      "patternId": "AGG-006",
+      "authorName": "System",
+      "sasCode": "/* SAS implementation pending */",
+      "rCode": "# R implementation pending",
+      "considerations": [],
+      "variations": [],
+      "isPremium": false
+    },
+    {
+      "patternId": "AGG-007",
+      "authorName": "System",
+      "sasCode": "/* SAS implementation pending */",
+      "rCode": "# R implementation pending",
+      "considerations": [],
+      "variations": [],
+      "isPremium": false
+    },
+    {
+      "patternId": "AGG-008",
+      "authorName": "System",
+      "sasCode": "/* SAS implementation pending */",
+      "rCode": "# R implementation pending",
+      "considerations": [],
+      "variations": [],
+      "isPremium": false
+    },
+    {
+      "patternId": "AGG-009",
+      "authorName": "System",
+      "sasCode": "/* SAS implementation pending */",
+      "rCode": "# R implementation pending",
+      "considerations": [],
+      "variations": [],
+      "isPremium": false
+    },
+    {
+      "patternId": "AGG-010",
+      "authorName": "System",
+      "sasCode": "/* SAS implementation pending */",
+      "rCode": "# R implementation pending",
+      "considerations": [],
+      "variations": [],
+      "isPremium": false
+    },
+    {
+      "patternId": "AGG-011",
+      "authorName": "System",
+      "sasCode": "/* SAS implementation pending */",
+      "rCode": "# R implementation pending",
+      "considerations": [],
+      "variations": [],
+      "isPremium": false
+    },
+    {
+      "patternId": "AGG-012",
+      "authorName": "System",
+      "sasCode": "/* SAS implementation pending */",
+      "rCode": "# R implementation pending",
+      "considerations": [],
+      "variations": [],
+      "isPremium": false
+    },
+    {
+      "patternId": "MRG-001",
+      "authorName": "System",
+      "sasCode": "/* SAS implementation pending */",
+      "rCode": "# R implementation pending",
+      "considerations": [],
+      "variations": [],
+      "isPremium": false
+    },
+    {
+      "patternId": "MRG-002",
+      "authorName": "System",
+      "sasCode": "/* SAS implementation pending */",
+      "rCode": "# R implementation pending",
+      "considerations": [],
+      "variations": [],
+      "isPremium": false
+    },
+    {
+      "patternId": "MRG-003",
+      "authorName": "System",
+      "sasCode": "/* SAS implementation pending */",
+      "rCode": "# R implementation pending",
+      "considerations": [],
+      "variations": [],
+      "isPremium": false
+    },
+    {
+      "patternId": "MRG-004",
+      "authorName": "System",
+      "sasCode": "/* SAS implementation pending */",
+      "rCode": "# R implementation pending",
+      "considerations": [],
+      "variations": [],
+      "isPremium": false
+    },
+    {
+      "patternId": "MRG-005",
+      "authorName": "System",
+      "sasCode": "/* SAS implementation pending */",
+      "rCode": "# R implementation pending",
+      "considerations": [],
+      "variations": [],
+      "isPremium": false
+    },
+    {
+      "patternId": "MRG-006",
+      "authorName": "System",
+      "sasCode": "/* SAS implementation pending */",
+      "rCode": "# R implementation pending",
+      "considerations": [],
+      "variations": [],
+      "isPremium": false
+    },
+    {
+      "patternId": "MRG-007",
+      "authorName": "System",
+      "sasCode": "/* SAS implementation pending */",
+      "rCode": "# R implementation pending",
+      "considerations": [],
+      "variations": [],
+      "isPremium": false
+    },
+    {
+      "patternId": "MRG-008",
+      "authorName": "System",
+      "sasCode": "/* SAS implementation pending */",
+      "rCode": "# R implementation pending",
+      "considerations": [],
+      "variations": [],
+      "isPremium": false
+    },
+    {
+      "patternId": "MRG-009",
+      "authorName": "System",
+      "sasCode": "/* SAS implementation pending */",
+      "rCode": "# R implementation pending",
+      "considerations": [],
+      "variations": [],
+      "isPremium": false
+    },
+    {
+      "patternId": "MRG-010",
+      "authorName": "System",
+      "sasCode": "/* SAS implementation pending */",
+      "rCode": "# R implementation pending",
+      "considerations": [],
+      "variations": [],
+      "isPremium": false
+    },
+    {
+      "patternId": "MRG-011",
+      "authorName": "System",
+      "sasCode": "/* SAS implementation pending */",
+      "rCode": "# R implementation pending",
+      "considerations": [],
+      "variations": [],
+      "isPremium": false
+    },
+    {
+      "patternId": "MRG-012",
+      "authorName": "System",
+      "sasCode": "/* SAS implementation pending */",
+      "rCode": "# R implementation pending",
+      "considerations": [],
+      "variations": [],
+      "isPremium": false
+    },
+    {
+      "patternId": "CAT-001",
+      "authorName": "System",
+      "sasCode": "/* SAS implementation pending */",
+      "rCode": "# R implementation pending",
+      "considerations": [],
+      "variations": [],
+      "isPremium": false
+    },
+    {
+      "patternId": "CAT-002",
+      "authorName": "System",
+      "sasCode": "/* SAS implementation pending */",
+      "rCode": "# R implementation pending",
+      "considerations": [],
+      "variations": [],
+      "isPremium": false
+    },
+    {
+      "patternId": "CAT-003",
+      "authorName": "System",
+      "sasCode": "/* SAS implementation pending */",
+      "rCode": "# R implementation pending",
+      "considerations": [],
+      "variations": [],
+      "isPremium": false
+    },
+    {
+      "patternId": "CAT-004",
+      "authorName": "System",
+      "sasCode": "/* SAS implementation pending */",
+      "rCode": "# R implementation pending",
+      "considerations": [],
+      "variations": [],
+      "isPremium": false
+    },
+    {
+      "patternId": "CAT-005",
+      "authorName": "System",
+      "sasCode": "/* SAS implementation pending */",
+      "rCode": "# R implementation pending",
+      "considerations": [],
+      "variations": [],
+      "isPremium": false
+    },
+    {
+      "patternId": "CAT-006",
+      "authorName": "System",
+      "sasCode": "/* SAS implementation pending */",
+      "rCode": "# R implementation pending",
+      "considerations": [],
+      "variations": [],
+      "isPremium": false
+    },
+    {
+      "patternId": "CAT-007",
+      "authorName": "System",
+      "sasCode": "/* SAS implementation pending */",
+      "rCode": "# R implementation pending",
+      "considerations": [],
+      "variations": [],
+      "isPremium": false
+    },
+    {
+      "patternId": "CAT-008",
+      "authorName": "System",
+      "sasCode": "/* SAS implementation pending */",
+      "rCode": "# R implementation pending",
+      "considerations": [],
+      "variations": [],
+      "isPremium": false
+    },
+    {
+      "patternId": "CAT-009",
+      "authorName": "System",
+      "sasCode": "/* SAS implementation pending */",
+      "rCode": "# R implementation pending",
+      "considerations": [],
+      "variations": [],
+      "isPremium": false
+    },
+    {
+      "patternId": "CAT-010",
+      "authorName": "System",
+      "sasCode": "/* SAS implementation pending */",
+      "rCode": "# R implementation pending",
+      "considerations": [],
+      "variations": [],
+      "isPremium": false
+    },
+    {
+      "patternId": "FLG-001",
+      "authorName": "System",
+      "sasCode": "/* SAS implementation pending */",
+      "rCode": "# R implementation pending",
+      "considerations": [],
+      "variations": [],
+      "isPremium": false
+    },
+    {
+      "patternId": "FLG-002",
+      "authorName": "System",
+      "sasCode": "/* SAS implementation pending */",
+      "rCode": "# R implementation pending",
+      "considerations": [],
+      "variations": [],
+      "isPremium": false
+    },
+    {
+      "patternId": "FLG-003",
+      "authorName": "System",
+      "sasCode": "/* SAS implementation pending */",
+      "rCode": "# R implementation pending",
+      "considerations": [],
+      "variations": [],
+      "isPremium": false
+    },
+    {
+      "patternId": "FLG-004",
+      "authorName": "System",
+      "sasCode": "/* SAS implementation pending */",
+      "rCode": "# R implementation pending",
+      "considerations": [],
+      "variations": [],
+      "isPremium": false
+    },
+    {
+      "patternId": "FLG-005",
+      "authorName": "System",
+      "sasCode": "/* SAS implementation pending */",
+      "rCode": "# R implementation pending",
+      "considerations": [],
+      "variations": [],
+      "isPremium": false
+    },
+    {
+      "patternId": "FLG-006",
+      "authorName": "System",
+      "sasCode": "/* SAS implementation pending */",
+      "rCode": "# R implementation pending",
+      "considerations": [],
+      "variations": [],
+      "isPremium": false
+    },
+    {
+      "patternId": "FLG-007",
+      "authorName": "System",
+      "sasCode": "/* SAS implementation pending */",
+      "rCode": "# R implementation pending",
+      "considerations": [],
+      "variations": [],
+      "isPremium": false
+    },
+    {
+      "patternId": "FLG-008",
+      "authorName": "System",
+      "sasCode": "/* SAS implementation pending */",
+      "rCode": "# R implementation pending",
+      "considerations": [],
+      "variations": [],
+      "isPremium": false
+    },
+    {
+      "patternId": "FLG-009",
+      "authorName": "System",
+      "sasCode": "/* SAS implementation pending */",
+      "rCode": "# R implementation pending",
+      "considerations": [],
+      "variations": [],
+      "isPremium": false
+    },
+    {
+      "patternId": "FLG-010",
+      "authorName": "System",
+      "sasCode": "/* SAS implementation pending */",
+      "rCode": "# R implementation pending",
+      "considerations": [],
+      "variations": [],
+      "isPremium": false
+    },
+    {
+      "patternId": "SRT-001",
+      "authorName": "System",
+      "sasCode": "/* SAS implementation pending */",
+      "rCode": "# R implementation pending",
+      "considerations": [],
+      "variations": [],
+      "isPremium": false
+    },
+    {
+      "patternId": "SRT-002",
+      "authorName": "System",
+      "sasCode": "/* SAS implementation pending */",
+      "rCode": "# R implementation pending",
+      "considerations": [],
+      "variations": [],
+      "isPremium": false
+    },
+    {
+      "patternId": "SRT-003",
+      "authorName": "System",
+      "sasCode": "/* SAS implementation pending */",
+      "rCode": "# R implementation pending",
+      "considerations": [],
+      "variations": [],
+      "isPremium": false
+    },
+    {
+      "patternId": "SRT-004",
+      "authorName": "System",
+      "sasCode": "/* SAS implementation pending */",
+      "rCode": "# R implementation pending",
+      "considerations": [],
+      "variations": [],
+      "isPremium": false
+    },
+    {
+      "patternId": "SRT-005",
+      "authorName": "System",
+      "sasCode": "/* SAS implementation pending */",
+      "rCode": "# R implementation pending",
+      "considerations": [],
+      "variations": [],
+      "isPremium": false
+    },
+    {
+      "patternId": "SRT-006",
+      "authorName": "System",
+      "sasCode": "/* SAS implementation pending */",
+      "rCode": "# R implementation pending",
+      "considerations": [],
+      "variations": [],
+      "isPremium": false
+    },
+    {
+      "patternId": "SRT-007",
+      "authorName": "System",
+      "sasCode": "/* SAS implementation pending */",
+      "rCode": "# R implementation pending",
+      "considerations": [],
+      "variations": [],
+      "isPremium": false
+    },
+    {
+      "patternId": "SRT-008",
+      "authorName": "System",
+      "sasCode": "/* SAS implementation pending */",
+      "rCode": "# R implementation pending",
+      "considerations": [],
+      "variations": [],
+      "isPremium": false
+    },
+    {
+      "patternId": "SRT-009",
+      "authorName": "System",
+      "sasCode": "/* SAS implementation pending */",
+      "rCode": "# R implementation pending",
+      "considerations": [],
+      "variations": [],
+      "isPremium": false
+    },
+    {
+      "patternId": "FMT-001",
+      "authorName": "System",
+      "sasCode": "/* SAS implementation pending */",
+      "rCode": "# R implementation pending",
+      "considerations": [],
+      "variations": [],
+      "isPremium": false
+    },
+    {
+      "patternId": "FMT-002",
+      "authorName": "System",
+      "sasCode": "/* SAS implementation pending */",
+      "rCode": "# R implementation pending",
+      "considerations": [],
+      "variations": [],
+      "isPremium": false
+    },
+    {
+      "patternId": "FMT-003",
+      "authorName": "System",
+      "sasCode": "/* SAS implementation pending */",
+      "rCode": "# R implementation pending",
+      "considerations": [],
+      "variations": [],
+      "isPremium": false
+    },
+    {
+      "patternId": "FMT-004",
+      "authorName": "System",
+      "sasCode": "/* SAS implementation pending */",
+      "rCode": "# R implementation pending",
+      "considerations": [],
+      "variations": [],
+      "isPremium": false
+    },
+    {
+      "patternId": "FMT-005",
+      "authorName": "System",
+      "sasCode": "/* SAS implementation pending */",
+      "rCode": "# R implementation pending",
+      "considerations": [],
+      "variations": [],
+      "isPremium": false
+    },
+    {
+      "patternId": "FMT-006",
+      "authorName": "System",
+      "sasCode": "/* SAS implementation pending */",
+      "rCode": "# R implementation pending",
+      "considerations": [],
+      "variations": [],
+      "isPremium": false
+    },
+    {
+      "patternId": "FMT-007",
+      "authorName": "System",
+      "sasCode": "/* SAS implementation pending */",
+      "rCode": "# R implementation pending",
+      "considerations": [],
+      "variations": [],
+      "isPremium": false
+    },
+    {
+      "patternId": "FMT-008",
+      "authorName": "System",
+      "sasCode": "/* SAS implementation pending */",
+      "rCode": "# R implementation pending",
+      "considerations": [],
+      "variations": [],
+      "isPremium": false
+    },
+    {
+      "patternId": "FMT-009",
+      "authorName": "System",
+      "sasCode": "/* SAS implementation pending */",
+      "rCode": "# R implementation pending",
+      "considerations": [],
+      "variations": [],
+      "isPremium": false
+    },
+    {
+      "patternId": "FMT-010",
+      "authorName": "System",
+      "sasCode": "/* SAS implementation pending */",
+      "rCode": "# R implementation pending",
+      "considerations": [],
+      "variations": [],
+      "isPremium": false
+    },
+    {
+      "patternId": "FMT-011",
+      "authorName": "System",
+      "sasCode": "/* SAS implementation pending */",
+      "rCode": "# R implementation pending",
+      "considerations": [],
+      "variations": [],
+      "isPremium": false
+    },
+    {
+      "patternId": "FMT-012",
+      "authorName": "System",
+      "sasCode": "/* SAS implementation pending */",
+      "rCode": "# R implementation pending",
+      "considerations": [],
+      "variations": [],
+      "isPremium": false
+    },
+    {
+      "patternId": "FMT-013",
+      "authorName": "System",
+      "sasCode": "/* SAS implementation pending */",
+      "rCode": "# R implementation pending",
+      "considerations": [],
+      "variations": [],
+      "isPremium": false
+    },
+    {
+      "patternId": "FMT-014",
+      "authorName": "System",
+      "sasCode": "/* SAS implementation pending */",
+      "rCode": "# R implementation pending",
+      "considerations": [],
+      "variations": [],
+      "isPremium": false
+    },
+    {
+      "patternId": "FMT-015",
+      "authorName": "System",
+      "sasCode": "/* SAS implementation pending */",
+      "rCode": "# R implementation pending",
+      "considerations": [],
+      "variations": [],
+      "isPremium": false
+    },
+    {
+      "patternId": "VAL-001",
+      "authorName": "System",
+      "sasCode": "/* SAS implementation pending */",
+      "rCode": "# R implementation pending",
+      "considerations": [],
+      "variations": [],
+      "isPremium": false
+    },
+    {
+      "patternId": "VAL-002",
+      "authorName": "System",
+      "sasCode": "/* SAS implementation pending */",
+      "rCode": "# R implementation pending",
+      "considerations": [],
+      "variations": [],
+      "isPremium": false
+    },
+    {
+      "patternId": "VAL-003",
+      "authorName": "System",
+      "sasCode": "/* SAS implementation pending */",
+      "rCode": "# R implementation pending",
+      "considerations": [],
+      "variations": [],
+      "isPremium": false
+    },
+    {
+      "patternId": "VAL-004",
+      "authorName": "System",
+      "sasCode": "/* SAS implementation pending */",
+      "rCode": "# R implementation pending",
+      "considerations": [],
+      "variations": [],
+      "isPremium": false
+    },
+    {
+      "patternId": "VAL-005",
+      "authorName": "System",
+      "sasCode": "/* SAS implementation pending */",
+      "rCode": "# R implementation pending",
+      "considerations": [],
+      "variations": [],
+      "isPremium": false
+    },
+    {
+      "patternId": "VAL-006",
+      "authorName": "System",
+      "sasCode": "/* SAS implementation pending */",
+      "rCode": "# R implementation pending",
+      "considerations": [],
+      "variations": [],
+      "isPremium": false
+    },
+    {
+      "patternId": "VAL-007",
+      "authorName": "System",
+      "sasCode": "/* SAS implementation pending */",
+      "rCode": "# R implementation pending",
+      "considerations": [],
+      "variations": [],
+      "isPremium": false
+    },
+    {
+      "patternId": "VAL-008",
+      "authorName": "System",
+      "sasCode": "/* SAS implementation pending */",
+      "rCode": "# R implementation pending",
+      "considerations": [],
+      "variations": [],
+      "isPremium": false
+    },
+    {
+      "patternId": "VAL-009",
+      "authorName": "System",
+      "sasCode": "/* SAS implementation pending */",
+      "rCode": "# R implementation pending",
+      "considerations": [],
+      "variations": [],
+      "isPremium": false
+    },
+    {
+      "patternId": "VAL-010",
+      "authorName": "System",
+      "sasCode": "/* SAS implementation pending */",
+      "rCode": "# R implementation pending",
+      "considerations": [],
+      "variations": [],
+      "isPremium": false
+    },
+    {
+      "patternId": "CDS-001",
+      "authorName": "System",
+      "sasCode": "/* SAS implementation pending */",
+      "rCode": "# R implementation pending",
+      "considerations": [],
+      "variations": [],
+      "isPremium": false
+    },
+    {
+      "patternId": "CDS-002",
+      "authorName": "System",
+      "sasCode": "/* SAS implementation pending */",
+      "rCode": "# R implementation pending",
+      "considerations": [],
+      "variations": [],
+      "isPremium": false
+    },
+    {
+      "patternId": "CDS-003",
+      "authorName": "System",
+      "sasCode": "/* SAS implementation pending */",
+      "rCode": "# R implementation pending",
+      "considerations": [],
+      "variations": [],
+      "isPremium": false
+    },
+    {
+      "patternId": "CDS-004",
+      "authorName": "System",
+      "sasCode": "/* SAS implementation pending */",
+      "rCode": "# R implementation pending",
+      "considerations": [],
+      "variations": [],
+      "isPremium": false
+    },
+    {
+      "patternId": "CDS-005",
+      "authorName": "System",
+      "sasCode": "/* SAS implementation pending */",
+      "rCode": "# R implementation pending",
+      "considerations": [],
+      "variations": [],
+      "isPremium": false
+    },
+    {
+      "patternId": "CDS-006",
+      "authorName": "System",
+      "sasCode": "/* SAS implementation pending */",
+      "rCode": "# R implementation pending",
+      "considerations": [],
+      "variations": [],
+      "isPremium": false
+    },
+    {
+      "patternId": "CDS-007",
+      "authorName": "System",
+      "sasCode": "/* SAS implementation pending */",
+      "rCode": "# R implementation pending",
+      "considerations": [],
+      "variations": [],
+      "isPremium": false
+    },
+    {
+      "patternId": "CDS-008",
+      "authorName": "System",
+      "sasCode": "/* SAS implementation pending */",
+      "rCode": "# R implementation pending",
+      "considerations": [],
+      "variations": [],
+      "isPremium": false
+    },
+    {
+      "patternId": "CDS-009",
+      "authorName": "System",
+      "sasCode": "/* SAS implementation pending */",
+      "rCode": "# R implementation pending",
+      "considerations": [],
+      "variations": [],
+      "isPremium": false
+    },
+    {
+      "patternId": "CDS-010",
+      "authorName": "System",
+      "sasCode": "/* SAS implementation pending */",
+      "rCode": "# R implementation pending",
+      "considerations": [],
+      "variations": [],
+      "isPremium": false
+    },
+    {
+      "patternId": "STA-001",
+      "authorName": "System",
+      "sasCode": "/* SAS implementation pending */",
+      "rCode": "# R implementation pending",
+      "considerations": [],
+      "variations": [],
+      "isPremium": false
+    },
+    {
+      "patternId": "STA-002",
+      "authorName": "System",
+      "sasCode": "/* SAS implementation pending */",
+      "rCode": "# R implementation pending",
+      "considerations": [],
+      "variations": [],
+      "isPremium": false
+    },
+    {
+      "patternId": "STA-003",
+      "authorName": "System",
+      "sasCode": "/* SAS implementation pending */",
+      "rCode": "# R implementation pending",
+      "considerations": [],
+      "variations": [],
+      "isPremium": false
+    },
+    {
+      "patternId": "STA-004",
+      "authorName": "System",
+      "sasCode": "/* SAS implementation pending */",
+      "rCode": "# R implementation pending",
+      "considerations": [],
+      "variations": [],
+      "isPremium": false
+    },
+    {
+      "patternId": "STA-005",
+      "authorName": "System",
+      "sasCode": "/* SAS implementation pending */",
+      "rCode": "# R implementation pending",
+      "considerations": [],
+      "variations": [],
+      "isPremium": false
+    },
+    {
+      "patternId": "STA-006",
+      "authorName": "System",
+      "sasCode": "/* SAS implementation pending */",
+      "rCode": "# R implementation pending",
+      "considerations": [],
+      "variations": [],
+      "isPremium": false
+    },
+    {
+      "patternId": "STA-007",
+      "authorName": "System",
+      "sasCode": "/* SAS implementation pending */",
+      "rCode": "# R implementation pending",
+      "considerations": [],
+      "variations": [],
+      "isPremium": false
+    },
+    {
+      "patternId": "STA-008",
+      "authorName": "System",
+      "sasCode": "/* SAS implementation pending */",
+      "rCode": "# R implementation pending",
+      "considerations": [],
+      "variations": [],
+      "isPremium": false
+    },
+    {
+      "patternId": "STA-009",
+      "authorName": "System",
+      "sasCode": "/* SAS implementation pending */",
+      "rCode": "# R implementation pending",
+      "considerations": [],
+      "variations": [],
+      "isPremium": false
+    },
+    {
+      "patternId": "STA-010",
+      "authorName": "System",
+      "sasCode": "/* SAS implementation pending */",
+      "rCode": "# R implementation pending",
+      "considerations": [],
+      "variations": [],
+      "isPremium": false
+    },
+    {
+      "patternId": "STA-011",
+      "authorName": "System",
+      "sasCode": "/* SAS implementation pending */",
+      "rCode": "# R implementation pending",
+      "considerations": [],
+      "variations": [],
+      "isPremium": false
+    },
+    {
+      "patternId": "STA-012",
+      "authorName": "System",
+      "sasCode": "/* SAS implementation pending */",
+      "rCode": "# R implementation pending",
+      "considerations": [],
+      "variations": [],
+      "isPremium": false
+    },
+    {
+      "patternId": "STA-013",
+      "authorName": "System",
+      "sasCode": "/* SAS implementation pending */",
+      "rCode": "# R implementation pending",
+      "considerations": [],
+      "variations": [],
+      "isPremium": false
+    },
+    {
+      "patternId": "STA-014",
+      "authorName": "System",
+      "sasCode": "/* SAS implementation pending */",
+      "rCode": "# R implementation pending",
+      "considerations": [],
+      "variations": [],
+      "isPremium": false
+    },
+    {
+      "patternId": "STA-015",
+      "authorName": "System",
+      "sasCode": "/* SAS implementation pending */",
+      "rCode": "# R implementation pending",
+      "considerations": [],
+      "variations": [],
+      "isPremium": false
+    },
+    {
+      "patternId": "OPT-001",
+      "authorName": "System",
+      "sasCode": "/* SAS implementation pending */",
+      "rCode": "# R implementation pending",
+      "considerations": [],
+      "variations": [],
+      "isPremium": false
+    },
+    {
+      "patternId": "OPT-002",
+      "authorName": "System",
+      "sasCode": "/* SAS implementation pending */",
+      "rCode": "# R implementation pending",
+      "considerations": [],
+      "variations": [],
+      "isPremium": false
+    },
+    {
+      "patternId": "OPT-003",
+      "authorName": "System",
+      "sasCode": "/* SAS implementation pending */",
+      "rCode": "# R implementation pending",
+      "considerations": [],
+      "variations": [],
+      "isPremium": false
+    },
+    {
+      "patternId": "OPT-004",
+      "authorName": "System",
+      "sasCode": "/* SAS implementation pending */",
+      "rCode": "# R implementation pending",
+      "considerations": [],
+      "variations": [],
+      "isPremium": false
+    },
+    {
+      "patternId": "OPT-005",
+      "authorName": "System",
+      "sasCode": "/* SAS implementation pending */",
+      "rCode": "# R implementation pending",
+      "considerations": [],
+      "variations": [],
+      "isPremium": false
+    },
+    {
+      "patternId": "OPT-006",
+      "authorName": "System",
+      "sasCode": "/* SAS implementation pending */",
+      "rCode": "# R implementation pending",
+      "considerations": [],
+      "variations": [],
+      "isPremium": false
+    },
+    {
+      "patternId": "OPT-007",
+      "authorName": "System",
+      "sasCode": "/* SAS implementation pending */",
+      "rCode": "# R implementation pending",
+      "considerations": [],
+      "variations": [],
+      "isPremium": false
+    },
+    {
+      "patternId": "OPT-008",
+      "authorName": "System",
+      "sasCode": "/* SAS implementation pending */",
+      "rCode": "# R implementation pending",
+      "considerations": [],
+      "variations": [],
+      "isPremium": false
+    }
+  ]
+}
