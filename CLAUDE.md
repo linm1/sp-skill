@@ -10,6 +10,7 @@ The system functions as a **Data Warehouse for code logic** - ingesting unstruct
 
 - **Frontend**: React 19 with TypeScript
 - **Build Tool**: Vite 6
+- **Authentication**: Clerk (`@clerk/clerk-react`)
 - **Backend**: Vercel Serverless Functions (Node.js)
 - **AI Integration**: Google Gemini API (`@google/genai`) - server-side only
 - **Styling**: Tailwind CSS (inline classes)
@@ -28,10 +29,13 @@ npm run build  # Production build
 
 **Local Development**: Create `.env.local` (not committed to git):
 ```
+VITE_CLERK_PUBLISHABLE_KEY=pk_test_your_publishable_key_here
 GEMINI_API_KEY=your_api_key_here
 ```
 
-**Production (Vercel)**: Set `GEMINI_API_KEY` in Vercel Dashboard → Settings → Environment Variables
+**Production (Vercel)**: Set environment variables in Vercel Dashboard → Settings → Environment Variables:
+- `VITE_CLERK_PUBLISHABLE_KEY` - Your Clerk publishable key
+- `GEMINI_API_KEY` - Your Gemini API key
 
 ## Project Structure
 
@@ -51,6 +55,48 @@ sp-skill/
 
 ## Security
 
+### Authentication with Clerk
+
+The application uses [Clerk](https://clerk.com) for user authentication and authorization:
+
+1. **Frontend** (`index.tsx`): Uses Clerk React hooks (`useUser`, `useAuth`, `SignInButton`, `UserButton`)
+2. **ClerkProvider**: Wraps the entire app and manages authentication state
+3. **Environment Variable**: `VITE_CLERK_PUBLISHABLE_KEY` (safe to expose client-side)
+4. **User Roles**: Stored in Clerk's `publicMetadata.role` field
+
+#### Authentication Flow
+
+```
+┌─────────────────┐                           ┌──────────────────┐
+│   User          │ ──── Sign In/Sign Up ───► │  Clerk Service   │
+│   (Browser)     │                           │  (Hosted)        │
+│                 │ ◄──── JWT Token ────────  │                  │
+└─────────────────┘                           └──────────────────┘
+        │
+        │ useUser() hook
+        ▼
+┌─────────────────┐
+│   App State     │
+│   - role        │
+│   - user info   │
+└─────────────────┘
+```
+
+#### Role-Based Access Control
+
+User roles are determined by `user.publicMetadata.role`:
+- **guest** (default): Read-only access to free patterns
+- **contributor**: Can create and edit patterns
+- **premier**: Full access to all patterns including premium
+- **admin**: Full access plus approval authority
+
+To set user roles, update metadata in Clerk Dashboard → Users → Select User → Metadata → Public:
+```json
+{
+  "role": "contributor"
+}
+```
+
 ### API Key Protection
 
 The Gemini API key is **never exposed to the client**. All AI operations are handled server-side:
@@ -59,7 +105,7 @@ The Gemini API key is **never exposed to the client**. All AI operations are han
 2. **Serverless Function** (`api/analyze.ts`): Reads `GEMINI_API_KEY` from server environment
 3. **Vercel Dashboard**: Store the API key in Environment Variables (Settings → Environment Variables)
 
-### Secure API Architecture
+#### Secure API Architecture
 
 ```
 ┌─────────────────┐     POST /api/analyze      ┌──────────────────┐
@@ -77,10 +123,12 @@ The Gemini API key is **never exposed to the client**. All AI operations are han
 
 ### Security Best Practices
 
-- **NEVER** expose API keys in client-side code or vite.config.ts
+- **NEVER** expose server-side API keys (like `GEMINI_API_KEY`) in client-side code or vite.config.ts
 - **NEVER** commit `.env.local` or any file containing secrets
 - Set `GEMINI_API_KEY` only in Vercel Dashboard for production
+- Set `VITE_CLERK_PUBLISHABLE_KEY` in environment variables (safe for client-side)
 - The API endpoint validates input and limits request size (50KB max)
+- Use Clerk's built-in security features (rate limiting, MFA support, session management)
 
 ## Core Domain Concepts
 
