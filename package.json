@@ -10,6 +10,9 @@
   },
   "dependencies": {
     "@google/genai": "^1.34.0",
+    "@vercel/postgres": "^0.10.0",
+    "drizzle-kit": "^0.31.8",
+    "drizzle-orm": "^0.45.1",
     "jszip": "^3.10.1",
     "react": "^19.2.3",
     "react-dom": "^19.2.3"
