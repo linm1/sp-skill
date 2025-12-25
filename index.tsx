@@ -2,15 +2,6 @@ import React, { useState, useEffect, useMemo } from "react";
 import { createRoot } from "react-dom/client";
 import { GoogleGenAI, Type } from "@google/genai";
 import JSZip from "jszip";
-import {
-  ClerkProvider,
-  SignedIn,
-  SignedOut,
-  SignInButton,
-  UserButton,
-  useUser,
-  useAuth
-} from "@clerk/clerk-react";
 
 // --- Types & Constants ---
 
@@ -41,13 +32,6 @@ interface PatternImplementation {
 
 const CURRENT_USER = "Current User";
 const SYSTEM_AUTHOR = "System";
-
-// Helper function to get user role from Clerk user metadata
-// Role is stored in user.publicMetadata.role or defaults to 'guest'
-const getUserRole = (user: any): Role => {
-  if (!user) return "guest";
-  return (user.publicMetadata?.role as Role) || "guest";
-};
 
 const CATEGORIES = [
   { code: "IMP", name: "Imputation", path: "references/imputation/" },
@@ -328,18 +312,18 @@ ${categorySections}
 const Layout = ({
   children,
   role,
+  setRole,
   currentView,
   setView,
   basketCount
 }: {
   children?: React.ReactNode;
   role: Role;
+  setRole: (r: Role) => void;
   currentView: string;
   setView: (v: string) => void;
   basketCount: number;
 }) => {
-  const { user, isLoaded } = useUser();
-
   return (
     <div className="min-h-screen flex flex-col font-sans text-slate-800">
       <nav className="bg-slate-900 text-white shadow-lg sticky top-0 z-50">
@@ -368,41 +352,18 @@ const Layout = ({
               Skill Basket
               <span className="ml-2 bg-indigo-600 text-white text-xs font-bold px-2 py-0.5 rounded-full">{basketCount}</span>
             </button>
-            <div className="border-l border-slate-700 pl-6 flex items-center space-x-4">
-              {isLoaded ? (
-                <>
-                  <SignedOut>
-                    <SignInButton mode="modal">
-                      <button className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors">
-                        Sign In
-                      </button>
-                    </SignInButton>
-                  </SignedOut>
-                  <SignedIn>
-                    <div className="flex items-center space-x-3">
-                      <div className="text-right">
-                        <p className="text-xs text-slate-400">Signed in as</p>
-                        <p className="text-sm font-medium">
-                          {user?.firstName || user?.emailAddresses[0]?.emailAddress}
-                          <span className="ml-2 text-xs bg-indigo-600 px-2 py-0.5 rounded-full">
-                            {role}
-                          </span>
-                        </p>
-                      </div>
-                      <UserButton
-                        afterSignOutUrl="/"
-                        appearance={{
-                          elements: {
-                            avatarBox: "w-10 h-10"
-                          }
-                        }}
-                      />
-                    </div>
-                  </SignedIn>
-                </>
-              ) : (
-                <div className="w-10 h-10 bg-slate-700 rounded-full animate-pulse"></div>
-              )}
+            <div className="border-l border-slate-700 pl-6 flex items-center space-x-2">
+              <span className="text-xs text-slate-500 uppercase">Simulate Role:</span>
+              <select
+                value={role}
+                onChange={(e) => setRole(e.target.value as Role)}
+                className="bg-slate-800 border border-slate-700 text-xs rounded px-2 py-1 focus:outline-none focus:border-indigo-500"
+              >
+                <option value="guest">Guest</option>
+                <option value="contributor">Contributor</option>
+                <option value="premier">Premier</option>
+                <option value="admin">Admin</option>
+              </select>
             </div>
           </div>
         </div>
@@ -457,16 +418,16 @@ const PatternCard: React.FC<PatternCardProps> = ({
   );
 };
 
-const PatternDetail = ({
-  def,
+const PatternDetail = ({ 
+  def, 
   impls,
   basketSelectedUuid,
-  onBack,
+  onBack, 
   onAddToBasket,
   onAddImplementation,
   onEditImplementation,
-  role
-}: {
+  role 
+}: { 
   def: PatternDefinition;
   impls: PatternImplementation[];
   basketSelectedUuid: string; // The UUID currently active in the basket for this Pattern ID
@@ -476,12 +437,10 @@ const PatternDetail = ({
   onEditImplementation: (impl: PatternImplementation) => void;
   role: Role;
 }) => {
-  const { isSignedIn } = useAuth();
-
   // State for the active tab (local UI state)
   // Default to the one selected in the basket, or the first one if not selected
   const [activeImplUuid, setActiveImplUuid] = useState<string>(basketSelectedUuid);
-
+  
   // Update local state if basket selection changes externally
   useEffect(() => {
     setActiveImplUuid(basketSelectedUuid);
@@ -489,9 +448,9 @@ const PatternDetail = ({
 
   const activeImpl = impls.find(i => i.uuid === activeImplUuid) || impls[0];
 
-  const canEdit =
-    role === "admin" ||
-    role === "premier" ||
+  const canEdit = 
+    role === "admin" || 
+    role === "premier" || 
     (role === "contributor" && activeImpl.author === CURRENT_USER);
 
   const markdown = generateMarkdown(def, activeImpl);
@@ -501,40 +460,21 @@ const PatternDetail = ({
     alert("Context copied!");
   };
 
-  const handleContributeClick = () => {
-    if (!isSignedIn) {
-      alert("Please sign in to contribute your own implementation.");
-      return;
-    }
-    onAddImplementation();
-  };
-
   return (
     <div className="max-w-5xl mx-auto">
       <div className="mb-6 flex items-center justify-between">
          <button onClick={onBack} className="text-sm text-slate-500 hover:text-indigo-600 flex items-center">
             <i className="fas fa-arrow-left mr-2"></i> Back to Catalog
           </button>
-
-          <SignedIn>
-            {(role === "contributor" || role === "premier" || role === "admin") && (
-              <button
-                onClick={handleContributeClick}
-                className="bg-indigo-600 text-white hover:bg-indigo-700 px-4 py-2 rounded-lg text-sm font-medium transition-colors shadow-sm"
-              >
-                <i className="fas fa-plus mr-2"></i> Contribute Alternative
-              </button>
-            )}
-          </SignedIn>
-          <SignedOut>
-            <button
-              onClick={handleContributeClick}
-              className="bg-slate-400 text-white px-4 py-2 rounded-lg text-sm font-medium cursor-not-allowed"
-              title="Sign in to contribute"
+          
+          {(role === "contributor" || role === "premier" || role === "admin") && (
+            <button 
+              onClick={onAddImplementation}
+              className="bg-indigo-600 text-white hover:bg-indigo-700 px-4 py-2 rounded-lg text-sm font-medium transition-colors shadow-sm"
             >
-              <i className="fas fa-lock mr-2"></i> Sign In to Contribute
+              <i className="fas fa-plus mr-2"></i> Contribute Alternative
             </button>
-          </SignedOut>
+          )}
       </div>
 
       {/* Container Header (Immutable Definition) */}
@@ -1214,8 +1154,7 @@ const Catalog = ({
 // --- Main App ---
 
 const App = () => {
-  const { user, isLoaded } = useUser();
-  const role = getUserRole(user);
+  const [role, setRole] = useState<Role>("contributor");
   const [view, setView] = useState("catalog");
   
   // Data State
@@ -1300,23 +1239,12 @@ const App = () => {
       setView("detail");
   };
 
-  // Show loading state while Clerk is initializing
-  if (!isLoaded) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-slate-50">
-        <div className="text-center">
-          <div className="w-16 h-16 bg-indigo-100 rounded-full animate-pulse mx-auto mb-4"></div>
-          <p className="text-slate-600">Loading...</p>
-        </div>
-      </div>
-    );
-  }
-
   return (
-    <Layout
-        role={role}
-        currentView={view}
-        setView={setView}
+    <Layout 
+        role={role} 
+        setRole={setRole} 
+        currentView={view} 
+        setView={setView} 
         basketCount={Object.keys(basket).length}
     >
       {view === "catalog" && (
@@ -1370,33 +1298,5 @@ const App = () => {
   );
 };
 
-// Get Clerk publishable key from environment variables
-// IMPORTANT: Set VITE_CLERK_PUBLISHABLE_KEY in your .env.local file for local development
-// For Vercel deployment, set this in the Vercel Dashboard → Settings → Environment Variables
-const clerkPubKey = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY;
-
-if (!clerkPubKey) {
-  console.error("Missing Clerk Publishable Key. Please set VITE_CLERK_PUBLISHABLE_KEY in your .env.local file.");
-}
-
 const root = createRoot(document.getElementById("root")!);
-root.render(
-  clerkPubKey ? (
-    <ClerkProvider publishableKey={clerkPubKey}>
-      <App />
-    </ClerkProvider>
-  ) : (
-    <div className="min-h-screen flex items-center justify-center bg-slate-50">
-      <div className="max-w-md text-center p-8 bg-white rounded-lg shadow-lg">
-        <i className="fas fa-exclamation-triangle text-4xl text-yellow-500 mb-4"></i>
-        <h2 className="text-xl font-bold text-slate-900 mb-2">Configuration Required</h2>
-        <p className="text-slate-600 mb-4">
-          Clerk authentication is not configured. Please set <code className="bg-slate-100 px-2 py-1 rounded text-sm">VITE_CLERK_PUBLISHABLE_KEY</code> in your environment variables.
-        </p>
-        <p className="text-sm text-slate-500">
-          See <code className="bg-slate-100 px-2 py-1 rounded">.env.local.example</code> for setup instructions.
-        </p>
-      </div>
-    </div>
-  )
-);
+root.render(<App />);
