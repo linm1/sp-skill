@@ -218,10 +218,10 @@ Author: [Author Name]
 - Basic search by category
 - Markdown preview generation
 
-### Phase 2: Smart ETL & Gamification
+### Phase 2: Smart ETL & Storage
 - AI-powered ingestion from URLs/text
-- Credit system for contributions
-- Tiered access enforcement
+- built up storage for system patterns / contributor's patterns. 
+
 
 ### Phase 3: Agent Integration
 - REST API for pattern retrieval
