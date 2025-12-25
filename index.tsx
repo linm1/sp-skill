@@ -66,6 +66,7 @@ const CATEGORIES = [
   { code: "OPT", name: "Optimization", path: "references/optimization/" },
 ];
 
+// Helper to extract slug from pattern for file naming
 const MANIFEST_DATA: Record<string, string[]> = {
   IMP: ["missing-category", "locf", "bocf", "wocf", "linear-interpolation", "mean-median", "mi-continuous", "mi-categorical", "pattern-mixture", "tipping-point", "visit-window", "partial-date", "baseline-extension", "control-based"],
   DER: ["trtemfl", "anlfl", "aval", "avalc", "ady", "avisit", "ablfl", "base", "chg", "pchg", "shift", "locfl", "focfl", "wocfl", "bocfl", "tte", "cnsr", "duration", "dose-norm", "bmi", "age", "relative-day", "period", "criterion", "derived-param"],
@@ -82,83 +83,6 @@ const MANIFEST_DATA: Record<string, string[]> = {
   STA: ["ttest-two", "ttest-paired", "anova", "ancova", "chisq", "fisher", "wilcoxon-rs", "wilcoxon-sr", "kruskal", "logrank", "km", "cox", "logistic", "mmrm", "cmh"],
   OPT: ["index-sort", "hash", "format-lookup", "subset-first", "avoid-sort", "bygroup", "temp-mgmt", "macro-vs-data"]
 };
-
-// Existing content to preserve/inject into the correct IDs
-const PRELOADED_CONTENT: Record<string, Partial<PatternDefinition> & Partial<PatternImplementation>> = {
-  "IMP-002": {
-    title: "Last Observation Carried Forward (LOCF)",
-    problem: "Missing values in longitudinal data need to be filled with the last known value.",
-    whenToUse: "When the analysis plan specifies LOCF for missing data handling in safety datasets.",
-    sasCode: `data locf;\n  set source;\n  by usubjid;\n  retain last_val;\n  if not missing(aval) then last_val = aval;\n  else aval = last_val;\nrun;`,
-    rCode: `library(dplyr)\nlibrary(tidyr)\n\ndf_locf <- df %>%\n  group_by(usubjid) %>%\n  fill(aval, .direction = "down")`,
-    considerations: ["Ensure data is sorted by subject and time before applying.", "Do not use for baseline imputation if baseline is missing."],
-    variations: ["Baseline Observation Carried Forward (BOCF)", "Worst Observation Carried Forward"],
-  },
-  "DER-020": {
-    title: "Calculate BMI from Height and Weight",
-    problem: "Need to derive Body Mass Index (BMI) from raw height and weight variables.",
-    whenToUse: "Vital signs domain derivation.",
-    sasCode: `if not missing(weight) and not missing(height) then \n  bmi = weight / ((height/100)**2);`,
-    rCode: `df <- df %>%\n  mutate(bmi = weight / ((height/100)^2))`,
-    considerations: ["Check units! Height is usually cm, weight kg."],
-  }
-};
-
-// --- Initial State Generators ---
-
-const { INITIAL_DEFS, INITIAL_IMPLS } = (() => {
-  const defs: PatternDefinition[] = [];
-  const impls: PatternImplementation[] = [];
-
-  Object.entries(MANIFEST_DATA).forEach(([catCode, slugs]) => {
-    slugs.forEach((slug, index) => {
-      const id = `${catCode}-${String(index + 1).padStart(3, "0")}`;
-      const preloaded = PRELOADED_CONTENT[id];
-      
-      const title = preloaded?.title || slug.split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
-      
-      // 1. Create Definition
-      defs.push({
-        id,
-        category: catCode,
-        title,
-        problem: preloaded?.problem || "Content to be added.",
-        whenToUse: preloaded?.whenToUse || "To be defined.",
-      });
-
-      // 2. Create System Implementation
-      impls.push({
-        uuid: `${id}-system`,
-        patternId: id,
-        author: SYSTEM_AUTHOR,
-        sasCode: preloaded?.sasCode || "/* SAS implementation pending */",
-        rCode: preloaded?.rCode || "# R implementation pending",
-        considerations: preloaded?.considerations || [],
-        variations: preloaded?.variations || [],
-        status: "active",
-        isPremium: false,
-        timestamp: Date.now(),
-      });
-
-      // 3. MOCK DATA: Add Jane Doe's version to IMP-002 to demonstrate tabs
-      if (id === "IMP-002") {
-        impls.push({
-          uuid: `${id}-jane`,
-          patternId: id,
-          author: "Jane Doe",
-          sasCode: `/* Jane's optimized LOCF with extra checks */\ndata locf_checked;\n  set source;\n  /* ... different logic ... */\nrun;`,
-          rCode: `# Jane's R Tidyverse version\n# ... `,
-          considerations: ["Jane's version handles partial dates differently."],
-          variations: [],
-          status: "active",
-          isPremium: false,
-          timestamp: Date.now() + 1000,
-        });
-      }
-    });
-  });
-  return { INITIAL_DEFS: defs, INITIAL_IMPLS: impls };
-})();
 
 // --- Helper Functions ---
 
@@ -339,6 +263,23 @@ const Layout = ({
   basketCount: number;
 }) => {
   const { user, isLoaded } = useUser();
+  const [creditBalance, setCreditBalance] = useState<number>(0);
+
+  // Fetch credit balance when user is loaded
+  useEffect(() => {
+    if (user) {
+      fetch('/api/credits/balance')
+        .then(res => {
+          if (!res.ok) throw new Error('Failed to fetch credits');
+          return res.json();
+        })
+        .then(data => setCreditBalance(data.balance))
+        .catch(err => {
+          console.error('Failed to load credits:', err);
+          // Don't show error to user, just log it
+        });
+    }
+  }, [user]);
 
   return (
     <div className="min-h-screen flex flex-col font-sans text-slate-800">
@@ -388,6 +329,10 @@ const Layout = ({
                             {role}
                           </span>
                         </p>
+                        <p className="text-xs text-amber-400 font-bold flex items-center justify-end mt-1">
+                          <i className="fas fa-coins mr-1"></i>
+                          {creditBalance} credits
+                        </p>
                       </div>
                       <UserButton
                         afterSignOutUrl="/"
@@ -419,17 +364,24 @@ const Layout = ({
 
 interface PatternCardProps {
   def: PatternDefinition;
-  implCount: number;
+  impls: PatternImplementation[];
   onClick: () => void;
   role: Role;
+  userId?: string;
 }
 
-const PatternCard: React.FC<PatternCardProps> = ({ 
-  def, 
-  implCount, 
-  onClick, 
-  role 
+const PatternCard: React.FC<PatternCardProps> = ({
+  def,
+  impls,
+  onClick,
+  role,
+  userId
 }) => {
+  const approvedCount = impls.filter(i => i.status === 'active').length;
+  const userPendingCount = userId
+    ? impls.filter(i => i.status === 'pending' && i.author !== 'System').length
+    : 0;
+
   return (
     <div
       onClick={onClick}
@@ -440,18 +392,26 @@ const PatternCard: React.FC<PatternCardProps> = ({
           <span className="inline-block px-2 py-1 text-xs font-semibold bg-indigo-50 text-indigo-700 rounded-md">
             {def.id}
           </span>
-          {implCount > 1 && (
-             <span className="text-xs bg-slate-100 text-slate-600 px-2 py-1 rounded-full border border-slate-200">
-                {implCount} Variations
-             </span>
-          )}
+          <div className="flex gap-2">
+            {approvedCount > 1 && (
+              <span className="text-xs bg-slate-100 text-slate-600 px-2 py-1 rounded-full border border-slate-200">
+                {approvedCount} Versions
+              </span>
+            )}
+            {userPendingCount > 0 && (
+              <span className="text-xs bg-yellow-100 text-yellow-800 px-2 py-1 rounded-full border border-yellow-200 flex items-center">
+                <i className="fas fa-clock mr-1 text-xs"></i>
+                {userPendingCount} Pending
+              </span>
+            )}
+          </div>
         </div>
         <h3 className="text-lg font-bold text-slate-900 mb-2 leading-tight group-hover:text-indigo-600 transition-colors">{def.title}</h3>
         <p className="text-sm text-slate-600 line-clamp-2 mb-4">{def.problem}</p>
       </div>
       <div className="px-5 py-3 bg-slate-50 border-t border-slate-100 flex justify-between items-center text-xs text-slate-500">
           <span>{def.category}</span>
-          <span>View Container &rarr;</span>
+          <span>View Details &rarr;</span>
       </div>
     </div>
   );
@@ -465,7 +425,8 @@ const PatternDetail = ({
   onAddToBasket,
   onAddImplementation,
   onEditImplementation,
-  role
+  role,
+  userId
 }: {
   def: PatternDefinition;
   impls: PatternImplementation[];
@@ -475,12 +436,13 @@ const PatternDetail = ({
   onAddImplementation: () => void;
   onEditImplementation: (impl: PatternImplementation) => void;
   role: Role;
+  userId?: string;
 }) => {
   const { isSignedIn } = useAuth();
-
-  // State for the active tab (local UI state)
-  // Default to the one selected in the basket, or the first one if not selected
   const [activeImplUuid, setActiveImplUuid] = useState<string>(basketSelectedUuid);
+  const [creditBalance, setCreditBalance] = useState<number>(0);
+  const [isUnlocked, setIsUnlocked] = useState(false);
+  const [unlocking, setUnlocking] = useState(false);
 
   // Update local state if basket selection changes externally
   useEffect(() => {
@@ -488,6 +450,120 @@ const PatternDetail = ({
   }, [basketSelectedUuid]);
 
   const activeImpl = impls.find(i => i.uuid === activeImplUuid) || impls[0];
+  const isPremium = activeImpl?.isPremium;
+
+  // Fetch credit balance and unlock status
+  useEffect(() => {
+    if (userId) {
+      Promise.all([
+        fetch('/api/credits/balance').then(r => r.json()),
+        isPremium ? fetch('/api/credits/unlocks').then(r => r.json()) : Promise.resolve(null)
+      ])
+        .then(([creditsData, unlocksData]) => {
+          setCreditBalance(creditsData.balance);
+          if (unlocksData) {
+            setIsUnlocked(
+              unlocksData.hasLifetimeAccess ||
+              unlocksData.patterns.includes(def.id) ||
+              unlocksData.categories.includes(def.category)
+            );
+          }
+        })
+        .catch(err => console.error('Failed to load user data:', err));
+    }
+  }, [userId, isPremium, def.id, def.category]);
+
+  const handleUnlock = async () => {
+    setUnlocking(true);
+    try {
+      const res = await fetch('/api/credits/spend', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          unlockType: 'pattern',
+          targetId: def.id,
+          cost: 50
+        })
+      });
+
+      if (!res.ok) {
+        const errorData = await res.json();
+        throw new Error(errorData.error || 'Failed to unlock');
+      }
+
+      const data = await res.json();
+      if (data.success) {
+        setIsUnlocked(true);
+        setCreditBalance(data.newBalance);
+        alert('Pattern unlocked!');
+      }
+    } catch (err: any) {
+      alert(err.message || 'Failed to unlock pattern');
+    } finally {
+      setUnlocking(false);
+    }
+  };
+
+  // Show premium lock overlay
+  if (isPremium && !isUnlocked && role !== 'premier' && role !== 'admin') {
+    const markdown = generateMarkdown(def, activeImpl);
+
+    return (
+      <div className="max-w-5xl mx-auto">
+        <button onClick={onBack} className="mb-6 text-sm text-slate-500 hover:text-indigo-600 flex items-center">
+          <i className="fas fa-arrow-left mr-2"></i> Back to Catalog
+        </button>
+
+        <div className="bg-white rounded-xl shadow-lg border border-slate-200 overflow-hidden">
+          <div className="p-8">
+            <h2 className="text-2xl font-bold text-slate-900 mb-4">{def.title}</h2>
+            <p className="text-slate-600 mb-6">{def.problem}</p>
+          </div>
+
+          <div className="relative">
+            <div className="blur-md p-8">
+              <pre className="text-xs text-slate-700 whitespace-pre-wrap">
+                {markdown.substring(0, 500)}...
+              </pre>
+            </div>
+
+            <div className="absolute inset-0 flex flex-col items-center justify-center bg-slate-900/70">
+              <i className="fas fa-lock text-amber-400 text-5xl mb-4"></i>
+              <h3 className="text-white text-2xl font-bold mb-2">Premium Pattern</h3>
+              <p className="text-slate-300 text-sm mb-6">Unlock this pattern to view the full implementation</p>
+
+              {isSignedIn ? (
+                <div className="flex flex-col items-center gap-3">
+                  <p className="text-amber-400 font-semibold">
+                    <i className="fas fa-coins mr-2"></i>
+                    {creditBalance} credits available
+                  </p>
+                  <button
+                    onClick={handleUnlock}
+                    disabled={unlocking || creditBalance < 50}
+                    className="bg-amber-500 hover:bg-amber-600 disabled:bg-slate-500 text-white px-8 py-3 rounded-lg font-semibold text-lg shadow-lg transition-colors"
+                  >
+                    {unlocking ? 'Unlocking...' : `Unlock for 50 Credits`}
+                  </button>
+                  {creditBalance < 50 && (
+                    <p className="text-red-400 text-sm">
+                      Insufficient credits. Contribute patterns to earn more!
+                    </p>
+                  )}
+                </div>
+              ) : (
+                <SignInButton mode="modal">
+                  <button className="bg-indigo-600 hover:bg-indigo-700 text-white px-8 py-3 rounded-lg font-semibold">
+                    Sign In to Unlock
+                  </button>
+                </SignInButton>
+              )}
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   const canEdit =
     role === "admin" ||
@@ -719,29 +795,87 @@ const SmartEtlForm = ({
     }
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    const newImpl: PatternImplementation = {
-      uuid: isEditMode && initialImpl ? initialImpl.uuid : crypto.randomUUID(),
-      patternId: definition.id,
-      author: formData.author || CURRENT_USER,
-      sasCode: formData.sasCode || "",
-      rCode: formData.rCode || "",
-      considerations: formData.considerations || [],
-      variations: formData.variations || [],
-      status: "active", // Simplified for MVP
-      isPremium: isEditMode && initialImpl ? initialImpl.isPremium : false,
-      timestamp: Date.now()
-    };
+    // If editing existing implementation, just update locally
+    if (isEditMode && initialImpl) {
+      const newImpl: PatternImplementation = {
+        uuid: initialImpl.uuid,
+        patternId: definition.id,
+        author: formData.author || CURRENT_USER,
+        sasCode: formData.sasCode || "",
+        rCode: formData.rCode || "",
+        considerations: formData.considerations || [],
+        variations: formData.variations || [],
+        status: initialImpl.status,
+        isPremium: initialImpl.isPremium,
+        timestamp: Date.now()
+      };
 
-    // Check if any definition fields have changed
-    const hasDefChanges =
-      defData.title !== definition.title ||
-      defData.problem !== definition.problem ||
-      defData.whenToUse !== definition.whenToUse;
+      const hasDefChanges =
+        defData.title !== definition.title ||
+        defData.problem !== definition.problem ||
+        defData.whenToUse !== definition.whenToUse;
 
-    onSave(newImpl, hasDefChanges ? defData : undefined);
+      onSave(newImpl, hasDefChanges ? defData : undefined);
+      return;
+    }
+
+    // For new contributions, submit to API
+    try {
+      const response = await fetch('/api/patterns/contribute', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          patternId: definition.id,
+          sasCode: formData.sasCode,
+          rCode: formData.rCode,
+          considerations: formData.considerations,
+          variations: formData.variations
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to submit contribution');
+      }
+
+      const result = await response.json();
+
+      if (result.status === 'pending') {
+        alert('Contribution submitted for review! You will earn credits once an admin approves it.');
+      } else if (result.status === 'approved') {
+        const creditsMsg = result.creditsAwarded
+          ? ` You earned ${result.creditsAwarded} credits!`
+          : '';
+        alert(`Contribution approved!${creditsMsg}`);
+      }
+
+      // Create implementation object
+      const newImpl: PatternImplementation = {
+        uuid: result.implementation.uuid,
+        patternId: result.implementation.patternId,
+        author: result.implementation.authorName,
+        sasCode: result.implementation.sasCode,
+        rCode: result.implementation.rCode,
+        considerations: result.implementation.considerations || [],
+        variations: result.implementation.variations || [],
+        status: result.implementation.status === 'approved' ? 'active' : 'pending',
+        isPremium: result.implementation.isPremium,
+        timestamp: new Date(result.implementation.createdAt).getTime()
+      };
+
+      // Check if definition fields changed
+      const hasDefChanges =
+        defData.title !== definition.title ||
+        defData.problem !== definition.problem ||
+        defData.whenToUse !== definition.whenToUse;
+
+      onSave(newImpl, hasDefChanges ? defData : undefined);
+    } catch (error) {
+      console.error('Contribution error:', error);
+      alert('Failed to submit contribution. Please try again.');
+    }
   };
 
   const handleArrayChange = (field: "considerations" | "variations", value: string) => {
@@ -1134,10 +1268,12 @@ const Catalog = ({
   defs,
   impls,
   onPatternClick,
+  userId
 }: {
   defs: PatternDefinition[];
   impls: PatternImplementation[];
   onPatternClick: (d: PatternDefinition) => void;
+  userId?: string;
 }) => {
   const [filter, setFilter] = useState("ALL");
   const [search, setSearch] = useState("");
@@ -1150,8 +1286,6 @@ const Catalog = ({
       d.problem.toLowerCase().includes(search.toLowerCase());
     return matchesCat && matchesSearch;
   }), [defs, filter, search]);
-
-  const getImplCount = (patId: string) => impls.filter(i => i.patternId === patId).length;
 
   return (
     <div className="space-y-6">
@@ -1190,17 +1324,21 @@ const Catalog = ({
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {filteredDefs.map((d) => (
-          <PatternCard 
-            key={d.id} 
-            def={d} 
-            implCount={getImplCount(d.id)}
-            onClick={() => onPatternClick(d)} 
-            role="contributor" 
-          />
-        ))}
+        {filteredDefs.map((d) => {
+          const patternImpls = impls.filter(i => i.patternId === d.id);
+          return (
+            <PatternCard
+              key={d.id}
+              def={d}
+              impls={patternImpls}
+              onClick={() => onPatternClick(d)}
+              role="contributor"
+              userId={userId}
+            />
+          );
+        })}
       </div>
-      
+
       {filteredDefs.length === 0 && (
           <div className="text-center py-10 text-slate-400">
               <i className="fas fa-folder-open text-4xl mb-2"></i>
@@ -1217,25 +1355,85 @@ const App = () => {
   const { user, isLoaded } = useUser();
   const role = getUserRole(user);
   const [view, setView] = useState("catalog");
-  
-  // Data State
-  const [definitions, setDefinitions] = useState<PatternDefinition[]>(INITIAL_DEFS);
-  const [implementations, setImplementations] = useState<PatternImplementation[]>(INITIAL_IMPLS);
-  
+
+  // Data State (now loaded from API)
+  const [definitions, setDefinitions] = useState<PatternDefinition[]>([]);
+  const [implementations, setImplementations] = useState<PatternImplementation[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
   // Selection State
   const [selectedDef, setSelectedDef] = useState<PatternDefinition | null>(null);
-  const [editingImpl, setEditingImpl] = useState<PatternImplementation | null>(null); // For edit/create
-  
-  // Basket State: Record<PatternID, ImplementationUUID>
-  const [basket, setBasket] = useState<Record<string, string>>(() => {
-     // Initialize basket with default SYSTEM implementations for all definitions
-     const initialBasket: Record<string, string> = {};
-     INITIAL_DEFS.forEach(def => {
-        const sysImpl = INITIAL_IMPLS.find(i => i.patternId === def.id && i.author === SYSTEM_AUTHOR);
-        if (sysImpl) initialBasket[def.id] = sysImpl.uuid;
-     });
-     return initialBasket;
-  });
+  const [editingImpl, setEditingImpl] = useState<PatternImplementation | null>(null);
+
+  // Basket State
+  const [basket, setBasket] = useState<Record<string, string>>({});
+
+  // Load patterns on mount
+  useEffect(() => {
+    const loadPatterns = async () => {
+      try {
+        setLoading(true);
+
+        // Fetch pattern list
+        const listRes = await fetch('/api/patterns/list');
+        if (!listRes.ok) throw new Error('Failed to fetch patterns');
+        const { patterns } = await listRes.json();
+
+        // Convert to PatternDefinition format
+        const defs: PatternDefinition[] = patterns.map((p: any) => ({
+          id: p.id,
+          category: p.category,
+          title: p.title,
+          problem: p.problem,
+          whenToUse: p.whenToUse
+        }));
+
+        setDefinitions(defs);
+
+        // Fetch all implementations for all patterns
+        const implPromises = patterns.map((p: any) =>
+          fetch(`/api/patterns/get?id=${p.id}`)
+            .then(res => res.json())
+            .then(data => data.implementations || [])
+        );
+
+        const allImpls = (await Promise.all(implPromises)).flat();
+
+        // Convert to PatternImplementation format
+        const impls: PatternImplementation[] = allImpls.map((impl: any) => ({
+          uuid: impl.uuid,
+          patternId: impl.patternId,
+          author: impl.authorName,
+          sasCode: impl.sasCode,
+          rCode: impl.rCode,
+          considerations: impl.considerations || [],
+          variations: impl.variations || [],
+          status: impl.status === 'approved' ? 'active' : 'pending',
+          isPremium: impl.isPremium,
+          timestamp: new Date(impl.createdAt).getTime()
+        }));
+
+        setImplementations(impls);
+
+        // Initialize basket with system implementations
+        const initialBasket: Record<string, string> = {};
+        defs.forEach(def => {
+          const sysImpl = impls.find(i => i.patternId === def.id && i.author === 'System');
+          if (sysImpl) initialBasket[def.id] = sysImpl.uuid;
+        });
+        setBasket(initialBasket);
+
+      } catch (err) {
+        console.error('Error loading patterns:', err);
+        setError('Failed to load patterns. Please refresh the page.');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadPatterns();
+  }, []);
 
   const handlePatternClick = (d: PatternDefinition) => {
     setSelectedDef(d);
@@ -1300,13 +1498,32 @@ const App = () => {
       setView("detail");
   };
 
-  // Show loading state while Clerk is initializing
-  if (!isLoaded) {
+  // Show loading screen
+  if (!isLoaded || loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-slate-50">
         <div className="text-center">
           <div className="w-16 h-16 bg-indigo-100 rounded-full animate-pulse mx-auto mb-4"></div>
-          <p className="text-slate-600">Loading...</p>
+          <p className="text-slate-600">Loading patterns...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Show error screen
+  if (error) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-slate-50">
+        <div className="max-w-md text-center p-8 bg-white rounded-lg shadow-lg">
+          <i className="fas fa-exclamation-triangle text-4xl text-red-500 mb-4"></i>
+          <h2 className="text-xl font-bold text-slate-900 mb-2">Error Loading Patterns</h2>
+          <p className="text-slate-600 mb-4">{error}</p>
+          <button
+            onClick={() => window.location.reload()}
+            className="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-2 rounded-lg"
+          >
+            Retry
+          </button>
         </div>
       </div>
     );
@@ -1320,13 +1537,14 @@ const App = () => {
         basketCount={Object.keys(basket).length}
     >
       {view === "catalog" && (
-        <Catalog 
-            defs={definitions} 
+        <Catalog
+            defs={definitions}
             impls={implementations}
-            onPatternClick={handlePatternClick} 
+            onPatternClick={handlePatternClick}
+            userId={user?.id}
         />
       )}
-      
+
       {view === "detail" && selectedDef && (
         <PatternDetail
           def={selectedDef}
@@ -1340,11 +1558,12 @@ const App = () => {
           onAddImplementation={handleAddImplementation}
           onEditImplementation={handleEditImplementation}
           role={role}
+          userId={user?.id}
         />
       )}
 
       {view === "contribute" && selectedDef && (
-        <SmartEtlForm 
+        <SmartEtlForm
             definition={selectedDef}
             initialImpl={editingImpl || undefined}
             onSave={handleSaveImplementation}
@@ -1353,7 +1572,7 @@ const App = () => {
       )}
 
       {view === "basket" && (
-          <BasketView 
+          <BasketView
              basket={basket}
              defs={definitions}
              impls={implementations}
