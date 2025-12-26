@@ -1,6 +1,6 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { db } from '../db';
-import { users, patternDefinitions, patternImplementations } from '../db/schema';
+import { db } from '../db/index.js';
+import { users, patternDefinitions, patternImplementations } from '../db/schema.js';
 import { eq } from 'drizzle-orm';
 
 /**
