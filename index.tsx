@@ -647,11 +647,13 @@ const SmartEtlForm = ({
   initialImpl,
   onSave,
   onCancel,
+  isSaving = false,
 }: {
   definition: PatternDefinition;
   initialImpl?: PatternImplementation;
   onSave: (impl: PatternImplementation, updatedDef?: Partial<PatternDefinition>) => void;
   onCancel: () => void;
+  isSaving?: boolean;
 }) => {
   const isEditMode = !!initialImpl;
   const [isAnalyzing, setIsAnalyzing] = useState(false);
@@ -861,15 +863,24 @@ const SmartEtlForm = ({
           <button
             type="button"
             onClick={onCancel}
-            className="px-4 py-2 border border-slate-300 rounded-md text-sm font-medium text-slate-700 hover:bg-slate-50"
+            disabled={isSaving}
+            className="px-4 py-2 border border-slate-300 rounded-md text-sm font-medium text-slate-700 hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             Cancel
           </button>
           <button
             type="submit"
-            className="px-4 py-2 bg-indigo-600 rounded-md text-sm font-medium text-white hover:bg-indigo-700"
+            disabled={isSaving}
+            className="px-4 py-2 bg-indigo-600 rounded-md text-sm font-medium text-white hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center"
           >
-            {isEditMode ? "Update Code" : "Submit Contribution"}
+            {isSaving ? (
+              <>
+                <i className="fas fa-spinner fa-spin mr-2"></i>
+                Saving...
+              </>
+            ) : (
+              isEditMode ? "Update Code" : "Submit Contribution"
+            )}
           </button>
         </div>
       </form>
@@ -1198,6 +1209,7 @@ const Catalog = ({
 
 const App = () => {
   const { user } = useUser();
+  const { getToken } = useAuth();
   const [view, setView] = useState("catalog");
 
   // SECURITY: Read role from Clerk metadata - defaults to contributor
@@ -1226,6 +1238,7 @@ const App = () => {
   // Selection State
   const [selectedDef, setSelectedDef] = useState<PatternDefinition | null>(null);
   const [editingImpl, setEditingImpl] = useState<PatternImplementation | null>(null); // For edit/create
+  const [savingImpl, setSavingImpl] = useState<string | null>(null); // Loading state for save operations
 
   // Basket State: Record<PatternID, ImplementationUUID>
   const [basket, setBasket] = useState<Record<string, string>>({});
@@ -1275,34 +1288,131 @@ const App = () => {
       setView("contribute");
   };
 
-  const handleSaveImplementation = (newImpl: PatternImplementation, updatedDef?: Partial<PatternDefinition>) => {
-      setImplementationsList(prev => {
-          const index = prev.findIndex(i => i.uuid === newImpl.uuid);
-          if (index >= 0) {
-              const updated = [...prev];
-              updated[index] = newImpl;
-              return updated;
+  const handleSaveImplementation = async (
+    newImpl: PatternImplementation,
+    updatedDef?: Partial<PatternDefinition>
+  ) => {
+    // Check if this is an edit (existing UUID) or new contribution
+    const isEdit = implementationsList.some(i => i.uuid === newImpl.uuid);
+
+    if (isEdit) {
+      // EDIT MODE: Call PUT endpoint
+      setSavingImpl(newImpl.uuid);
+
+      try {
+        // 1. Get Clerk authentication token
+        const token = await getToken();
+
+        if (!token) {
+          alert('Please log in to edit implementations');
+          return;
+        }
+
+        // 2. Prepare request payload
+        const payload = {
+          sasCode: newImpl.sasCode,
+          rCode: newImpl.rCode,
+          considerations: newImpl.considerations || [],
+          variations: newImpl.variations || [],
+          isPremium: newImpl.isPremium || false
+        };
+
+        // 3. Call backend API
+        const response = await fetch(`/api/implementations/${newImpl.uuid}`, {
+          method: 'PUT',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(payload)
+        });
+
+        const data = await response.json();
+
+        // 4. Handle errors
+        if (!response.ok) {
+          if (response.status === 401) {
+            alert('Please log in to edit implementations');
+          } else if (response.status === 403) {
+            alert('You can only edit your own implementations');
+          } else if (response.status === 404) {
+            alert('Implementation not found');
+          } else {
+            alert(`Error: ${data.error || 'Failed to save changes'}`);
           }
-          return [...prev, newImpl];
-      });
+          return;
+        }
+
+        // 5. Update local state with server response
+        setImplementationsList(prev =>
+          prev.map(impl =>
+            impl.uuid === newImpl.uuid
+              ? {
+                  ...impl,
+                  ...newImpl,
+                  status: data.implementation.status, // Use status from server
+                  timestamp: new Date(data.implementation.updatedAt).getTime()
+                }
+              : impl
+          )
+        );
+
+        // 6. Show success message
+        if (data.statusChanged) {
+          alert(
+            `✅ ${data.message}\n\n` +
+            `Status changed: ${data.previousStatus} → ${data.newStatus}\n\n` +
+            `Your changes have been submitted for admin review.`
+          );
+        } else {
+          alert('✅ Implementation updated successfully!');
+        }
+
+        // Update definition if provided
+        if (updatedDef && selectedDef) {
+          setDefinitions(prev => {
+            const index = prev.findIndex(d => d.id === selectedDef.id);
+            if (index >= 0) {
+              const updated = [...prev];
+              updated[index] = { ...updated[index], ...updatedDef };
+              return updated;
+            }
+            return prev;
+          });
+          setSelectedDef(prev => prev ? { ...prev, ...updatedDef } : prev);
+        }
+
+        // 7. Navigate back to detail view
+        setView("detail");
+        setEditingImpl(null);
+
+      } catch (error) {
+        console.error('Failed to save implementation:', error);
+        alert('❌ Network error: Could not save changes. Please try again.');
+      } finally {
+        setSavingImpl(null);
+      }
+
+    } else {
+      // NEW CONTRIBUTION MODE: Keep existing logic (will be updated in Story 7)
+      setImplementationsList(prev => [...prev, newImpl]);
 
       // Update definition if provided
       if (updatedDef && selectedDef) {
-          setDefinitions(prev => {
-              const index = prev.findIndex(d => d.id === selectedDef.id);
-              if (index >= 0) {
-                  const updated = [...prev];
-                  updated[index] = { ...updated[index], ...updatedDef };
-                  return updated;
-              }
-              return prev;
-          });
-          // Update the selectedDef to reflect changes
-          setSelectedDef(prev => prev ? { ...prev, ...updatedDef } : prev);
+        setDefinitions(prev => {
+          const index = prev.findIndex(d => d.id === selectedDef.id);
+          if (index >= 0) {
+            const updated = [...prev];
+            updated[index] = { ...updated[index], ...updatedDef };
+            return updated;
+          }
+          return prev;
+        });
+        setSelectedDef(prev => prev ? { ...prev, ...updatedDef } : prev);
       }
 
-      // Auto-select the new contribution in basket? Optional. Let's not for now.
       setView("detail");
+    }
   };
 
   // Show loading state
@@ -1375,6 +1485,7 @@ const App = () => {
             initialImpl={editingImpl || undefined}
             onSave={handleSaveImplementation}
             onCancel={() => setView("detail")}
+            isSaving={savingImpl !== null}
         />
       )}
 
