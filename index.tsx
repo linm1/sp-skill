@@ -312,21 +312,20 @@ ${categorySections}
 
 const Layout = ({
   children,
-  role,
-  setRole,
   currentView,
   setView,
   basketCount
 }: {
   children?: React.ReactNode;
-  role: Role;
-  setRole: (r: Role) => void;
   currentView: string;
   setView: (v: string) => void;
   basketCount: number;
 }) => {
   const { isSignedIn, isLoaded } = useAuth();
   const { user } = useUser();
+
+  // SECURITY: Read role from Clerk metadata - users cannot change this themselves
+  const userRole = (user?.publicMetadata?.role as Role) || 'contributor';
 
   return (
     <div className="min-h-screen flex flex-col font-sans text-slate-800">
@@ -372,19 +371,16 @@ const Layout = ({
                       }}
                     />
                   </div>
-                  <div className="flex items-center space-x-2">
-                    <span className="text-xs text-slate-500 uppercase">Dev Role:</span>
-                    <select
-                      value={role}
-                      onChange={(e) => setRole(e.target.value as Role)}
-                      className="bg-slate-800 border border-slate-700 text-xs rounded px-2 py-1 focus:outline-none focus:border-indigo-500"
-                      title="For development only - simulates different user roles"
-                    >
-                      <option value="guest">Guest</option>
-                      <option value="contributor">Contributor</option>
-                      <option value="premier">Premier</option>
-                      <option value="admin">Admin</option>
-                    </select>
+                  <div className="flex flex-col items-end">
+                    <span className="text-xs text-slate-500 uppercase">Role</span>
+                    <span className={`text-sm font-semibold ${
+                      userRole === 'admin' ? 'text-amber-400' :
+                      userRole === 'premier' ? 'text-purple-400' :
+                      userRole === 'contributor' ? 'text-indigo-400' :
+                      'text-slate-400'
+                    }`}>
+                      {userRole.charAt(0).toUpperCase() + userRole.slice(1)}
+                    </span>
                   </div>
                 </>
               ) : (
@@ -419,14 +415,12 @@ interface PatternCardProps {
   def: PatternDefinition;
   implCount: number;
   onClick: () => void;
-  role: Role;
 }
 
-const PatternCard: React.FC<PatternCardProps> = ({ 
-  def, 
-  implCount, 
-  onClick, 
-  role 
+const PatternCard: React.FC<PatternCardProps> = ({
+  def,
+  implCount,
+  onClick
 }) => {
   return (
     <div
@@ -1170,12 +1164,11 @@ const Catalog = ({
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {filteredDefs.map((d) => (
-          <PatternCard 
-            key={d.id} 
-            def={d} 
+          <PatternCard
+            key={d.id}
+            def={d}
             implCount={getImplCount(d.id)}
-            onClick={() => onPatternClick(d)} 
-            role="contributor" 
+            onClick={() => onPatternClick(d)}
           />
         ))}
       </div>
@@ -1193,17 +1186,20 @@ const Catalog = ({
 // --- Main App ---
 
 const App = () => {
-  const [role, setRole] = useState<Role>("contributor");
+  const { user } = useUser();
   const [view, setView] = useState("catalog");
-  
+
+  // SECURITY: Read role from Clerk metadata - defaults to contributor
+  const userRole = (user?.publicMetadata?.role as Role) || 'contributor';
+
   // Data State
   const [definitions, setDefinitions] = useState<PatternDefinition[]>(INITIAL_DEFS);
   const [implementations, setImplementations] = useState<PatternImplementation[]>(INITIAL_IMPLS);
-  
+
   // Selection State
   const [selectedDef, setSelectedDef] = useState<PatternDefinition | null>(null);
   const [editingImpl, setEditingImpl] = useState<PatternImplementation | null>(null); // For edit/create
-  
+
   // Basket State: Record<PatternID, ImplementationUUID>
   const [basket, setBasket] = useState<Record<string, string>>(() => {
      // Initialize basket with default SYSTEM implementations for all definitions
@@ -1279,21 +1275,19 @@ const App = () => {
   };
 
   return (
-    <Layout 
-        role={role} 
-        setRole={setRole} 
-        currentView={view} 
-        setView={setView} 
+    <Layout
+        currentView={view}
+        setView={setView}
         basketCount={Object.keys(basket).length}
     >
       {view === "catalog" && (
-        <Catalog 
-            defs={definitions} 
+        <Catalog
+            defs={definitions}
             impls={implementations}
-            onPatternClick={handlePatternClick} 
+            onPatternClick={handlePatternClick}
         />
       )}
-      
+
       {view === "detail" && selectedDef && (
         <PatternDetail
           def={selectedDef}
@@ -1306,12 +1300,12 @@ const App = () => {
           onAddToBasket={handleAddToBasket}
           onAddImplementation={handleAddImplementation}
           onEditImplementation={handleEditImplementation}
-          role={role}
+          role={userRole}
         />
       )}
 
       {view === "contribute" && selectedDef && (
-        <SmartEtlForm 
+        <SmartEtlForm
             definition={selectedDef}
             initialImpl={editingImpl || undefined}
             onSave={handleSaveImplementation}
@@ -1320,7 +1314,7 @@ const App = () => {
       )}
 
       {view === "basket" && (
-          <BasketView 
+          <BasketView
              basket={basket}
              defs={definitions}
              impls={implementations}
