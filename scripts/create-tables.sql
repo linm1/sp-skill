@@ -6,9 +6,10 @@
 -- ============================================
 CREATE TABLE IF NOT EXISTS users (
   id SERIAL PRIMARY KEY,
+  clerk_id VARCHAR(255) UNIQUE,
   email VARCHAR(255) UNIQUE NOT NULL,
   name VARCHAR(255),
-  role VARCHAR(50) DEFAULT 'guest', -- guest, contributor, premier, admin
+  role VARCHAR(50) DEFAULT 'contributor', -- guest, contributor, premier, admin
   created_at TIMESTAMP DEFAULT NOW(),
   updated_at TIMESTAMP DEFAULT NOW()
 );
