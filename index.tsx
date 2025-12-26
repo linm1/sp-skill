@@ -89,61 +89,72 @@ const PRELOADED_CONTENT: Record<string, Partial<PatternDefinition> & Partial<Pat
   }
 };
 
-// --- Initial State Generators ---
+// --- API Fetch Hook ---
 
-const { INITIAL_DEFS, INITIAL_IMPLS } = (() => {
-  const defs: PatternDefinition[] = [];
-  const impls: PatternImplementation[] = [];
+const usePatterns = () => {
+  const [patterns, setPatterns] = useState<PatternDefinition[]>([]);
+  const [implementations, setImplementations] = useState<PatternImplementation[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  Object.entries(MANIFEST_DATA).forEach(([catCode, slugs]) => {
-    slugs.forEach((slug, index) => {
-      const id = `${catCode}-${String(index + 1).padStart(3, "0")}`;
-      const preloaded = PRELOADED_CONTENT[id];
-      
-      const title = preloaded?.title || slug.split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
-      
-      // 1. Create Definition
-      defs.push({
-        id,
-        category: catCode,
-        title,
-        problem: preloaded?.problem || "Content to be added.",
-        whenToUse: preloaded?.whenToUse || "To be defined.",
-      });
+  useEffect(() => {
+    const fetchPatterns = async () => {
+      try {
+        setLoading(true);
+        setError(null);
 
-      // 2. Create System Implementation
-      impls.push({
-        uuid: `${id}-system`,
-        patternId: id,
-        author: SYSTEM_AUTHOR,
-        sasCode: preloaded?.sasCode || "/* SAS implementation pending */",
-        rCode: preloaded?.rCode || "# R implementation pending",
-        considerations: preloaded?.considerations || [],
-        variations: preloaded?.variations || [],
-        status: "active",
-        isPremium: false,
-        timestamp: Date.now(),
-      });
+        const response = await fetch('/api/patterns');
+        if (!response.ok) {
+          throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        }
 
-      // 3. MOCK DATA: Add Jane Doe's version to IMP-002 to demonstrate tabs
-      if (id === "IMP-002") {
-        impls.push({
-          uuid: `${id}-jane`,
-          patternId: id,
-          author: "Jane Doe",
-          sasCode: `/* Jane's optimized LOCF with extra checks */\ndata locf_checked;\n  set source;\n  /* ... different logic ... */\nrun;`,
-          rCode: `# Jane's R Tidyverse version\n# ... `,
-          considerations: ["Jane's version handles partial dates differently."],
-          variations: [],
-          status: "active",
-          isPremium: false,
-          timestamp: Date.now() + 1000,
+        const data = await response.json();
+
+        // Transform API response to match current data model
+        const defs: PatternDefinition[] = data.patterns.map((p: any) => ({
+          id: p.id,
+          category: p.category,
+          title: p.title,
+          problem: p.problem,
+          whenToUse: p.whenToUse
+        }));
+
+        // Flatten implementations from all patterns
+        const impls: PatternImplementation[] = [];
+        data.patterns.forEach((p: any) => {
+          if (p.implementations) {
+            p.implementations.forEach((impl: any) => {
+              impls.push({
+                uuid: impl.uuid,
+                patternId: p.id,
+                author: impl.authorName,
+                sasCode: impl.sasCode,
+                rCode: impl.rCode,
+                considerations: impl.considerations || [],
+                variations: impl.variations || [],
+                status: impl.status,
+                isPremium: impl.isPremium || false,
+                timestamp: new Date(impl.updatedAt || impl.createdAt).getTime()
+              });
+            });
+          }
         });
+
+        setPatterns(defs);
+        setImplementations(impls);
+      } catch (err) {
+        console.error('Failed to fetch patterns:', err);
+        setError(err instanceof Error ? err.message : 'Failed to fetch patterns');
+      } finally {
+        setLoading(false);
       }
-    });
-  });
-  return { INITIAL_DEFS: defs, INITIAL_IMPLS: impls };
-})();
+    };
+
+    fetchPatterns();
+  }, []);
+
+  return { patterns, implementations, loading, error };
+};
 
 // --- Helper Functions ---
 
@@ -1192,24 +1203,44 @@ const App = () => {
   // SECURITY: Read role from Clerk metadata - defaults to contributor
   const userRole = (user?.publicMetadata?.role as Role) || 'contributor';
 
+  // Fetch patterns from API
+  const { patterns, implementations, loading, error } = usePatterns();
+
   // Data State
-  const [definitions, setDefinitions] = useState<PatternDefinition[]>(INITIAL_DEFS);
-  const [implementations, setImplementations] = useState<PatternImplementation[]>(INITIAL_IMPLS);
+  const [definitions, setDefinitions] = useState<PatternDefinition[]>([]);
+  const [implementationsList, setImplementationsList] = useState<PatternImplementation[]>([]);
+
+  // Update local state when API data loads
+  useEffect(() => {
+    if (patterns.length > 0) {
+      setDefinitions(patterns);
+    }
+  }, [patterns]);
+
+  useEffect(() => {
+    if (implementations.length > 0) {
+      setImplementationsList(implementations);
+    }
+  }, [implementations]);
 
   // Selection State
   const [selectedDef, setSelectedDef] = useState<PatternDefinition | null>(null);
   const [editingImpl, setEditingImpl] = useState<PatternImplementation | null>(null); // For edit/create
 
   // Basket State: Record<PatternID, ImplementationUUID>
-  const [basket, setBasket] = useState<Record<string, string>>(() => {
-     // Initialize basket with default SYSTEM implementations for all definitions
-     const initialBasket: Record<string, string> = {};
-     INITIAL_DEFS.forEach(def => {
-        const sysImpl = INITIAL_IMPLS.find(i => i.patternId === def.id && i.author === SYSTEM_AUTHOR);
+  const [basket, setBasket] = useState<Record<string, string>>({});
+
+  // Initialize basket with system implementations when data loads
+  useEffect(() => {
+    if (patterns.length > 0 && implementations.length > 0) {
+      const initialBasket: Record<string, string> = {};
+      patterns.forEach(def => {
+        const sysImpl = implementations.find(i => i.patternId === def.id && i.author === SYSTEM_AUTHOR);
         if (sysImpl) initialBasket[def.id] = sysImpl.uuid;
-     });
-     return initialBasket;
-  });
+      });
+      setBasket(initialBasket);
+    }
+  }, [patterns, implementations]);
 
   const handlePatternClick = (d: PatternDefinition) => {
     setSelectedDef(d);
@@ -1225,7 +1256,7 @@ const App = () => {
   };
   
   const handleResetToSystem = (patternId: string) => {
-      const sysImpl = implementations.find(i => i.patternId === patternId && i.author === SYSTEM_AUTHOR);
+      const sysImpl = implementationsList.find(i => i.patternId === patternId && i.author === SYSTEM_AUTHOR);
       if (sysImpl) {
           setBasket(prev => ({
               ...prev,
@@ -1245,7 +1276,7 @@ const App = () => {
   };
 
   const handleSaveImplementation = (newImpl: PatternImplementation, updatedDef?: Partial<PatternDefinition>) => {
-      setImplementations(prev => {
+      setImplementationsList(prev => {
           const index = prev.findIndex(i => i.uuid === newImpl.uuid);
           if (index >= 0) {
               const updated = [...prev];
@@ -1274,6 +1305,40 @@ const App = () => {
       setView("detail");
   };
 
+  // Show loading state
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-slate-900 flex items-center justify-center">
+        <div className="text-center">
+          <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-white mb-4"></div>
+          <div className="text-white text-xl">Loading patterns...</div>
+          <div className="text-slate-400 text-sm mt-2">Fetching data from database</div>
+        </div>
+      </div>
+    );
+  }
+
+  // Show error state
+  if (error) {
+    return (
+      <div className="min-h-screen bg-slate-900 flex items-center justify-center">
+        <div className="bg-red-900 text-white p-6 rounded-lg max-w-md">
+          <div className="flex items-center mb-3">
+            <i className="fas fa-exclamation-triangle text-2xl mr-3"></i>
+            <h2 className="text-xl font-bold">Error Loading Patterns</h2>
+          </div>
+          <p className="mb-4">{error}</p>
+          <button
+            onClick={() => window.location.reload()}
+            className="mt-4 px-4 py-2 bg-red-700 rounded hover:bg-red-600 transition-colors w-full"
+          >
+            <i className="fas fa-sync mr-2"></i> Retry
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <Layout
         currentView={view}
@@ -1283,7 +1348,7 @@ const App = () => {
       {view === "catalog" && (
         <Catalog
             defs={definitions}
-            impls={implementations}
+            impls={implementationsList}
             onPatternClick={handlePatternClick}
         />
       )}
@@ -1291,7 +1356,7 @@ const App = () => {
       {view === "detail" && selectedDef && (
         <PatternDetail
           def={selectedDef}
-          impls={implementations.filter(i => i.patternId === selectedDef.id)}
+          impls={implementationsList.filter(i => i.patternId === selectedDef.id)}
           basketSelectedUuid={basket[selectedDef.id]}
           onBack={() => {
             setSelectedDef(null);
@@ -1317,7 +1382,7 @@ const App = () => {
           <BasketView
              basket={basket}
              defs={definitions}
-             impls={implementations}
+             impls={implementationsList}
              onClear={() => setBasket({})}
              onRemove={(patId) => {
                  const newBasket = {...basket};

@@ -58,12 +58,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       patterns.map(async (pattern) => {
         // Get all implementations for this pattern
         const implementations = await db
-          .select({
-            uuid: patternImplementations.uuid,
-            authorName: patternImplementations.authorName,
-            status: patternImplementations.status,
-            updatedAt: patternImplementations.updatedAt
-          })
+          .select()
           .from(patternImplementations)
           .where(eq(patternImplementations.patternId, pattern.id));
 
@@ -90,7 +85,20 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
           implementationCount: activeImplementations.length,
           authors: authors,
           latestUpdate: latestUpdate.toISOString(),
-          createdAt: pattern.createdAt
+          createdAt: pattern.createdAt,
+          implementations: implementations.map(impl => ({
+            uuid: impl.uuid,
+            authorId: impl.authorId,
+            authorName: impl.authorName,
+            sasCode: impl.sasCode,
+            rCode: impl.rCode,
+            considerations: impl.considerations,
+            variations: impl.variations,
+            status: impl.status,
+            isPremium: impl.isPremium,
+            createdAt: impl.createdAt,
+            updatedAt: impl.updatedAt
+          }))
         };
       })
     );
