@@ -114,7 +114,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     return res.status(200).json({
       success: true,
       count: enrichedPatterns.length,
-      category: category ? category.toUpperCase() : 'ALL',
+      category: category ? (Array.isArray(category) ? category[0].toUpperCase() : category.toUpperCase()) : 'ALL',
       patterns: enrichedPatterns
     });
 

@@ -4,9 +4,9 @@ import { db } from '../db/index.js';
 import { users } from '../db/schema.js';
 import { eq } from 'drizzle-orm';
 
-// Initialize Clerk client with secret key from environment
+// Initialize Clerk client
 const clerkClient = createClerkClient({
-  secretKey: process.env.CLERK_SECRET_KEY,
+  secretKey: process.env.CLERK_SECRET_KEY || '',
 });
 
 /**
@@ -27,8 +27,10 @@ export async function getAuthenticatedUser(req: VercelRequest) {
 
   // 2. Verify token with Clerk
   try {
+    // Verify the JWT token
     const verifiedToken = await clerkClient.verifyToken(token);
-    if (!verifiedToken) return null;
+
+    if (!verifiedToken || !verifiedToken.sub) return null;
 
     // Get the user ID from the token
     const userId = verifiedToken.sub;
