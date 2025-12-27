@@ -1,5 +1,5 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { createClerkClient } from '@clerk/backend';
+import { createClerkClient, verifyToken } from '@clerk/backend';
 import { db } from '../db/index.js';
 import { users } from '../db/schema.js';
 import { eq } from 'drizzle-orm';
@@ -8,6 +8,9 @@ import { eq } from 'drizzle-orm';
 const clerkClient = createClerkClient({
   secretKey: process.env.CLERK_SECRET_KEY || '',
 });
+
+// Get publishable key from environment
+const CLERK_PUBLISHABLE_KEY = process.env.VITE_CLERK_PUBLISHABLE_KEY || '';
 
 /**
  * Gets the authenticated user from Clerk JWT token
@@ -27,16 +30,15 @@ export async function getAuthenticatedUser(req: VercelRequest) {
 
   // 2. Verify token with Clerk
   try {
-    // Use authenticateRequest to verify the session token
-    const requestState = await clerkClient.authenticateRequest(req, {
-      secretKey: process.env.CLERK_SECRET_KEY,
+    // Verify the JWT token directly using the verifyToken function
+    const payload = await verifyToken(token, {
+      secretKey: process.env.CLERK_SECRET_KEY || '',
     });
 
-    if (!requestState.isSignedIn) return null;
+    if (!payload || !payload.sub) return null;
 
-    // Get the user ID from the authenticated request
-    const userId = requestState.toAuth().userId;
-    if (!userId) return null;
+    // Get the user ID from the token payload
+    const userId = payload.sub;
 
     // Fetch full user details from Clerk
     const clerkUser = await clerkClient.users.getUser(userId);
