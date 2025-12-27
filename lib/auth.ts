@@ -27,13 +27,16 @@ export async function getAuthenticatedUser(req: VercelRequest) {
 
   // 2. Verify token with Clerk
   try {
-    // Verify the JWT token
-    const verifiedToken = await clerkClient.verifyToken(token);
+    // Use authenticateRequest to verify the session token
+    const requestState = await clerkClient.authenticateRequest(req, {
+      secretKey: process.env.CLERK_SECRET_KEY,
+    });
 
-    if (!verifiedToken || !verifiedToken.sub) return null;
+    if (!requestState.isSignedIn) return null;
 
-    // Get the user ID from the token
-    const userId = verifiedToken.sub;
+    // Get the user ID from the authenticated request
+    const userId = requestState.toAuth().userId;
+    if (!userId) return null;
 
     // Fetch full user details from Clerk
     const clerkUser = await clerkClient.users.getUser(userId);
