@@ -18,7 +18,8 @@
     "drizzle-orm": "^0.45.1",
     "jszip": "^3.10.1",
     "react": "^19.2.3",
-    "react-dom": "^19.2.3"
+    "react-dom": "^19.2.3",
+    "svix": "^1.82.0"
   },
   "devDependencies": {
     "@types/cors": "^2.8.19",
