@@ -57,13 +57,42 @@ export async function getAuthenticatedUser(req: VercelRequest) {
       const email = clerkUser.emailAddresses[0]?.emailAddress || '';
       const name = clerkUser.firstName || clerkUser.username || email.split('@')[0];
 
-      const newUser = await db.insert(users).values({
-        clerkId: clerkUser.id,
-        email: email,
-        name: name,
-        role: role
-      }).returning();
-      dbUser = newUser;
+      try {
+        const newUser = await db.insert(users).values({
+          clerkId: clerkUser.id,
+          email: email,
+          name: name,
+          role: role
+        }).returning();
+        dbUser = newUser;
+      } catch (insertError: any) {
+        // Handle duplicate key error (race condition or sequence issue)
+        // Error code 23505 = unique constraint violation
+        if (insertError.code === '23505') {
+          console.warn('User insert conflict, attempting SELECT:', {
+            clerkId: clerkUser.id,
+            email,
+            errorCode: insertError.code
+          });
+
+          // Try to SELECT the user again (might have been created by another request)
+          dbUser = await db.select()
+            .from(users)
+            .where(eq(users.clerkId, clerkUser.id))
+            .limit(1);
+
+          if (dbUser.length === 0) {
+            // User still not found - this is a real error, not a race condition
+            console.error('Failed to create or find user after conflict:', insertError);
+            throw insertError;
+          }
+
+          console.log('User found after conflict, continuing with existing user');
+        } else {
+          // Some other database error - rethrow
+          throw insertError;
+        }
+      }
     }
 
     return dbUser[0];
