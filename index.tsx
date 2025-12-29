@@ -325,12 +325,14 @@ const Layout = ({
   children,
   currentView,
   setView,
-  basketCount
+  basketCount,
+  onContributeClick
 }: {
   children?: React.ReactNode;
   currentView: string;
   setView: (v: string) => void;
   basketCount: number;
+  onContributeClick?: () => void;
 }) => {
   const { isSignedIn, isLoaded } = useAuth();
   const { user } = useUser();
@@ -358,6 +360,39 @@ const Layout = ({
             >
               Catalog
             </button>
+            {isLoaded && isSignedIn && userRole !== 'guest' && (
+              <button
+                onClick={() => {
+                  if (onContributeClick) {
+                    onContributeClick();
+                  } else {
+                    setView("contribute");
+                  }
+                }}
+                className={`hover:text-indigo-400 flex items-center ${currentView === "contribute" ? "text-indigo-400" : ""}`}
+              >
+                <i className="fas fa-plus-circle mr-2"></i>
+                Contribute
+              </button>
+            )}
+            {isLoaded && isSignedIn && userRole !== 'guest' && (
+              <button
+                onClick={() => setView("my-contributions")}
+                className={`hover:text-indigo-400 flex items-center ${currentView === "my-contributions" ? "text-indigo-400" : ""}`}
+              >
+                <i className="fas fa-folder-open mr-2"></i>
+                My Contributions
+              </button>
+            )}
+            {isLoaded && isSignedIn && userRole === 'admin' && (
+              <button
+                onClick={() => setView("admin-review")}
+                className={`hover:text-indigo-400 flex items-center ${currentView === "admin-review" ? "text-indigo-400" : ""}`}
+              >
+                <i className="fas fa-clipboard-check mr-2"></i>
+                Admin Review
+              </button>
+            )}
             <button
               onClick={() => setView("basket")}
               className={`hover:text-indigo-400 flex items-center ${currentView === "basket" ? "text-indigo-400" : ""}`}
@@ -648,16 +683,19 @@ const SmartEtlForm = ({
   onSave,
   onCancel,
   isSaving = false,
+  allPatterns = [],
 }: {
-  definition: PatternDefinition;
+  definition?: PatternDefinition;
   initialImpl?: PatternImplementation;
   onSave: (impl: PatternImplementation, updatedDef?: Partial<PatternDefinition>) => void;
   onCancel: () => void;
   isSaving?: boolean;
+  allPatterns?: PatternDefinition[];
 }) => {
   const isEditMode = !!initialImpl;
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [rawInput, setRawInput] = useState("");
+  const [selectedPatternId, setSelectedPatternId] = useState(definition?.id || "");
   const [formData, setFormData] = useState<Partial<PatternImplementation>>({
     sasCode: "",
     rCode: "",
@@ -667,12 +705,26 @@ const SmartEtlForm = ({
     ...initialImpl
   });
 
+  // Get current pattern based on selection
+  const currentPattern = definition || allPatterns.find(p => p.id === selectedPatternId);
+
   // State for pattern definition fields
   const [defData, setDefData] = useState<Partial<PatternDefinition>>({
-    title: definition.title,
-    problem: definition.problem,
-    whenToUse: definition.whenToUse,
+    title: definition?.title || "",
+    problem: definition?.problem || "",
+    whenToUse: definition?.whenToUse || "",
   });
+
+  // Update defData when pattern selection changes
+  useEffect(() => {
+    if (currentPattern && !definition) {
+      setDefData({
+        title: currentPattern.title,
+        problem: currentPattern.problem,
+        whenToUse: currentPattern.whenToUse,
+      });
+    }
+  }, [currentPattern, definition]);
 
   const analyzeWithGemini = async () => {
     if (!rawInput.trim()) return;
@@ -685,7 +737,7 @@ const SmartEtlForm = ({
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          patternTitle: definition.title,
+          patternTitle: currentPattern?.title || "",
           rawInput: rawInput,
         }),
       });
@@ -708,9 +760,23 @@ const SmartEtlForm = ({
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
+    if (!currentPattern) {
+      alert("Please select a pattern to contribute to.");
+      return;
+    }
+
+    // Validate that at least one code field is provided
+    const hasSasCode = formData.sasCode && formData.sasCode.trim().length > 0;
+    const hasRCode = formData.rCode && formData.rCode.trim().length > 0;
+
+    if (!hasSasCode && !hasRCode) {
+      alert("Please provide at least one code implementation (SAS or R).");
+      return;
+    }
+
     const newImpl: PatternImplementation = {
       uuid: isEditMode && initialImpl ? initialImpl.uuid : crypto.randomUUID(),
-      patternId: definition.id,
+      patternId: currentPattern.id,
       author: formData.author || CURRENT_USER,
       sasCode: formData.sasCode || "",
       rCode: formData.rCode || "",
@@ -722,10 +788,11 @@ const SmartEtlForm = ({
     };
 
     // Check if any definition fields have changed
-    const hasDefChanges =
+    const hasDefChanges = definition && (
       defData.title !== definition.title ||
       defData.problem !== definition.problem ||
-      defData.whenToUse !== definition.whenToUse;
+      defData.whenToUse !== definition.whenToUse
+    );
 
     onSave(newImpl, hasDefChanges ? defData : undefined);
   };
@@ -738,11 +805,40 @@ const SmartEtlForm = ({
     <div className="max-w-3xl mx-auto bg-white rounded-xl shadow-lg border border-slate-200 overflow-hidden">
       <div className="bg-indigo-600 px-6 py-4 flex justify-between items-center">
         <div>
-           <h2 className="text-white font-bold text-lg">{isEditMode ? "Edit Implementation" : "Contribute New Version"}</h2>
-           <p className="text-indigo-200 text-xs">For Pattern: {definition.id} - {definition.title}</p>
+           <h2 className="text-white font-bold text-lg">{isEditMode ? "Edit Implementation" : "Contribute New Pattern Implementation"}</h2>
+           {currentPattern && <p className="text-indigo-200 text-xs">For Pattern: {currentPattern.id} - {currentPattern.title}</p>}
         </div>
         {!isEditMode && <span className="text-indigo-200 text-xs uppercase font-semibold tracking-wider">Smart Ingest Active</span>}
       </div>
+
+      {/* Pattern Selection Dropdown (only show if no definition provided) */}
+      {!definition && !isEditMode && (
+        <div className="p-6 bg-slate-50 border-b border-slate-200">
+          <label className="block text-sm font-medium text-slate-700 mb-2">
+            <i className="fas fa-list-alt mr-2"></i>Select Pattern to Contribute To
+          </label>
+          <select
+            name="patternId"
+            required
+            value={selectedPatternId}
+            onChange={(e) => setSelectedPatternId(e.target.value)}
+            className="w-full p-3 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+          >
+            <option value="">Choose a pattern...</option>
+            {CATEGORIES.map(cat => (
+              <optgroup key={cat.code} label={cat.name}>
+                {allPatterns
+                  .filter(p => p.category === cat.code)
+                  .map(pattern => (
+                    <option key={pattern.id} value={pattern.id}>
+                      {pattern.id} - {pattern.title}
+                    </option>
+                  ))}
+              </optgroup>
+            ))}
+          </select>
+        </div>
+      )}
 
       {!isEditMode && (
         <div className="p-6 bg-slate-50 border-b border-slate-200">
@@ -771,69 +867,78 @@ const SmartEtlForm = ({
 
       <form onSubmit={handleSubmit} className="p-6 space-y-6">
 
-        {/* Pattern Definition Fields */}
-        <div className="bg-slate-50 border border-slate-200 rounded-lg p-4 space-y-4">
-          <h3 className="text-sm font-semibold text-slate-700 uppercase tracking-wide mb-2">
-            <i className="fas fa-info-circle mr-2"></i>Pattern Definition
-          </h3>
+        {/* Pattern Definition Fields (Read-only when pattern selected from dropdown) */}
+        {currentPattern && (
+          <div className="bg-slate-50 border border-slate-200 rounded-lg p-4 space-y-4">
+            <h3 className="text-sm font-semibold text-slate-700 uppercase tracking-wide mb-2">
+              <i className="fas fa-info-circle mr-2"></i>Pattern Definition {!definition && <span className="text-xs text-slate-500 font-normal">(Read-only)</span>}
+            </h3>
 
-          <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1">Pattern Title</label>
-            <input
-              type="text"
-              required
-              value={defData.title}
-              onChange={(e) => setDefData({ ...defData, title: e.target.value })}
-              className="w-full p-2 border border-slate-300 rounded-md text-sm"
-              placeholder="e.g., Last Observation Carried Forward (LOCF)"
-            />
-          </div>
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-1">Pattern Title</label>
+              <input
+                type="text"
+                required
+                value={defData.title}
+                onChange={(e) => setDefData({ ...defData, title: e.target.value })}
+                className="w-full p-2 border border-slate-300 rounded-md text-sm bg-slate-100"
+                placeholder="e.g., Last Observation Carried Forward (LOCF)"
+                disabled={!definition}
+              />
+            </div>
 
-          <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1">Problem Statement</label>
-            <textarea
-              required
-              rows={2}
-              value={defData.problem}
-              onChange={(e) => setDefData({ ...defData, problem: e.target.value })}
-              className="w-full p-2 border border-slate-300 rounded-md text-sm"
-              placeholder="Describe what problem this pattern solves..."
-            />
-          </div>
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-1">Problem Statement</label>
+              <textarea
+                required
+                rows={2}
+                value={defData.problem}
+                onChange={(e) => setDefData({ ...defData, problem: e.target.value })}
+                className="w-full p-2 border border-slate-300 rounded-md text-sm bg-slate-100"
+                placeholder="Describe what problem this pattern solves..."
+                disabled={!definition}
+              />
+            </div>
 
-          <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1">When to Use</label>
-            <textarea
-              required
-              rows={2}
-              value={defData.whenToUse}
-              onChange={(e) => setDefData({ ...defData, whenToUse: e.target.value })}
-              className="w-full p-2 border border-slate-300 rounded-md text-sm"
-              placeholder="Specify scenarios and triggers for using this pattern..."
-            />
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-1">When to Use</label>
+              <textarea
+                required
+                rows={2}
+                value={defData.whenToUse}
+                onChange={(e) => setDefData({ ...defData, whenToUse: e.target.value })}
+                className="w-full p-2 border border-slate-300 rounded-md text-sm bg-slate-100"
+                placeholder="Specify scenarios and triggers for using this pattern..."
+                disabled={!definition}
+              />
+            </div>
           </div>
-        </div>
+        )}
 
         {/* Implementation Fields */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1">SAS Implementation</label>
+            <label className="block text-sm font-medium text-slate-700 mb-1">
+              SAS Implementation {!formData.rCode && <span className="text-red-500 text-xs">(Required if R code not provided)</span>}
+            </label>
             <textarea
-              required
               rows={8}
               value={formData.sasCode}
               onChange={(e) => setFormData({ ...formData, sasCode: e.target.value })}
               className="w-full p-2 border border-slate-300 rounded-md text-sm font-mono bg-slate-50"
+              placeholder="Enter SAS code..."
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1">R Implementation</label>
+            <label className="block text-sm font-medium text-slate-700 mb-1">
+              R Implementation {!formData.sasCode && <span className="text-red-500 text-xs">(Required if SAS code not provided)</span>}
+            </label>
             <textarea
-              required
               rows={8}
               value={formData.rCode}
               onChange={(e) => setFormData({ ...formData, rCode: e.target.value })}
               className="w-full p-2 border border-slate-300 rounded-md text-sm font-mono bg-slate-50"
+              placeholder="Enter R code..."
             />
           </div>
         </div>
@@ -888,15 +993,568 @@ const SmartEtlForm = ({
   );
 };
 
-const BasketView = ({ 
-  basket, 
+const AdminReviewQueue = () => {
+  const { getToken } = useAuth();
+  const { user } = useUser();
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [pendingImplementations, setPendingImplementations] = useState<Array<{
+    uuid: string;
+    patternId: string;
+    patternTitle: string;
+    patternCategory: string;
+    authorId: string;
+    authorName: string;
+    sasCode: string;
+    rCode: string;
+    considerations: string[];
+    variations: string[];
+    status: "pending";
+    createdAt: string;
+    updatedAt: string;
+  }>>([]);
+  const [processingUuid, setProcessingUuid] = useState<string | null>(null);
+
+  // Check if user is admin
+  const userRole = (user?.publicMetadata?.role as Role) || 'contributor';
+  const isAdmin = userRole === 'admin';
+
+  useEffect(() => {
+    const fetchPendingImplementations = async () => {
+      if (!isAdmin) {
+        setLoading(false);
+        setError("Access denied. Admin role required.");
+        return;
+      }
+
+      try {
+        setLoading(true);
+        setError(null);
+
+        const token = await getToken();
+        if (!token) {
+          setError("Please sign in to access admin features");
+          setLoading(false);
+          return;
+        }
+
+        const response = await fetch('/api/implementations?status=pending', {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
+
+        if (!response.ok) {
+          if (response.status === 401) {
+            throw new Error("Please sign in to access admin features");
+          }
+          if (response.status === 403) {
+            throw new Error("Access denied. Admin role required.");
+          }
+          throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        }
+
+        const data = await response.json();
+        setPendingImplementations(data.implementations || []);
+      } catch (err) {
+        console.error('Failed to fetch pending implementations:', err);
+        setError(err instanceof Error ? err.message : 'Failed to load pending implementations');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchPendingImplementations();
+  }, [getToken, isAdmin, user]);
+
+  const handleApprove = async (uuid: string) => {
+    try {
+      setProcessingUuid(uuid);
+
+      const token = await getToken();
+      if (!token) {
+        alert("Please sign in to approve implementations");
+        return;
+      }
+
+      const response = await fetch(`/api/implementations/${uuid}`, {
+        method: 'PATCH',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ status: 'active' })
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        if (response.status === 403) {
+          alert('Access denied. Admin role required.');
+        } else if (response.status === 404) {
+          alert('Implementation not found');
+        } else {
+          alert(`Error: ${data.error || 'Failed to approve implementation'}`);
+        }
+        return;
+      }
+
+      // Remove from pending list
+      setPendingImplementations(prev => prev.filter(impl => impl.uuid !== uuid));
+      alert('Implementation approved successfully!');
+
+    } catch (error) {
+      console.error('Failed to approve implementation:', error);
+      alert('Network error: Could not approve implementation. Please try again.');
+    } finally {
+      setProcessingUuid(null);
+    }
+  };
+
+  const handleReject = async (uuid: string) => {
+    if (!confirm('Are you sure you want to reject this implementation? This action cannot be undone.')) {
+      return;
+    }
+
+    try {
+      setProcessingUuid(uuid);
+
+      const token = await getToken();
+      if (!token) {
+        alert("Please sign in to reject implementations");
+        return;
+      }
+
+      const response = await fetch(`/api/implementations/${uuid}`, {
+        method: 'PATCH',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ status: 'rejected' })
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        if (response.status === 403) {
+          alert('Access denied. Admin role required.');
+        } else if (response.status === 404) {
+          alert('Implementation not found');
+        } else {
+          alert(`Error: ${data.error || 'Failed to reject implementation'}`);
+        }
+        return;
+      }
+
+      // Remove from pending list
+      setPendingImplementations(prev => prev.filter(impl => impl.uuid !== uuid));
+      alert('Implementation rejected.');
+
+    } catch (error) {
+      console.error('Failed to reject implementation:', error);
+      alert('Network error: Could not reject implementation. Please try again.');
+    } finally {
+      setProcessingUuid(null);
+    }
+  };
+
+  const getCodePreview = (sasCode: string, rCode: string) => {
+    const code = sasCode || rCode || "";
+    const lines = code.split('\n').filter(l => l.trim()).slice(0, 5);
+    return lines.length > 0 ? lines.join('\n') : "No code preview available";
+  };
+
+  if (loading) {
+    return (
+      <div className="max-w-6xl mx-auto">
+        <div className="text-center py-20">
+          <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 mb-4"></div>
+          <div className="text-slate-700 text-lg">Loading pending submissions...</div>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="max-w-6xl mx-auto">
+        <div className="bg-red-50 border border-red-200 rounded-xl p-6 text-center">
+          <i className="fas fa-exclamation-triangle text-red-500 text-3xl mb-3"></i>
+          <h3 className="text-lg font-semibold text-red-900 mb-2">Access Denied</h3>
+          <p className="text-red-700">{error}</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (pendingImplementations.length === 0) {
+    return (
+      <div className="max-w-6xl mx-auto">
+        <div className="mb-6">
+          <h2 className="text-3xl font-bold text-slate-900 mb-2">Admin Review Queue</h2>
+          <p className="text-slate-600">Review and approve pattern implementations submitted by contributors</p>
+        </div>
+        <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-12 text-center">
+          <div className="w-20 h-20 bg-green-50 rounded-full flex items-center justify-center mx-auto mb-6">
+            <i className="fas fa-check-circle text-green-500 text-3xl"></i>
+          </div>
+          <h3 className="text-2xl font-bold text-slate-900 mb-3">No Pending Submissions</h3>
+          <p className="text-slate-600 mb-6 max-w-md mx-auto">
+            All pattern implementations have been reviewed. Great job!
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="max-w-6xl mx-auto">
+      <div className="mb-6">
+        <h2 className="text-3xl font-bold text-slate-900 mb-2">Admin Review Queue</h2>
+        <p className="text-slate-600">
+          {pendingImplementations.length} pending submission{pendingImplementations.length !== 1 ? 's' : ''} awaiting review
+        </p>
+      </div>
+
+      <div className="space-y-4">
+        {pendingImplementations.map((implementation) => (
+          <div
+            key={implementation.uuid}
+            className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden hover:shadow-md transition-shadow"
+          >
+            <div className="p-6">
+              <div className="flex items-start justify-between mb-4">
+                <div className="flex-grow">
+                  <div className="flex items-center space-x-3 mb-2">
+                    <span className="px-2 py-1 bg-slate-100 text-slate-700 text-xs font-mono font-semibold rounded">
+                      {implementation.patternId}
+                    </span>
+                    <h3 className="text-lg font-bold text-slate-900">
+                      {implementation.patternTitle}
+                    </h3>
+                    <span className="px-3 py-1 text-xs font-semibold rounded-full border bg-yellow-100 text-yellow-800 border-yellow-200">
+                      Pending Review
+                    </span>
+                  </div>
+                  <p className="text-sm text-slate-500">
+                    Category: {implementation.patternCategory} |
+                    Contributor: <span className="font-medium text-slate-700">{implementation.authorName}</span> |
+                    Submitted: {new Date(implementation.createdAt).toLocaleDateString()}
+                  </p>
+                </div>
+              </div>
+
+              <div className="bg-slate-50 rounded-lg p-4 border border-slate-200 mb-4">
+                <h4 className="text-xs font-semibold text-slate-700 uppercase mb-2">Code Preview (First 5 lines)</h4>
+                <pre className="text-xs font-mono text-slate-700 whitespace-pre-wrap overflow-hidden">
+                  {getCodePreview(implementation.sasCode, implementation.rCode)}
+                </pre>
+                {(implementation.sasCode.split('\n').length > 5 || implementation.rCode.split('\n').length > 5) && (
+                  <p className="text-xs text-slate-500 mt-2 italic">...</p>
+                )}
+              </div>
+
+              {implementation.considerations.length > 0 && (
+                <div className="mb-4">
+                  <h4 className="text-xs font-semibold text-slate-700 uppercase mb-1">Considerations</h4>
+                  <ul className="list-disc list-inside text-sm text-slate-600 space-y-1">
+                    {implementation.considerations.slice(0, 3).map((c, i) => (
+                      <li key={i}>{c}</li>
+                    ))}
+                    {implementation.considerations.length > 3 && (
+                      <li className="text-slate-500 italic">+ {implementation.considerations.length - 3} more...</li>
+                    )}
+                  </ul>
+                </div>
+              )}
+
+              <div className="flex items-center justify-end space-x-3 pt-4 border-t border-slate-100">
+                <button
+                  onClick={() => handleReject(implementation.uuid)}
+                  disabled={processingUuid === implementation.uuid}
+                  className="bg-red-600 hover:bg-red-700 text-white px-6 py-2 rounded-lg text-sm font-medium transition-colors shadow-sm disabled:opacity-50 disabled:cursor-not-allowed flex items-center"
+                >
+                  {processingUuid === implementation.uuid ? (
+                    <>
+                      <i className="fas fa-spinner fa-spin mr-2"></i>
+                      Processing...
+                    </>
+                  ) : (
+                    <>
+                      <i className="fas fa-times-circle mr-2"></i>
+                      Reject
+                    </>
+                  )}
+                </button>
+                <button
+                  onClick={() => handleApprove(implementation.uuid)}
+                  disabled={processingUuid === implementation.uuid}
+                  className="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-lg text-sm font-medium transition-colors shadow-sm disabled:opacity-50 disabled:cursor-not-allowed flex items-center"
+                >
+                  {processingUuid === implementation.uuid ? (
+                    <>
+                      <i className="fas fa-spinner fa-spin mr-2"></i>
+                      Processing...
+                    </>
+                  ) : (
+                    <>
+                      <i className="fas fa-check-circle mr-2"></i>
+                      Approve
+                    </>
+                  )}
+                </button>
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+};
+
+const MyContributions = ({
+  onEdit,
+  onContribute
+}: {
+  onEdit: (impl: PatternImplementation) => void;
+  onContribute: () => void;
+}) => {
+  const { getToken } = useAuth();
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [contributions, setContributions] = useState<Array<{
+    uuid: string;
+    patternId: string;
+    patternTitle: string;
+    patternCategory: string;
+    sasCode: string;
+    rCode: string;
+    considerations: string[];
+    variations: string[];
+    status: "pending" | "active" | "rejected";
+    createdAt: string;
+    updatedAt: string;
+  }>>([]);
+
+  useEffect(() => {
+    const fetchContributions = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+
+        const token = await getToken();
+        if (!token) {
+          setError("Please sign in to view your contributions");
+          setLoading(false);
+          return;
+        }
+
+        const response = await fetch('/api/implementations?author_id=me', {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
+
+        if (!response.ok) {
+          if (response.status === 401) {
+            throw new Error("Please sign in to view your contributions");
+          }
+          throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        }
+
+        const data = await response.json();
+        setContributions(data.implementations || []);
+      } catch (err) {
+        console.error('Failed to fetch contributions:', err);
+        setError(err instanceof Error ? err.message : 'Failed to load contributions');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchContributions();
+  }, [getToken]);
+
+  const getStatusBadgeClass = (status: string) => {
+    switch (status) {
+      case 'pending':
+        return 'bg-yellow-100 text-yellow-800 border-yellow-200';
+      case 'active':
+        return 'bg-green-100 text-green-800 border-green-200';
+      case 'rejected':
+        return 'bg-red-100 text-red-800 border-red-200';
+      default:
+        return 'bg-slate-100 text-slate-800 border-slate-200';
+    }
+  };
+
+  const getCodePreview = (sasCode: string, rCode: string) => {
+    const code = sasCode || rCode || "";
+    const lines = code.split('\n').filter(l => l.trim()).slice(0, 3);
+    return lines.length > 0 ? lines.join('\n') : "No code preview available";
+  };
+
+  if (loading) {
+    return (
+      <div className="max-w-6xl mx-auto">
+        <div className="text-center py-20">
+          <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 mb-4"></div>
+          <div className="text-slate-700 text-lg">Loading your contributions...</div>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="max-w-6xl mx-auto">
+        <div className="bg-red-50 border border-red-200 rounded-xl p-6 text-center">
+          <i className="fas fa-exclamation-triangle text-red-500 text-3xl mb-3"></i>
+          <h3 className="text-lg font-semibold text-red-900 mb-2">Error Loading Contributions</h3>
+          <p className="text-red-700">{error}</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (contributions.length === 0) {
+    return (
+      <div className="max-w-6xl mx-auto">
+        <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-12 text-center">
+          <div className="w-20 h-20 bg-indigo-50 rounded-full flex items-center justify-center mx-auto mb-6">
+            <i className="fas fa-folder-open text-indigo-500 text-3xl"></i>
+          </div>
+          <h3 className="text-2xl font-bold text-slate-900 mb-3">No Contributions Yet</h3>
+          <p className="text-slate-600 mb-6 max-w-md mx-auto">
+            You haven't submitted any pattern implementations yet. Share your expertise with the community!
+          </p>
+          <button
+            onClick={onContribute}
+            className="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-3 rounded-lg font-medium transition-colors shadow-sm inline-flex items-center"
+          >
+            <i className="fas fa-plus-circle mr-2"></i>
+            Contribute Now
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="max-w-6xl mx-auto">
+      <div className="mb-6">
+        <h2 className="text-3xl font-bold text-slate-900 mb-2">My Contributions</h2>
+        <p className="text-slate-600">
+          You have submitted {contributions.length} pattern implementation{contributions.length !== 1 ? 's' : ''}
+        </p>
+      </div>
+
+      <div className="space-y-4">
+        {contributions.map((contribution) => {
+          const isPending = contribution.status === 'pending';
+          const isActive = contribution.status === 'active';
+          const isRejected = contribution.status === 'rejected';
+
+          return (
+            <div
+              key={contribution.uuid}
+              className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden hover:shadow-md transition-shadow"
+            >
+              <div className="p-6">
+                <div className="flex items-start justify-between mb-4">
+                  <div className="flex-grow">
+                    <div className="flex items-center space-x-3 mb-2">
+                      <span className="px-2 py-1 bg-slate-100 text-slate-700 text-xs font-mono font-semibold rounded">
+                        {contribution.patternId}
+                      </span>
+                      <h3 className="text-lg font-bold text-slate-900">
+                        {contribution.patternTitle}
+                      </h3>
+                      <span className={`px-3 py-1 text-xs font-semibold rounded-full border ${getStatusBadgeClass(contribution.status)}`}>
+                        {contribution.status.charAt(0).toUpperCase() + contribution.status.slice(1)}
+                      </span>
+                    </div>
+                    <p className="text-sm text-slate-500">
+                      Category: {contribution.patternCategory} | Submitted: {new Date(contribution.createdAt).toLocaleDateString()}
+                      {contribution.updatedAt !== contribution.createdAt && (
+                        <> | Updated: {new Date(contribution.updatedAt).toLocaleDateString()}</>
+                      )}
+                    </p>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    {isPending && (
+                      <button
+                        onClick={() => {
+                          const impl: PatternImplementation = {
+                            uuid: contribution.uuid,
+                            patternId: contribution.patternId,
+                            author: CURRENT_USER,
+                            sasCode: contribution.sasCode,
+                            rCode: contribution.rCode,
+                            considerations: contribution.considerations,
+                            variations: contribution.variations,
+                            status: contribution.status,
+                            isPremium: false,
+                            timestamp: new Date(contribution.updatedAt).getTime()
+                          };
+                          onEdit(impl);
+                        }}
+                        className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors shadow-sm"
+                      >
+                        <i className="fas fa-edit mr-2"></i>
+                        Edit
+                      </button>
+                    )}
+                    {(isActive || isRejected) && (
+                      <span className="text-sm text-slate-500 italic">
+                        {isActive ? 'Published' : 'View Only'}
+                      </span>
+                    )}
+                  </div>
+                </div>
+
+                <div className="bg-slate-50 rounded-lg p-4 border border-slate-200">
+                  <h4 className="text-xs font-semibold text-slate-700 uppercase mb-2">Code Preview</h4>
+                  <pre className="text-xs font-mono text-slate-700 whitespace-pre-wrap overflow-hidden">
+                    {getCodePreview(contribution.sasCode, contribution.rCode)}
+                  </pre>
+                  {(contribution.sasCode.split('\n').length > 3 || contribution.rCode.split('\n').length > 3) && (
+                    <p className="text-xs text-slate-500 mt-2 italic">...</p>
+                  )}
+                </div>
+
+                {contribution.considerations.length > 0 && (
+                  <div className="mt-4">
+                    <h4 className="text-xs font-semibold text-slate-700 uppercase mb-1">Considerations</h4>
+                    <ul className="list-disc list-inside text-sm text-slate-600 space-y-1">
+                      {contribution.considerations.slice(0, 2).map((c, i) => (
+                        <li key={i}>{c}</li>
+                      ))}
+                      {contribution.considerations.length > 2 && (
+                        <li className="text-slate-500 italic">+ {contribution.considerations.length - 2} more...</li>
+                      )}
+                    </ul>
+                  </div>
+                )}
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+};
+
+const BasketView = ({
+  basket,
   defs,
   impls,
   onClear,
   onRemove,
   onReset
-}: { 
-  basket: Record<string, string>, 
+}: {
+  basket: Record<string, string>,
   defs: PatternDefinition[],
   impls: PatternImplementation[],
   onClear: () => void,
@@ -1293,7 +1951,8 @@ const App = () => {
     updatedDef?: Partial<PatternDefinition>
   ) => {
     // Check if this is an edit (existing UUID) or new contribution
-    const isEdit = implementationsList.some(i => i.uuid === newImpl.uuid);
+    // Use editingImpl to determine edit mode since implementationsList only contains active implementations
+    const isEdit = editingImpl !== null && editingImpl.uuid === newImpl.uuid;
 
     if (isEdit) {
       // EDIT MODE: Call PUT endpoint
@@ -1382,8 +2041,8 @@ const App = () => {
           setSelectedDef(prev => prev ? { ...prev, ...updatedDef } : prev);
         }
 
-        // 7. Navigate back to detail view
-        setView("detail");
+        // 7. Navigate back to My Contributions
+        setView("my-contributions");
         setEditingImpl(null);
 
       } catch (error) {
@@ -1394,24 +2053,95 @@ const App = () => {
       }
 
     } else {
-      // NEW CONTRIBUTION MODE: Keep existing logic (will be updated in Story 7)
-      setImplementationsList(prev => [...prev, newImpl]);
+      // NEW CONTRIBUTION MODE: Call POST /api/implementations
+      setSavingImpl(newImpl.uuid);
 
-      // Update definition if provided
-      if (updatedDef && selectedDef) {
-        setDefinitions(prev => {
-          const index = prev.findIndex(d => d.id === selectedDef.id);
-          if (index >= 0) {
-            const updated = [...prev];
-            updated[index] = { ...updated[index], ...updatedDef };
-            return updated;
+      (async () => {
+        try {
+          // 1. Get Clerk authentication token
+          const token = await getToken();
+
+          if (!token) {
+            alert('Please sign in to submit pattern implementations.');
+            setSavingImpl(null);
+            return;
           }
-          return prev;
-        });
-        setSelectedDef(prev => prev ? { ...prev, ...updatedDef } : prev);
-      }
 
-      setView("detail");
+          // 2. Prepare request payload (match API schema)
+          const payload = {
+            patternId: newImpl.patternId,
+            sasCode: newImpl.sasCode || undefined,
+            rCode: newImpl.rCode || undefined,
+            considerations: newImpl.considerations || [],
+            variations: newImpl.variations || []
+          };
+
+          // 3. Call backend API
+          const response = await fetch('/api/implementations', {
+            method: 'POST',
+            headers: {
+              'Authorization': `Bearer ${token}`,
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(payload)
+          });
+
+          const data = await response.json();
+
+          // 4. Handle errors
+          if (!response.ok) {
+            if (response.status === 401) {
+              alert('Please sign in to submit pattern implementations.');
+            } else if (response.status === 404) {
+              alert('Selected pattern not found. Please refresh and try again.');
+            } else if (response.status === 400) {
+              alert(`Validation error: ${data.details?.map((d: any) => d.message).join(', ') || data.error || 'Please check your input.'}`);
+            } else {
+              alert(`Error: ${data.error || 'Failed to submit implementation'}`);
+            }
+            setSavingImpl(null);
+            return;
+          }
+
+          // 5. Update local state with server response
+          const createdImpl: PatternImplementation = {
+            uuid: data.implementation.uuid,
+            patternId: data.implementation.patternId,
+            author: data.implementation.authorName,
+            sasCode: data.implementation.sasCode || "",
+            rCode: data.implementation.rCode || "",
+            considerations: data.implementation.considerations || [],
+            variations: data.implementation.variations || [],
+            status: data.implementation.status,
+            isPremium: data.implementation.isPremium || false,
+            timestamp: new Date(data.implementation.createdAt).getTime()
+          };
+
+          setImplementationsList(prev => [...prev, createdImpl]);
+
+          // 6. Show success message
+          alert(
+            `✅ Pattern implementation submitted successfully!\n\n` +
+            `Status: ${data.implementation.status}\n\n` +
+            `Your contribution has been submitted for admin review. Thank you for contributing to StatPatternHub!`
+          );
+
+          // 7. Navigate back to detail view or catalog
+          if (selectedDef && selectedDef.id === newImpl.patternId) {
+            setView("detail");
+          } else {
+            // If submitting for a different pattern, go back to catalog
+            setView("catalog");
+          }
+          setEditingImpl(null);
+
+        } catch (error) {
+          console.error('Failed to submit implementation:', error);
+          alert('❌ Network error: Could not submit implementation. Please try again.');
+        } finally {
+          setSavingImpl(null);
+        }
+      })();
     }
   };
 
@@ -1454,6 +2184,11 @@ const App = () => {
         currentView={view}
         setView={setView}
         basketCount={Object.keys(basket).length}
+        onContributeClick={() => {
+          setSelectedDef(null); // Clear selected pattern for standalone contribute mode
+          setEditingImpl(null);
+          setView("contribute");
+        }}
     >
       {view === "catalog" && (
         <Catalog
@@ -1479,14 +2214,45 @@ const App = () => {
         />
       )}
 
-      {view === "contribute" && selectedDef && (
+      {view === "contribute" && (
         <SmartEtlForm
-            definition={selectedDef}
+            definition={selectedDef || undefined}
             initialImpl={editingImpl || undefined}
             onSave={handleSaveImplementation}
-            onCancel={() => setView("detail")}
+            onCancel={() => {
+              if (selectedDef) {
+                setView("detail");
+              } else {
+                setView("catalog");
+              }
+              setEditingImpl(null);
+            }}
             isSaving={savingImpl !== null}
+            allPatterns={definitions}
         />
+      )}
+
+      {view === "my-contributions" && (
+        <MyContributions
+          onEdit={(impl) => {
+            // Find the pattern definition for this implementation
+            const pattern = definitions.find(d => d.id === impl.patternId);
+            if (pattern) {
+              setSelectedDef(pattern);
+            }
+            setEditingImpl(impl);
+            setView("contribute");
+          }}
+          onContribute={() => {
+            setSelectedDef(null);
+            setEditingImpl(null);
+            setView("contribute");
+          }}
+        />
+      )}
+
+      {view === "admin-review" && (
+        <AdminReviewQueue />
       )}
 
       {view === "basket" && (
