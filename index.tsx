@@ -1514,13 +1514,37 @@ const MyContributions = ({
                   </div>
                 </div>
 
+                {/* SAS Code Preview */}
                 <div className="bg-slate-50 rounded-lg p-4 border border-slate-200">
-                  <h4 className="text-xs font-semibold text-slate-700 uppercase mb-2">Code Preview</h4>
-                  <pre className="text-xs font-mono text-slate-700 whitespace-pre-wrap overflow-hidden">
-                    {getCodePreview(contribution.sasCode, contribution.rCode)}
-                  </pre>
-                  {(contribution.sasCode.split('\n').length > 3 || contribution.rCode.split('\n').length > 3) && (
-                    <p className="text-xs text-slate-500 mt-2 italic">...</p>
+                  <h4 className="text-xs font-semibold text-slate-700 uppercase mb-2">SAS Code Preview</h4>
+                  {contribution.sasCode ? (
+                    <>
+                      <pre className="text-xs font-mono text-slate-700 whitespace-pre-wrap overflow-hidden">
+                        {contribution.sasCode.split('\n').filter(l => l.trim()).slice(0, 3).join('\n')}
+                      </pre>
+                      {contribution.sasCode.split('\n').length > 3 && (
+                        <p className="text-xs text-slate-500 mt-2 italic">...</p>
+                      )}
+                    </>
+                  ) : (
+                    <p className="text-xs text-slate-500 italic">(Not provided)</p>
+                  )}
+                </div>
+
+                {/* R Code Preview */}
+                <div className="bg-slate-50 rounded-lg p-4 border border-slate-200 mt-4">
+                  <h4 className="text-xs font-semibold text-slate-700 uppercase mb-2">R Code Preview</h4>
+                  {contribution.rCode ? (
+                    <>
+                      <pre className="text-xs font-mono text-slate-700 whitespace-pre-wrap overflow-hidden">
+                        {contribution.rCode.split('\n').filter(l => l.trim()).slice(0, 3).join('\n')}
+                      </pre>
+                      {contribution.rCode.split('\n').length > 3 && (
+                        <p className="text-xs text-slate-500 mt-2 italic">...</p>
+                      )}
+                    </>
+                  ) : (
+                    <p className="text-xs text-slate-500 italic">(Not provided)</p>
                   )}
                 </div>
 
