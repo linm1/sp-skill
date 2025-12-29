@@ -1,7 +1,7 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { db } from '../db/index.js';
 import { patternDefinitions, patternImplementations } from '../db/schema.js';
-import { eq, sql } from 'drizzle-orm';
+import { eq, and } from 'drizzle-orm';
 
 /**
  * Pattern Catalog API - List Endpoint
@@ -56,19 +56,19 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     // For each pattern, get implementation details
     const enrichedPatterns = await Promise.all(
       patterns.map(async (pattern) => {
-        // Get all implementations for this pattern
+        // Get only active implementations for this pattern
         const implementations = await db
           .select()
           .from(patternImplementations)
-          .where(eq(patternImplementations.patternId, pattern.id));
-
-        // Get active implementations only for counts
-        const activeImplementations = implementations.filter(
-          impl => impl.status === 'active'
-        );
+          .where(
+            and(
+              eq(patternImplementations.patternId, pattern.id),
+              eq(patternImplementations.status, 'active')
+            )
+          );
 
         // Extract unique authors
-        const authors = [...new Set(activeImplementations.map(impl => impl.authorName))];
+        const authors = [...new Set(implementations.map(impl => impl.authorName))];
 
         // Get latest update timestamp
         const latestUpdate = implementations.reduce((latest, impl) => {
@@ -82,7 +82,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
           title: pattern.title,
           problem: pattern.problem,
           whenToUse: pattern.whenToUse,
-          implementationCount: activeImplementations.length,
+          implementationCount: implementations.length,
           authors: authors,
           latestUpdate: latestUpdate.toISOString(),
           createdAt: pattern.createdAt,
