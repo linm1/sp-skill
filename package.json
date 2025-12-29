@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "dev:api": "vercel dev --listen 3001",
+    "dev:api": "dotenv -e .env.local -- vercel dev --listen 3001",
     "build": "vite build",
     "preview": "vite preview"
   },
@@ -19,7 +19,9 @@
     "jszip": "^3.10.1",
     "react": "^19.2.3",
     "react-dom": "^19.2.3",
-    "svix": "^1.82.0"
+    "resend": "^6.6.0",
+    "svix": "^1.82.0",
+    "zod": "^3.25.76"
   },
   "devDependencies": {
     "@types/cors": "^2.8.19",
@@ -28,6 +30,8 @@
     "@vercel/node": "^3.2.0",
     "@vitejs/plugin-react": "^5.0.0",
     "cors": "^2.8.5",
+    "dotenv": "^17.2.3",
+    "dotenv-cli": "^11.0.0",
     "express": "^5.2.1",
     "tsx": "^4.21.0",
     "typescript": "~5.8.2",
