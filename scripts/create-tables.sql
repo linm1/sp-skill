@@ -6,9 +6,10 @@
 -- ============================================
 CREATE TABLE IF NOT EXISTS users (
   id SERIAL PRIMARY KEY,
+  clerk_id VARCHAR(255) UNIQUE,
   email VARCHAR(255) UNIQUE NOT NULL,
   name VARCHAR(255),
-  role VARCHAR(50) DEFAULT 'guest', -- guest, contributor, premier, admin
+  role VARCHAR(50) DEFAULT 'contributor', -- guest, contributor, premier, admin
   created_at TIMESTAMP DEFAULT NOW(),
   updated_at TIMESTAMP DEFAULT NOW()
 );
@@ -66,9 +67,15 @@ CREATE INDEX IF NOT EXISTS idx_pattern_implementations_author_id
 -- ============================================
 -- 5. Seed System User (for default patterns)
 -- ============================================
-INSERT INTO users (id, email, name, role)
-VALUES (1, 'system@statpatternhub.com', 'System', 'admin')
-ON CONFLICT (id) DO NOTHING;
+-- Insert system user WITHOUT specifying explicit ID
+-- This allows PostgreSQL to auto-assign ID via sequence
+INSERT INTO users (email, name, role)
+VALUES ('system@statpatternhub.com', 'System', 'admin')
+ON CONFLICT (email) DO NOTHING;
+
+-- CRITICAL: Reset sequence to match current max ID
+-- This prevents duplicate key errors on next auto-insert
+SELECT setval('users_id_seq', (SELECT COALESCE(MAX(id), 1) FROM users));
 
 -- ============================================
 -- Database Schema Complete

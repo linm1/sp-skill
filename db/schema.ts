@@ -5,9 +5,10 @@ import { pgTable, serial, varchar, text, boolean, timestamp, uuid, index } from 
  */
 export const users = pgTable('users', {
   id: serial('id').primaryKey(),
+  clerkId: varchar('clerk_id', { length: 255 }).unique(),
   email: varchar('email', { length: 255 }).notNull().unique(),
   name: varchar('name', { length: 255 }),
-  role: varchar('role', { length: 50 }).default('guest'), // guest, contributor, premier, admin
+  role: varchar('role', { length: 50 }).default('contributor'), // guest, contributor, premier, admin
   createdAt: timestamp('created_at').defaultNow(),
   updatedAt: timestamp('updated_at').defaultNow(),
 });

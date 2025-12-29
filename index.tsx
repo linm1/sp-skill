@@ -2,6 +2,7 @@ import React, { useState, useEffect, useMemo } from "react";
 import { createRoot } from "react-dom/client";
 import { GoogleGenAI, Type } from "@google/genai";
 import JSZip from "jszip";
+import { ClerkProvider, SignInButton, SignUpButton, UserButton, useAuth, useUser } from "@clerk/clerk-react";
 
 // --- Types & Constants ---
 
@@ -88,61 +89,72 @@ const PRELOADED_CONTENT: Record<string, Partial<PatternDefinition> & Partial<Pat
   }
 };
 
-// --- Initial State Generators ---
+// --- API Fetch Hook ---
 
-const { INITIAL_DEFS, INITIAL_IMPLS } = (() => {
-  const defs: PatternDefinition[] = [];
-  const impls: PatternImplementation[] = [];
+const usePatterns = () => {
+  const [patterns, setPatterns] = useState<PatternDefinition[]>([]);
+  const [implementations, setImplementations] = useState<PatternImplementation[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  Object.entries(MANIFEST_DATA).forEach(([catCode, slugs]) => {
-    slugs.forEach((slug, index) => {
-      const id = `${catCode}-${String(index + 1).padStart(3, "0")}`;
-      const preloaded = PRELOADED_CONTENT[id];
-      
-      const title = preloaded?.title || slug.split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
-      
-      // 1. Create Definition
-      defs.push({
-        id,
-        category: catCode,
-        title,
-        problem: preloaded?.problem || "Content to be added.",
-        whenToUse: preloaded?.whenToUse || "To be defined.",
-      });
+  useEffect(() => {
+    const fetchPatterns = async () => {
+      try {
+        setLoading(true);
+        setError(null);
 
-      // 2. Create System Implementation
-      impls.push({
-        uuid: `${id}-system`,
-        patternId: id,
-        author: SYSTEM_AUTHOR,
-        sasCode: preloaded?.sasCode || "/* SAS implementation pending */",
-        rCode: preloaded?.rCode || "# R implementation pending",
-        considerations: preloaded?.considerations || [],
-        variations: preloaded?.variations || [],
-        status: "active",
-        isPremium: false,
-        timestamp: Date.now(),
-      });
+        const response = await fetch('/api/patterns');
+        if (!response.ok) {
+          throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        }
 
-      // 3. MOCK DATA: Add Jane Doe's version to IMP-002 to demonstrate tabs
-      if (id === "IMP-002") {
-        impls.push({
-          uuid: `${id}-jane`,
-          patternId: id,
-          author: "Jane Doe",
-          sasCode: `/* Jane's optimized LOCF with extra checks */\ndata locf_checked;\n  set source;\n  /* ... different logic ... */\nrun;`,
-          rCode: `# Jane's R Tidyverse version\n# ... `,
-          considerations: ["Jane's version handles partial dates differently."],
-          variations: [],
-          status: "active",
-          isPremium: false,
-          timestamp: Date.now() + 1000,
+        const data = await response.json();
+
+        // Transform API response to match current data model
+        const defs: PatternDefinition[] = data.patterns.map((p: any) => ({
+          id: p.id,
+          category: p.category,
+          title: p.title,
+          problem: p.problem,
+          whenToUse: p.whenToUse
+        }));
+
+        // Flatten implementations from all patterns
+        const impls: PatternImplementation[] = [];
+        data.patterns.forEach((p: any) => {
+          if (p.implementations) {
+            p.implementations.forEach((impl: any) => {
+              impls.push({
+                uuid: impl.uuid,
+                patternId: p.id,
+                author: impl.authorName,
+                sasCode: impl.sasCode,
+                rCode: impl.rCode,
+                considerations: impl.considerations || [],
+                variations: impl.variations || [],
+                status: impl.status,
+                isPremium: impl.isPremium || false,
+                timestamp: new Date(impl.updatedAt || impl.createdAt).getTime()
+              });
+            });
+          }
         });
+
+        setPatterns(defs);
+        setImplementations(impls);
+      } catch (err) {
+        console.error('Failed to fetch patterns:', err);
+        setError(err instanceof Error ? err.message : 'Failed to fetch patterns');
+      } finally {
+        setLoading(false);
       }
-    });
-  });
-  return { INITIAL_DEFS: defs, INITIAL_IMPLS: impls };
-})();
+    };
+
+    fetchPatterns();
+  }, []);
+
+  return { patterns, implementations, loading, error };
+};
 
 // --- Helper Functions ---
 
@@ -311,19 +323,21 @@ ${categorySections}
 
 const Layout = ({
   children,
-  role,
-  setRole,
   currentView,
   setView,
   basketCount
 }: {
   children?: React.ReactNode;
-  role: Role;
-  setRole: (r: Role) => void;
   currentView: string;
   setView: (v: string) => void;
   basketCount: number;
 }) => {
+  const { isSignedIn, isLoaded } = useAuth();
+  const { user } = useUser();
+
+  // SECURITY: Read role from Clerk metadata - users cannot change this themselves
+  const userRole = (user?.publicMetadata?.role as Role) || 'contributor';
+
   return (
     <div className="min-h-screen flex flex-col font-sans text-slate-800">
       <nav className="bg-slate-900 text-white shadow-lg sticky top-0 z-50">
@@ -352,18 +366,48 @@ const Layout = ({
               Skill Basket
               <span className="ml-2 bg-indigo-600 text-white text-xs font-bold px-2 py-0.5 rounded-full">{basketCount}</span>
             </button>
-            <div className="border-l border-slate-700 pl-6 flex items-center space-x-2">
-              <span className="text-xs text-slate-500 uppercase">Simulate Role:</span>
-              <select
-                value={role}
-                onChange={(e) => setRole(e.target.value as Role)}
-                className="bg-slate-800 border border-slate-700 text-xs rounded px-2 py-1 focus:outline-none focus:border-indigo-500"
-              >
-                <option value="guest">Guest</option>
-                <option value="contributor">Contributor</option>
-                <option value="premier">Premier</option>
-                <option value="admin">Admin</option>
-              </select>
+            <div className="border-l border-slate-700 pl-6 flex items-center space-x-4">
+              {isLoaded && isSignedIn ? (
+                <>
+                  <div className="flex items-center space-x-2">
+                    <span className="text-sm text-slate-300">
+                      {user?.firstName || user?.username || "User"}
+                    </span>
+                    <UserButton
+                      afterSignOutUrl="/"
+                      appearance={{
+                        elements: {
+                          avatarBox: "w-8 h-8"
+                        }
+                      }}
+                    />
+                  </div>
+                  <div className="flex flex-col items-end">
+                    <span className="text-xs text-slate-500 uppercase">Role</span>
+                    <span className={`text-sm font-semibold ${
+                      userRole === 'admin' ? 'text-amber-400' :
+                      userRole === 'premier' ? 'text-purple-400' :
+                      userRole === 'contributor' ? 'text-indigo-400' :
+                      'text-slate-400'
+                    }`}>
+                      {userRole.charAt(0).toUpperCase() + userRole.slice(1)}
+                    </span>
+                  </div>
+                </>
+              ) : (
+                <div className="flex items-center space-x-3">
+                  <SignInButton mode="modal">
+                    <button className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors">
+                      Sign In
+                    </button>
+                  </SignInButton>
+                  <SignUpButton mode="modal">
+                    <button className="bg-white hover:bg-slate-100 text-slate-900 px-4 py-2 rounded-lg text-sm font-medium transition-colors">
+                      Sign Up
+                    </button>
+                  </SignUpButton>
+                </div>
+              )}
             </div>
           </div>
         </div>
@@ -382,14 +426,12 @@ interface PatternCardProps {
   def: PatternDefinition;
   implCount: number;
   onClick: () => void;
-  role: Role;
 }
 
-const PatternCard: React.FC<PatternCardProps> = ({ 
-  def, 
-  implCount, 
-  onClick, 
-  role 
+const PatternCard: React.FC<PatternCardProps> = ({
+  def,
+  implCount,
+  onClick
 }) => {
   return (
     <div
@@ -418,16 +460,16 @@ const PatternCard: React.FC<PatternCardProps> = ({
   );
 };
 
-const PatternDetail = ({ 
-  def, 
+const PatternDetail = ({
+  def,
   impls,
   basketSelectedUuid,
-  onBack, 
+  onBack,
   onAddToBasket,
   onAddImplementation,
   onEditImplementation,
-  role 
-}: { 
+  role
+}: {
   def: PatternDefinition;
   impls: PatternImplementation[];
   basketSelectedUuid: string; // The UUID currently active in the basket for this Pattern ID
@@ -437,10 +479,12 @@ const PatternDetail = ({
   onEditImplementation: (impl: PatternImplementation) => void;
   role: Role;
 }) => {
+  const { isSignedIn } = useAuth();
+
   // State for the active tab (local UI state)
   // Default to the one selected in the basket, or the first one if not selected
   const [activeImplUuid, setActiveImplUuid] = useState<string>(basketSelectedUuid);
-  
+
   // Update local state if basket selection changes externally
   useEffect(() => {
     setActiveImplUuid(basketSelectedUuid);
@@ -448,9 +492,9 @@ const PatternDetail = ({
 
   const activeImpl = impls.find(i => i.uuid === activeImplUuid) || impls[0];
 
-  const canEdit = 
-    role === "admin" || 
-    role === "premier" || 
+  const canEdit =
+    role === "admin" ||
+    role === "premier" ||
     (role === "contributor" && activeImpl.author === CURRENT_USER);
 
   const markdown = generateMarkdown(def, activeImpl);
@@ -466,9 +510,9 @@ const PatternDetail = ({
          <button onClick={onBack} className="text-sm text-slate-500 hover:text-indigo-600 flex items-center">
             <i className="fas fa-arrow-left mr-2"></i> Back to Catalog
           </button>
-          
-          {(role === "contributor" || role === "premier" || role === "admin") && (
-            <button 
+
+          {isSignedIn && (role === "contributor" || role === "premier" || role === "admin") && (
+            <button
               onClick={onAddImplementation}
               className="bg-indigo-600 text-white hover:bg-indigo-700 px-4 py-2 rounded-lg text-sm font-medium transition-colors shadow-sm"
             >
@@ -603,11 +647,13 @@ const SmartEtlForm = ({
   initialImpl,
   onSave,
   onCancel,
+  isSaving = false,
 }: {
   definition: PatternDefinition;
   initialImpl?: PatternImplementation;
   onSave: (impl: PatternImplementation, updatedDef?: Partial<PatternDefinition>) => void;
   onCancel: () => void;
+  isSaving?: boolean;
 }) => {
   const isEditMode = !!initialImpl;
   const [isAnalyzing, setIsAnalyzing] = useState(false);
@@ -817,15 +863,24 @@ const SmartEtlForm = ({
           <button
             type="button"
             onClick={onCancel}
-            className="px-4 py-2 border border-slate-300 rounded-md text-sm font-medium text-slate-700 hover:bg-slate-50"
+            disabled={isSaving}
+            className="px-4 py-2 border border-slate-300 rounded-md text-sm font-medium text-slate-700 hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             Cancel
           </button>
           <button
             type="submit"
-            className="px-4 py-2 bg-indigo-600 rounded-md text-sm font-medium text-white hover:bg-indigo-700"
+            disabled={isSaving}
+            className="px-4 py-2 bg-indigo-600 rounded-md text-sm font-medium text-white hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center"
           >
-            {isEditMode ? "Update Code" : "Submit Contribution"}
+            {isSaving ? (
+              <>
+                <i className="fas fa-spinner fa-spin mr-2"></i>
+                Saving...
+              </>
+            ) : (
+              isEditMode ? "Update Code" : "Submit Contribution"
+            )}
           </button>
         </div>
       </form>
@@ -1131,12 +1186,11 @@ const Catalog = ({
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {filteredDefs.map((d) => (
-          <PatternCard 
-            key={d.id} 
-            def={d} 
+          <PatternCard
+            key={d.id}
+            def={d}
             implCount={getImplCount(d.id)}
-            onClick={() => onPatternClick(d)} 
-            role="contributor" 
+            onClick={() => onPatternClick(d)}
           />
         ))}
       </div>
@@ -1154,27 +1208,52 @@ const Catalog = ({
 // --- Main App ---
 
 const App = () => {
-  const [role, setRole] = useState<Role>("contributor");
+  const { user } = useUser();
+  const { getToken } = useAuth();
   const [view, setView] = useState("catalog");
-  
+
+  // SECURITY: Read role from Clerk metadata - defaults to contributor
+  const userRole = (user?.publicMetadata?.role as Role) || 'contributor';
+
+  // Fetch patterns from API
+  const { patterns, implementations, loading, error } = usePatterns();
+
   // Data State
-  const [definitions, setDefinitions] = useState<PatternDefinition[]>(INITIAL_DEFS);
-  const [implementations, setImplementations] = useState<PatternImplementation[]>(INITIAL_IMPLS);
-  
+  const [definitions, setDefinitions] = useState<PatternDefinition[]>([]);
+  const [implementationsList, setImplementationsList] = useState<PatternImplementation[]>([]);
+
+  // Update local state when API data loads
+  useEffect(() => {
+    if (patterns.length > 0) {
+      setDefinitions(patterns);
+    }
+  }, [patterns]);
+
+  useEffect(() => {
+    if (implementations.length > 0) {
+      setImplementationsList(implementations);
+    }
+  }, [implementations]);
+
   // Selection State
   const [selectedDef, setSelectedDef] = useState<PatternDefinition | null>(null);
   const [editingImpl, setEditingImpl] = useState<PatternImplementation | null>(null); // For edit/create
-  
+  const [savingImpl, setSavingImpl] = useState<string | null>(null); // Loading state for save operations
+
   // Basket State: Record<PatternID, ImplementationUUID>
-  const [basket, setBasket] = useState<Record<string, string>>(() => {
-     // Initialize basket with default SYSTEM implementations for all definitions
-     const initialBasket: Record<string, string> = {};
-     INITIAL_DEFS.forEach(def => {
-        const sysImpl = INITIAL_IMPLS.find(i => i.patternId === def.id && i.author === SYSTEM_AUTHOR);
+  const [basket, setBasket] = useState<Record<string, string>>({});
+
+  // Initialize basket with system implementations when data loads
+  useEffect(() => {
+    if (patterns.length > 0 && implementations.length > 0) {
+      const initialBasket: Record<string, string> = {};
+      patterns.forEach(def => {
+        const sysImpl = implementations.find(i => i.patternId === def.id && i.author === SYSTEM_AUTHOR);
         if (sysImpl) initialBasket[def.id] = sysImpl.uuid;
-     });
-     return initialBasket;
-  });
+      });
+      setBasket(initialBasket);
+    }
+  }, [patterns, implementations]);
 
   const handlePatternClick = (d: PatternDefinition) => {
     setSelectedDef(d);
@@ -1190,7 +1269,7 @@ const App = () => {
   };
   
   const handleResetToSystem = (patternId: string) => {
-      const sysImpl = implementations.find(i => i.patternId === patternId && i.author === SYSTEM_AUTHOR);
+      const sysImpl = implementationsList.find(i => i.patternId === patternId && i.author === SYSTEM_AUTHOR);
       if (sysImpl) {
           setBasket(prev => ({
               ...prev,
@@ -1209,56 +1288,185 @@ const App = () => {
       setView("contribute");
   };
 
-  const handleSaveImplementation = (newImpl: PatternImplementation, updatedDef?: Partial<PatternDefinition>) => {
-      setImplementations(prev => {
-          const index = prev.findIndex(i => i.uuid === newImpl.uuid);
-          if (index >= 0) {
-              const updated = [...prev];
-              updated[index] = newImpl;
-              return updated;
+  const handleSaveImplementation = async (
+    newImpl: PatternImplementation,
+    updatedDef?: Partial<PatternDefinition>
+  ) => {
+    // Check if this is an edit (existing UUID) or new contribution
+    const isEdit = implementationsList.some(i => i.uuid === newImpl.uuid);
+
+    if (isEdit) {
+      // EDIT MODE: Call PUT endpoint
+      setSavingImpl(newImpl.uuid);
+
+      try {
+        // 1. Get Clerk authentication token
+        const token = await getToken();
+
+        if (!token) {
+          alert('Please log in to edit implementations');
+          return;
+        }
+
+        // 2. Prepare request payload
+        const payload = {
+          sasCode: newImpl.sasCode,
+          rCode: newImpl.rCode,
+          considerations: newImpl.considerations || [],
+          variations: newImpl.variations || [],
+          isPremium: newImpl.isPremium || false
+        };
+
+        // 3. Call backend API
+        const response = await fetch(`/api/implementations/${newImpl.uuid}`, {
+          method: 'PUT',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(payload)
+        });
+
+        const data = await response.json();
+
+        // 4. Handle errors
+        if (!response.ok) {
+          if (response.status === 401) {
+            alert('Please log in to edit implementations');
+          } else if (response.status === 403) {
+            alert('You can only edit your own implementations');
+          } else if (response.status === 404) {
+            alert('Implementation not found');
+          } else {
+            alert(`Error: ${data.error || 'Failed to save changes'}`);
           }
-          return [...prev, newImpl];
-      });
+          return;
+        }
+
+        // 5. Update local state with server response
+        setImplementationsList(prev =>
+          prev.map(impl =>
+            impl.uuid === newImpl.uuid
+              ? {
+                  ...impl,
+                  ...newImpl,
+                  status: data.implementation.status, // Use status from server
+                  timestamp: new Date(data.implementation.updatedAt).getTime()
+                }
+              : impl
+          )
+        );
+
+        // 6. Show success message
+        if (data.statusChanged) {
+          alert(
+            `✅ ${data.message}\n\n` +
+            `Status changed: ${data.previousStatus} → ${data.newStatus}\n\n` +
+            `Your changes have been submitted for admin review.`
+          );
+        } else {
+          alert('✅ Implementation updated successfully!');
+        }
+
+        // Update definition if provided
+        if (updatedDef && selectedDef) {
+          setDefinitions(prev => {
+            const index = prev.findIndex(d => d.id === selectedDef.id);
+            if (index >= 0) {
+              const updated = [...prev];
+              updated[index] = { ...updated[index], ...updatedDef };
+              return updated;
+            }
+            return prev;
+          });
+          setSelectedDef(prev => prev ? { ...prev, ...updatedDef } : prev);
+        }
+
+        // 7. Navigate back to detail view
+        setView("detail");
+        setEditingImpl(null);
+
+      } catch (error) {
+        console.error('Failed to save implementation:', error);
+        alert('❌ Network error: Could not save changes. Please try again.');
+      } finally {
+        setSavingImpl(null);
+      }
+
+    } else {
+      // NEW CONTRIBUTION MODE: Keep existing logic (will be updated in Story 7)
+      setImplementationsList(prev => [...prev, newImpl]);
 
       // Update definition if provided
       if (updatedDef && selectedDef) {
-          setDefinitions(prev => {
-              const index = prev.findIndex(d => d.id === selectedDef.id);
-              if (index >= 0) {
-                  const updated = [...prev];
-                  updated[index] = { ...updated[index], ...updatedDef };
-                  return updated;
-              }
-              return prev;
-          });
-          // Update the selectedDef to reflect changes
-          setSelectedDef(prev => prev ? { ...prev, ...updatedDef } : prev);
+        setDefinitions(prev => {
+          const index = prev.findIndex(d => d.id === selectedDef.id);
+          if (index >= 0) {
+            const updated = [...prev];
+            updated[index] = { ...updated[index], ...updatedDef };
+            return updated;
+          }
+          return prev;
+        });
+        setSelectedDef(prev => prev ? { ...prev, ...updatedDef } : prev);
       }
 
-      // Auto-select the new contribution in basket? Optional. Let's not for now.
       setView("detail");
+    }
   };
 
+  // Show loading state
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-slate-900 flex items-center justify-center">
+        <div className="text-center">
+          <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-white mb-4"></div>
+          <div className="text-white text-xl">Loading patterns...</div>
+          <div className="text-slate-400 text-sm mt-2">Fetching data from database</div>
+        </div>
+      </div>
+    );
+  }
+
+  // Show error state
+  if (error) {
+    return (
+      <div className="min-h-screen bg-slate-900 flex items-center justify-center">
+        <div className="bg-red-900 text-white p-6 rounded-lg max-w-md">
+          <div className="flex items-center mb-3">
+            <i className="fas fa-exclamation-triangle text-2xl mr-3"></i>
+            <h2 className="text-xl font-bold">Error Loading Patterns</h2>
+          </div>
+          <p className="mb-4">{error}</p>
+          <button
+            onClick={() => window.location.reload()}
+            className="mt-4 px-4 py-2 bg-red-700 rounded hover:bg-red-600 transition-colors w-full"
+          >
+            <i className="fas fa-sync mr-2"></i> Retry
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <Layout 
-        role={role} 
-        setRole={setRole} 
-        currentView={view} 
-        setView={setView} 
+    <Layout
+        currentView={view}
+        setView={setView}
         basketCount={Object.keys(basket).length}
     >
       {view === "catalog" && (
-        <Catalog 
-            defs={definitions} 
-            impls={implementations}
-            onPatternClick={handlePatternClick} 
+        <Catalog
+            defs={definitions}
+            impls={implementationsList}
+            onPatternClick={handlePatternClick}
         />
       )}
-      
+
       {view === "detail" && selectedDef && (
         <PatternDetail
           def={selectedDef}
-          impls={implementations.filter(i => i.patternId === selectedDef.id)}
+          impls={implementationsList.filter(i => i.patternId === selectedDef.id)}
           basketSelectedUuid={basket[selectedDef.id]}
           onBack={() => {
             setSelectedDef(null);
@@ -1267,24 +1475,25 @@ const App = () => {
           onAddToBasket={handleAddToBasket}
           onAddImplementation={handleAddImplementation}
           onEditImplementation={handleEditImplementation}
-          role={role}
+          role={userRole}
         />
       )}
 
       {view === "contribute" && selectedDef && (
-        <SmartEtlForm 
+        <SmartEtlForm
             definition={selectedDef}
             initialImpl={editingImpl || undefined}
             onSave={handleSaveImplementation}
             onCancel={() => setView("detail")}
+            isSaving={savingImpl !== null}
         />
       )}
 
       {view === "basket" && (
-          <BasketView 
+          <BasketView
              basket={basket}
              defs={definitions}
-             impls={implementations}
+             impls={implementationsList}
              onClear={() => setBasket({})}
              onRemove={(patId) => {
                  const newBasket = {...basket};
@@ -1298,5 +1507,16 @@ const App = () => {
   );
 };
 
+// Get Clerk publishable key from environment variables
+const clerkPubKey = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY;
+
+if (!clerkPubKey) {
+  console.error("Missing VITE_CLERK_PUBLISHABLE_KEY environment variable");
+}
+
 const root = createRoot(document.getElementById("root")!);
-root.render(<App />);
+root.render(
+  <ClerkProvider publishableKey={clerkPubKey || ""}>
+    <App />
+  </ClerkProvider>
+);
