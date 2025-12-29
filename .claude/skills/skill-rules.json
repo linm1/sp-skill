@@ -1,0 +1,277 @@
+{
+    "version": "1.0",
+    "description": "Skill activation triggers for StatPatternHub. Controls when skills automatically suggest or block actions.",
+    "skills": {
+        "skill-developer": {
+            "type": "domain",
+            "enforcement": "suggest",
+            "priority": "high",
+            "description": "Meta-skill for creating and managing Claude Code skills",
+            "promptTriggers": {
+                "keywords": [
+                    "skill system",
+                    "create skill",
+                    "add skill",
+                    "skill triggers",
+                    "skill rules",
+                    "hook system",
+                    "skill development",
+                    "skill-rules.json"
+                ],
+                "intentPatterns": [
+                    "(how do|how does|explain).*?skill",
+                    "(create|add|modify|build).*?skill",
+                    "skill.*?(work|trigger|activate|system)"
+                ]
+            },
+            "fileTriggers": {
+                "pathPatterns": [
+                    ".claude/skills/**/*.md",
+                    ".claude/skills/skill-rules.json",
+                    ".claude/hooks/**/*"
+                ]
+            }
+        },
+        "react-vite-guidelines": {
+            "type": "domain",
+            "enforcement": "suggest",
+            "priority": "high",
+            "description": "React 19 + Vite + Tailwind CSS best practices",
+            "promptTriggers": {
+                "keywords": [
+                    "component",
+                    "react component",
+                    "UI",
+                    "interface",
+                    "page",
+                    "modal",
+                    "dialog",
+                    "form",
+                    "tailwind",
+                    "styling",
+                    "frontend",
+                    "React",
+                    "vite",
+                    "lazy load"
+                ],
+                "intentPatterns": [
+                    "(create|add|make|build|update|modify|edit).*?(component|UI|page|modal|dialog|form)",
+                    "(how to|best practice).*?(component|react|tailwind)",
+                    "(style|design|layout).*?(component|UI)",
+                    "(optimize|performance).*?(frontend|react)"
+                ]
+            },
+            "fileTriggers": {
+                "pathPatterns": [
+                    "index.tsx",
+                    "src/**/*.tsx",
+                    "src/**/*.ts",
+                    "components/**/*.tsx",
+                    "features/**/*.tsx",
+                    "*.tsx"
+                ],
+                "pathExclusions": [
+                    "**/*.test.tsx",
+                    "**/*.test.ts",
+                    "**/*.spec.tsx",
+                    "**/*.spec.ts",
+                    "vite.config.ts",
+                    "tsconfig.json"
+                ],
+                "contentPatterns": [
+                    "import.*React",
+                    "export.*:.*React\\.FC",
+                    "className=",
+                    "React\\.lazy",
+                    "Suspense"
+                ]
+            }
+        },
+        "vercel-serverless-guidelines": {
+            "type": "domain",
+            "enforcement": "suggest",
+            "priority": "high",
+            "description": "Vercel serverless function patterns with Node.js/TypeScript",
+            "promptTriggers": {
+                "keywords": [
+                    "serverless",
+                    "vercel function",
+                    "API route",
+                    "endpoint",
+                    "API handler",
+                    "serverless function",
+                    "vercel api",
+                    "handler",
+                    "validation",
+                    "Zod",
+                    "environment variable",
+                    "cold start"
+                ],
+                "intentPatterns": [
+                    "(create|add|implement|build).*?(API|endpoint|function|handler|route)",
+                    "(fix|handle|debug).*?(error|exception|API)",
+                    "(add|implement).*?(validation|error.*?handling)",
+                    "(optimize|improve).*?(cold start|performance|serverless)",
+                    "(how to|best practice).*?(serverless|vercel|API)"
+                ]
+            },
+            "fileTriggers": {
+                "pathPatterns": [
+                    "api/**/*.ts",
+                    "api/**/*.js",
+                    "lib/**/*.ts"
+                ],
+                "pathExclusions": [
+                    "**/*.test.ts",
+                    "**/*.spec.ts"
+                ],
+                "contentPatterns": [
+                    "export.*default.*async.*function.*handler",
+                    "VercelRequest",
+                    "VercelResponse",
+                    "req\\.method",
+                    "res\\.status",
+                    "process\\.env\\."
+                ]
+            }
+        },
+        "clinical-programming-patterns": {
+            "type": "domain",
+            "enforcement": "suggest",
+            "priority": "high",
+            "description": "Clinical programming patterns for SAS and R code in clinical trials",
+            "promptTriggers": {
+                "keywords": [
+                    "pattern",
+                    "SAS",
+                    "R code",
+                    "clinical programming",
+                    "CDISC",
+                    "SDTM",
+                    "ADaM",
+                    "imputation",
+                    "LOCF",
+                    "derivation",
+                    "BMI",
+                    "baseline",
+                    "markdown export",
+                    "agent skill",
+                    "pattern definition",
+                    "pattern implementation",
+                    "ETL",
+                    "SmartETL",
+                    "basket"
+                ],
+                "intentPatterns": [
+                    "(create|add|edit).*?(pattern|implementation|SAS|R code)",
+                    "(export|generate).*?(markdown|agent skill)",
+                    "(CDISC|SDTM|ADaM).*?(pattern|derivation|flag|imputation)",
+                    "(imputation|LOCF|BOCF|WOCF|derivation|categorization|flagging)",
+                    "(pattern|basket).*?(export|manage|curate)"
+                ]
+            },
+            "fileTriggers": {
+                "pathPatterns": [
+                    "data/**/*.json",
+                    "lib/services/**/*Pattern*.ts",
+                    "index.tsx"
+                ],
+                "contentPatterns": [
+                    "patternId",
+                    "PatternDefinition",
+                    "PatternImplementation",
+                    "sasCode",
+                    "rCode",
+                    "generateMarkdown",
+                    "MANIFEST_DATA",
+                    "IMP-|DER-|DAT-|RSH-|AGG-|MRG-|CAT-|FLG-|SRT-|FMT-|VAL-|CDS-|STA-|OPT-"
+                ]
+            }
+        },
+        "scrum-master": {
+            "type": "domain",
+            "enforcement": "suggest",
+            "priority": "high",
+            "description": "Agentic Scrum Master for facilitating Agile ceremonies and managing sprint artifacts",
+            "promptTriggers": {
+                "keywords": [
+                    "sprint",
+                    "scrum",
+                    "agile",
+                    "sprint planning",
+                    "daily scrum",
+                    "standup",
+                    "daily standup",
+                    "sprint review",
+                    "retrospective",
+                    "retro",
+                    "backlog refinement",
+                    "backlog grooming",
+                    "user story",
+                    "user stories",
+                    "acceptance criteria",
+                    "story points",
+                    "velocity",
+                    "burndown",
+                    "product backlog",
+                    "sprint backlog",
+                    "scrum master",
+                    "product owner",
+                    "PO",
+                    "sprint goal",
+                    "ceremony",
+                    "task assignment"
+                ],
+                "intentPatterns": [
+                    "(start|begin|plan|prepare).*?(sprint|iteration)",
+                    "(daily|standup).*?(scrum|meeting|update)",
+                    "(sprint|iteration).*?(review|demo|retrospective|retro)",
+                    "(refine|groom|prioritize|estimate).*?(backlog|stories|tasks)",
+                    "(create|add|write|update).*?(user story|stories|task|acceptance criteria)",
+                    "(track|check|review).*?(progress|sprint|velocity|burndown)",
+                    "act.*?scrum master",
+                    "play.*?scrum master",
+                    "(manage|organize).*?(sprint|scrum|agile)"
+                ]
+            },
+            "fileTriggers": {
+                "pathPatterns": [
+                    ".scrum/**/*.md",
+                    ".scrum/product-backlog.md",
+                    ".scrum/config.md",
+                    ".scrum/sprints/**/*"
+                ],
+                "contentPatterns": [
+                    "sprint-info",
+                    "sprint-backlog",
+                    "product-backlog",
+                    "daily-scrum",
+                    "sprint-review",
+                    "sprint-retro",
+                    "User Story",
+                    "Acceptance Criteria",
+                    "Story Points",
+                    "Sprint Goal"
+                ]
+            }
+        }
+    },
+    "notes": {
+        "enforcement_types": {
+            "suggest": "Skill suggestion appears but doesn't block execution",
+            "block": "Requires skill to be used before proceeding (guardrail)",
+            "warn": "Shows warning but allows proceeding"
+        },
+        "priority_levels": {
+            "critical": "Highest - Always trigger when matched",
+            "high": "Important - Trigger for most matches",
+            "medium": "Moderate - Trigger for clear matches",
+            "low": "Optional - Trigger only for explicit matches"
+        },
+        "project_specific": {
+            "tech_stack": "React 19 + Vite + Tailwind CSS frontend, Vercel serverless backend",
+            "domain": "Clinical programming pattern management (SAS/R)",
+            "structure": "Single-file React app (index.tsx) with api/ directory for serverless functions"
+        }
+    }
+}

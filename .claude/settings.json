@@ -1,0 +1,42 @@
+{
+    "description": "Claude Code settings for StatPatternHub project",
+    "project": {
+        "name": "StatPatternHub",
+        "description": "Knowledge management platform for clinical programming patterns (SAS/R)"
+    },
+    "hooks": {
+        "UserPromptSubmit": [
+            {
+                "description": "Auto-suggest skills based on user prompts",
+                "hooks": [
+                    {
+                        "type": "command",
+                        "command": "cd \"$CLAUDE_PROJECT_DIR/.claude/hooks\" && cat | npx tsx skill-activation-prompt.ts || true"
+                    }
+                ]
+            }
+        ],
+        "PostToolUse": [
+            {
+                "description": "Track file changes for context management",
+                "matcher": "Edit|MultiEdit|Write",
+                "hooks": [
+                    {
+                        "type": "command",
+                        "command": "$CLAUDE_PROJECT_DIR/.claude/hooks/post-tool-use-tracker.sh"
+                    }
+                ]
+            }
+        ]
+    },
+    "notes": {
+        "hooks": {
+            "skill-activation-prompt": "Automatically suggests relevant skills based on user's natural language prompts",
+            "post-tool-use-tracker": "Tracks which files are being edited to maintain context and suggest appropriate skills"
+        },
+        "customization": {
+            "skills": "Edit .claude/skills/skill-rules.json to customize skill triggers",
+            "hooks": "Add more hooks as needed for your workflow"
+        }
+    }
+}
