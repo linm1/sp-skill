@@ -20,18 +20,46 @@ The system functions as a **Data Warehouse for code logic** - ingesting unstruct
 
 ```bash
 npm install
-npm run dev    # Starts dev server on http://localhost:3000
-npm run build  # Production build
+npm run dev        # Starts frontend dev server on http://localhost:3000
+npm run dev:api    # Starts backend API server on http://localhost:3001
+npm run build      # Production build
 ```
 
 ### Environment Setup
 
 **Local Development**: Create `.env.local` (not committed to git):
-```
-GEMINI_API_KEY=your_api_key_here
+```bash
+# Database (required for backend API)
+POSTGRES_URL=postgresql://user:password@host:port/database
+
+# AI Integration (required for pattern extraction)
+GEMINI_API_KEY=your_gemini_api_key_here
+
+# Authentication (required for user management)
+CLERK_SECRET_KEY=your_clerk_secret_key_here
+CLERK_WEBHOOK_SECRET=your_clerk_webhook_secret_here
+VITE_CLERK_PUBLISHABLE_KEY=your_clerk_publishable_key_here
+
+# Email Service (required for admin notifications)
+RESEND_API_KEY=your_resend_api_key_here
+ADMIN_EMAIL=admin@example.com
 ```
 
-**Production (Vercel)**: Set `GEMINI_API_KEY` in Vercel Dashboard → Settings → Environment Variables
+**Getting Environment Variables:**
+- **Option 1 (Recommended for Team):** Pull from Vercel project:
+  ```bash
+  vercel env pull .env.local
+  ```
+
+- **Option 2 (Individual Setup):** Manually create `.env.local` and add each variable
+
+**Production (Vercel)**: Set all environment variables in Vercel Dashboard → Settings → Environment Variables
+
+**Important Notes:**
+- `.env.local` is gitignored and never committed
+- The `dev:api` script uses `dotenv-cli` to ensure environment variables are loaded correctly
+- Frontend (Vite) auto-loads `.env.local` variables prefixed with `VITE_`
+- Backend API requires explicit env loading (handled by npm script)
 
 ## Project Structure
 

@@ -48,13 +48,130 @@ import { getAuthenticatedUser } from '../../lib/auth.js';
  *   previousStatus: string,
  *   newStatus: string
  * }
+ *
+ * PATCH /api/implementations/:uuid
+ * Updates the status of an implementation (admin only)
+ *
+ * Authorization:
+ * - Must be authenticated
+ * - Must have 'admin' role
+ *
+ * Request Body:
+ * {
+ *   status: 'active' | 'rejected'
+ * }
+ *
+ * Response Schema (Success - 200):
+ * {
+ *   success: true,
+ *   message: string,
+ *   implementation: {
+ *     uuid: string,
+ *     patternId: string,
+ *     authorId: number,
+ *     status: string,
+ *     updatedAt: Date
+ *   }
+ * }
  */
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
-  // Only allow PUT requests
-  if (req.method !== 'PUT') {
+  // Route to appropriate handler based on method
+  if (req.method === 'PUT') {
+    return handlePut(req, res);
+  } else if (req.method === 'PATCH') {
+    return handlePatch(req, res);
+  } else {
     return res.status(405).json({ error: 'Method not allowed' });
   }
+}
+
+/**
+ * PATCH handler - Admin-only status updates
+ */
+async function handlePatch(req: VercelRequest, res: VercelResponse) {
+  // Get UUID from query parameter
+  const { uuid } = req.query;
+
+  if (!uuid || typeof uuid !== 'string') {
+    return res.status(400).json({ error: 'Implementation UUID is required' });
+  }
+
+  // Authenticate user
+  const user = await getAuthenticatedUser(req);
+  if (!user) {
+    return res.status(401).json({ error: 'Unauthorized - Please log in' });
+  }
+
+  // Check admin role
+  if (user.role !== 'admin') {
+    return res.status(403).json({ error: 'Forbidden - Admin role required' });
+  }
+
+  try {
+    // Validate status value
+    const { status } = req.body;
+
+    if (!status || typeof status !== 'string') {
+      return res.status(400).json({ error: 'Status is required' });
+    }
+
+    if (status !== 'active' && status !== 'rejected') {
+      return res.status(400).json({
+        error: 'Invalid status value. Must be "active" or "rejected"',
+        providedStatus: status
+      });
+    }
+
+    // Check if implementation exists
+    const existing = await db
+      .select()
+      .from(patternImplementations)
+      .where(eq(patternImplementations.uuid, uuid))
+      .limit(1);
+
+    if (existing.length === 0) {
+      return res.status(404).json({
+        error: 'Implementation not found',
+        uuid
+      });
+    }
+
+    // Update status
+    const updated = await db
+      .update(patternImplementations)
+      .set({
+        status,
+        updatedAt: new Date()
+      })
+      .where(eq(patternImplementations.uuid, uuid))
+      .returning();
+
+    return res.status(200).json({
+      success: true,
+      message: `Implementation ${status === 'active' ? 'approved' : 'rejected'} successfully`,
+      implementation: {
+        uuid: updated[0].uuid,
+        patternId: updated[0].patternId,
+        authorId: updated[0].authorId,
+        status: updated[0].status,
+        updatedAt: updated[0].updatedAt
+      }
+    });
+
+  } catch (error) {
+    console.error('Error updating implementation status:', error);
+    return res.status(500).json({
+      error: 'Failed to update implementation status',
+      message: error instanceof Error ? error.message : String(error)
+    });
+  }
+}
+
+/**
+ * PUT handler - Content updates
+ */
+async function handlePut(req: VercelRequest, res: VercelResponse) {
 
   // Get UUID from query parameter
   const { uuid } = req.query;
