@@ -73,6 +73,26 @@ import { getAuthenticatedUser } from '../../lib/auth.js';
  *     updatedAt: Date
  *   }
  * }
+ *
+ * DELETE /api/implementations/:uuid
+ * Soft-deletes an implementation (admin only)
+ *
+ * Authorization:
+ * - Must be authenticated
+ * - Must have 'admin' role
+ *
+ * Response Schema (Success - 200):
+ * {
+ *   success: true,
+ *   message: string,
+ *   implementation: {
+ *     uuid: string,
+ *     patternId: string,
+ *     isDeleted: boolean,
+ *     deletedAt: Date,
+ *     deletedBy: string
+ *   }
+ * }
  */
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
@@ -81,6 +101,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     return handlePut(req, res);
   } else if (req.method === 'PATCH') {
     return handlePatch(req, res);
+  } else if (req.method === 'DELETE') {
+    return handleDelete(req, res);
   } else {
     return res.status(405).json({ error: 'Method not allowed' });
   }
@@ -285,6 +307,91 @@ async function handlePut(req: VercelRequest, res: VercelResponse) {
     return res.status(500).json({
       error: 'Failed to update implementation',
       message: error instanceof Error ? error.message : String(error)
+    });
+  }
+}
+
+/**
+ * DELETE handler - Soft-delete implementation (admin only)
+ */
+async function handleDelete(req: VercelRequest, res: VercelResponse) {
+  try {
+    // 1. Authenticate user and check admin role
+    const user = await getAuthenticatedUser(req);
+    if (!user) {
+      return res.status(401).json({
+        error: 'Unauthorized',
+        message: 'Please log in to delete implementations'
+      });
+    }
+
+    if (user.role !== 'admin') {
+      return res.status(403).json({
+        error: 'Forbidden',
+        message: 'Admin role required to delete implementations'
+      });
+    }
+
+    // 2. Extract UUID from query parameters
+    const { uuid } = req.query;
+
+    if (!uuid || typeof uuid !== 'string') {
+      return res.status(400).json({
+        error: 'Implementation UUID is required'
+      });
+    }
+
+    // 3. Check if implementation exists
+    const existingImplementation = await db
+      .select()
+      .from(patternImplementations)
+      .where(eq(patternImplementations.uuid, uuid))
+      .limit(1);
+
+    if (existingImplementation.length === 0) {
+      return res.status(404).json({
+        error: 'Not found',
+        message: `Implementation with UUID '${uuid}' not found`
+      });
+    }
+
+    // 4. Check if implementation is already deleted
+    if (existingImplementation[0].isDeleted) {
+      return res.status(400).json({
+        error: 'Implementation already deleted',
+        message: `Implementation with UUID '${uuid}' has already been deleted`
+      });
+    }
+
+    // 5. Soft delete the implementation
+    const deletedImplementation = await db
+      .update(patternImplementations)
+      .set({
+        isDeleted: true,
+        deletedAt: new Date(),
+        deletedBy: user.clerkId
+      })
+      .where(eq(patternImplementations.uuid, uuid))
+      .returning();
+
+    // 6. Return success response
+    return res.status(200).json({
+      success: true,
+      message: 'Implementation soft-deleted successfully',
+      implementation: {
+        uuid: deletedImplementation[0].uuid,
+        patternId: deletedImplementation[0].patternId,
+        isDeleted: deletedImplementation[0].isDeleted,
+        deletedAt: deletedImplementation[0].deletedAt,
+        deletedBy: deletedImplementation[0].deletedBy
+      }
+    });
+
+  } catch (error) {
+    console.error('[API /implementations/[uuid]] DELETE error:', error);
+    return res.status(500).json({
+      error: 'Internal server error',
+      message: error instanceof Error ? error.message : 'Failed to delete implementation'
     });
   }
 }

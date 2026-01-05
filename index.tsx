@@ -3,6 +3,7 @@ import { createRoot } from "react-dom/client";
 import { GoogleGenAI, Type } from "@google/genai";
 import JSZip from "jszip";
 import { ClerkProvider, SignInButton, SignUpButton, UserButton, useAuth, useUser } from "@clerk/clerk-react";
+import { formatRelativeTime } from "./lib/dateFormat";
 import "./index.css";
 
 // --- Types & Constants ---
@@ -687,6 +688,97 @@ const PatternDetail = ({
   );
 };
 
+// Multi-entry field component for dynamic add/remove inputs
+interface MultiEntryFieldProps {
+  label: string;
+  value: string[];
+  onChange: (newValue: string[]) => void;
+  placeholder?: string;
+  maxEntries?: number;
+}
+
+const MultiEntryField = ({
+  label,
+  value,
+  onChange,
+  placeholder = "",
+  maxEntries = 10,
+}: MultiEntryFieldProps) => {
+  const handleAdd = () => {
+    if (value.length < maxEntries) {
+      onChange([...value, ""]);
+    }
+  };
+
+  const handleRemove = (index: number) => {
+    const newValue = value.filter((_, i) => i !== index);
+    onChange(newValue);
+  };
+
+  const handleChange = (index: number, newText: string) => {
+    const newValue = [...value];
+    newValue[index] = newText;
+    // Filter out empty strings when updating
+    const filtered = newValue.filter((s) => s.trim() !== "");
+    onChange(filtered);
+  };
+
+  const canAdd = value.length < maxEntries;
+
+  return (
+    <div>
+      <label className="block text-sm font-medium text-slate-700 mb-1">
+        {label}
+        <span className="ml-2 text-xs text-slate-500">
+          ({value.length}/{maxEntries} entries)
+        </span>
+      </label>
+
+      {/* Existing entries */}
+      <div className="space-y-2 mb-2">
+        {value.length === 0 && (
+          <p className="text-sm text-slate-400 italic">No entries yet. Click "Add Entry" to start.</p>
+        )}
+        {value.map((entry, index) => (
+          <div key={index} className="flex items-center space-x-2">
+            <input
+              type="text"
+              value={entry}
+              onChange={(e) => handleChange(index, e.target.value)}
+              placeholder={placeholder}
+              className="flex-1 p-2 border border-slate-300 rounded-md text-sm"
+              autoFocus={index === value.length - 1}
+            />
+            <button
+              type="button"
+              onClick={() => handleRemove(index)}
+              className="text-red-600 hover:text-red-800 transition-colors"
+              title="Remove entry"
+            >
+              <i className="fas fa-times"></i>
+            </button>
+          </div>
+        ))}
+      </div>
+
+      {/* Add button */}
+      <button
+        type="button"
+        onClick={handleAdd}
+        disabled={!canAdd}
+        className={`w-full p-2 border-2 border-dashed rounded-md text-sm transition-colors ${
+          canAdd
+            ? "border-indigo-300 text-indigo-600 hover:border-indigo-400 hover:bg-indigo-50"
+            : "border-slate-200 text-slate-400 cursor-not-allowed"
+        }`}
+      >
+        <i className="fas fa-plus mr-1"></i>
+        Add Entry {!canAdd && "(Max reached)"}
+      </button>
+    </div>
+  );
+};
+
 const SmartEtlForm = ({
   definition,
   initialImpl,
@@ -805,10 +897,6 @@ const SmartEtlForm = ({
     );
 
     onSave(newImpl, hasDefChanges ? defData : undefined);
-  };
-
-  const handleArrayChange = (field: "considerations" | "variations", value: string) => {
-    setFormData({ ...formData, [field]: value.split("\n").filter((s) => s.trim() !== "") });
   };
 
   return (
@@ -953,26 +1041,21 @@ const SmartEtlForm = ({
           </div>
         </div>
 
-        <div>
-          <label className="block text-sm font-medium text-slate-700 mb-1">Considerations (One per line)</label>
-          <textarea
-            rows={3}
-            value={formData.considerations?.join("\n")}
-            onChange={(e) => handleArrayChange("considerations", e.target.value)}
-            className="w-full p-2 border border-slate-300 rounded-md text-sm"
-          />
-        </div>
-        
-        <div>
-          <label className="block text-sm font-medium text-slate-700 mb-1">Common Variations (One per line)</label>
-          <textarea
-            rows={3}
-            value={formData.variations?.join("\n")}
-            onChange={(e) => handleArrayChange("variations", e.target.value)}
-            className="w-full p-2 border border-slate-300 rounded-md text-sm"
-            placeholder="e.g. Baseline Observation Carried Forward (BOCF)"
-          />
-        </div>
+        <MultiEntryField
+          label="Key Considerations"
+          value={formData.considerations || []}
+          onChange={(newValue) => setFormData({ ...formData, considerations: newValue })}
+          placeholder="e.g., Requires non-missing baseline value"
+          maxEntries={10}
+        />
+
+        <MultiEntryField
+          label="Common Variations"
+          value={formData.variations || []}
+          onChange={(newValue) => setFormData({ ...formData, variations: newValue })}
+          placeholder="e.g., Baseline Observation Carried Forward (BOCF)"
+          maxEntries={10}
+        />
 
         <div className="flex justify-end space-x-3 pt-4 border-t border-slate-100">
           <button
@@ -1250,7 +1333,7 @@ const AdminReviewQueue = () => {
                   <p className="text-sm text-slate-500">
                     Category: {implementation.patternCategory} |
                     Contributor: <span className="font-medium text-slate-700">{implementation.authorName}</span> |
-                    Submitted: {new Date(implementation.createdAt).toLocaleDateString()}
+                    Submitted: {formatRelativeTime(implementation.createdAt)}
                   </p>
                 </div>
               </div>
@@ -1506,6 +1589,111 @@ const PatternDefinitionModal = ({
   );
 };
 
+const ImplementationsTable = ({
+  implementations,
+  onDelete,
+}: {
+  implementations: Array<PatternImplementation & {
+    isDeleted?: boolean;
+    patternTitle?: string;
+    patternCategory?: string;
+    createdAt?: string;
+  }>;
+  onDelete: (uuid: string) => void;
+}) => {
+  if (implementations.length === 0) {
+    return (
+      <div className="bg-white rounded-xl p-12 text-center">
+        <i className="fas fa-folder-open text-4xl text-slate-300 mb-4"></i>
+        <p className="text-slate-500">No implementations found.</p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-4">
+      {implementations.map((implementation) => (
+        <div
+          key={implementation.uuid}
+          className={`bg-white rounded-xl shadow-sm border border-slate-200 p-6 hover:shadow-md transition-shadow ${
+            implementation.isDeleted ? 'bg-slate-50 opacity-60' : ''
+          }`}
+        >
+          <div className="flex items-start justify-between">
+            {/* Left: Implementation Info */}
+            <div className="flex-grow">
+              {/* Badges row */}
+              <div className="flex items-center space-x-3 mb-2">
+                <span className="px-2 py-1 bg-slate-100 text-slate-700 text-xs font-mono rounded">
+                  {implementation.uuid.substring(0, 8)}...
+                </span>
+                <span className="px-2 py-1 bg-slate-100 text-slate-700 text-xs font-mono rounded">
+                  {implementation.patternId}
+                </span>
+                {implementation.patternCategory && (
+                  <span className="px-2 py-1 bg-indigo-100 text-indigo-700 text-xs font-semibold rounded">
+                    {implementation.patternCategory}
+                  </span>
+                )}
+                <span className={`px-2 py-1 text-xs font-semibold rounded ${
+                  implementation.status === 'active'
+                    ? 'bg-green-100 text-green-700'
+                    : 'bg-yellow-100 text-yellow-700'
+                }`}>
+                  {implementation.status}
+                </span>
+                {implementation.isDeleted && (
+                  <span className="px-2 py-1 bg-red-100 text-red-700 text-xs font-semibold rounded">
+                    Deleted
+                  </span>
+                )}
+              </div>
+
+              {/* Title */}
+              <h3 className={`text-lg font-bold ${
+                implementation.isDeleted ? 'line-through text-slate-400' : 'text-slate-900'
+              }`}>
+                {implementation.patternTitle || implementation.patternId}
+              </h3>
+
+              {/* Author & Date */}
+              <div className="flex items-center space-x-4 mt-1">
+                <p className="text-sm text-slate-600">
+                  <i className="fas fa-user mr-1"></i>
+                  Author: {implementation.author}
+                </p>
+                {implementation.createdAt && (
+                  <p className="text-sm text-slate-500">
+                    <i className="fas fa-clock mr-1"></i>
+                    Submitted: {formatRelativeTime(implementation.createdAt)}
+                  </p>
+                )}
+              </div>
+            </div>
+
+            {/* Right: Actions */}
+            {!implementation.isDeleted && (
+              <div className="flex space-x-2 ml-4">
+                <button
+                  onClick={() => {
+                    if (window.confirm(`Are you sure you want to delete this implementation?`)) {
+                      onDelete(implementation.uuid);
+                    }
+                  }}
+                  className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg text-sm transition-colors flex items-center"
+                >
+                  <i className="fas fa-trash mr-2"></i>
+                  Delete
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+};
+
 const PatternDefinitionsTable = ({
   patterns,
   onEdit,
@@ -1554,7 +1742,7 @@ const PatternDefinitionsTable = ({
               </h3>
               {pattern.createdAt && (
                 <p className="text-sm text-slate-500 mt-1">
-                  Created: {new Date(pattern.createdAt).toLocaleDateString()}
+                  Created: {formatRelativeTime(pattern.createdAt)}
                 </p>
               )}
               <p className="text-sm text-slate-600 mt-2 line-clamp-2">
@@ -1608,6 +1796,13 @@ const AdminPatternManager = ({
   const [activeTab, setActiveTab] = useState<"definitions" | "implementations">("definitions");
   const [editingPattern, setEditingPattern] = useState<PatternDefinition | null>(null);
   const [showModal, setShowModal] = useState(false);
+  const [implementations, setImplementations] = useState<Array<PatternImplementation & {
+    isDeleted?: boolean;
+    patternTitle?: string;
+    patternCategory?: string;
+    createdAt?: string;
+  }>>([]);
+  const [implementationsLoading, setImplementationsLoading] = useState(false);
 
   const { getToken } = useAuth();
 
@@ -1645,6 +1840,42 @@ const AdminPatternManager = ({
     }
   };
 
+  const fetchImplementations = async () => {
+    setImplementationsLoading(true);
+    setError(null);
+    try {
+      const token = await getToken();
+      if (!token) {
+        setError("Authentication required");
+        setImplementationsLoading(false);
+        return;
+      }
+
+      const url = `/api/implementations?status=pending${showDeleted ? '&includeDeleted=true' : ''}`;
+      const response = await fetch(url, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+
+      if (!response.ok) {
+        throw new Error(`Failed to fetch implementations: ${response.statusText}`);
+      }
+
+      const data = await response.json();
+      setImplementations(data.implementations || []);
+    } catch (err: any) {
+      setError(err.message);
+    } finally {
+      setImplementationsLoading(false);
+    }
+  };
+
+  // Fetch implementations when tab changes
+  useEffect(() => {
+    if (activeTab === "implementations") {
+      fetchImplementations();
+    }
+  }, [activeTab, showDeleted]);
+
   // Filter patterns (client-side)
   const filteredPatterns = patterns.filter(p => {
     const matchesSearch =
@@ -1652,6 +1883,17 @@ const AdminPatternManager = ({
       p.title.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesCategory = categoryFilter === "all" || p.category === categoryFilter;
     return matchesSearch && matchesCategory;
+  });
+
+  // Filter implementations (client-side)
+  const filteredImplementations = implementations.filter(impl => {
+    if (!searchTerm) return true;
+    const search = searchTerm.toLowerCase();
+    return (
+      impl.patternId?.toLowerCase().includes(search) ||
+      impl.author?.toLowerCase().includes(search) ||
+      impl.patternTitle?.toLowerCase().includes(search)
+    );
   });
 
   // Handle save (create or update)
@@ -1718,6 +1960,29 @@ const AdminPatternManager = ({
     }
   };
 
+  // Handle delete implementation
+  const handleDeleteImplementation = async (uuid: string) => {
+    try {
+      const token = await getToken();
+      if (!token) throw new Error("Authentication required");
+
+      const response = await fetch(`/api/implementations/${uuid}`, {
+        method: 'DELETE',
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to delete implementation');
+      }
+
+      // Refresh implementations list
+      await fetchImplementations();
+    } catch (err: any) {
+      alert(`Error deleting implementation: ${err.message}`);
+    }
+  };
+
   if (userRole !== 'admin') {
     return (
       <div className="max-w-7xl mx-auto px-4 py-8">
@@ -1768,53 +2033,79 @@ const AdminPatternManager = ({
       </div>
 
       {/* Filters & Controls */}
-      <div className="bg-white rounded-lg shadow-sm border border-slate-200 p-4 mb-6">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-          {/* Search */}
-          <input
-            type="text"
-            placeholder="Search by ID or title..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full p-2 border border-slate-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
-          />
-
-          {/* Category Filter */}
-          <select
-            value={categoryFilter}
-            onChange={(e) => setCategoryFilter(e.target.value)}
-            className="w-full p-2 border border-slate-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
-          >
-            <option value="all">All Categories</option>
-            {CATEGORIES.map(cat => (
-              <option key={cat.code} value={cat.code}>{cat.code} - {cat.name}</option>
-            ))}
-          </select>
-
-          {/* Show Deleted Checkbox */}
-          <label className="flex items-center space-x-2 px-2">
+      {activeTab === "definitions" ? (
+        <div className="bg-white rounded-lg shadow-sm border border-slate-200 p-4 mb-6">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+            {/* Search */}
             <input
-              type="checkbox"
-              checked={showDeleted}
-              onChange={(e) => setShowDeleted(e.target.checked)}
-              className="w-4 h-4 text-indigo-600 rounded focus:ring-indigo-500"
+              type="text"
+              placeholder="Search by ID or title..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-full p-2 border border-slate-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
             />
-            <span className="text-sm text-slate-700">Show Deleted</span>
-          </label>
 
-          {/* Create New Button */}
-          <button
-            onClick={() => {
-              setEditingPattern(null);
-              setShowModal(true);
-            }}
-            className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg text-sm font-semibold transition-colors flex items-center justify-center"
-          >
-            <i className="fas fa-plus mr-2"></i>
-            Create New
-          </button>
+            {/* Category Filter */}
+            <select
+              value={categoryFilter}
+              onChange={(e) => setCategoryFilter(e.target.value)}
+              className="w-full p-2 border border-slate-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            >
+              <option value="all">All Categories</option>
+              {CATEGORIES.map(cat => (
+                <option key={cat.code} value={cat.code}>{cat.code} - {cat.name}</option>
+              ))}
+            </select>
+
+            {/* Show Deleted Checkbox */}
+            <label className="flex items-center space-x-2 px-2">
+              <input
+                type="checkbox"
+                checked={showDeleted}
+                onChange={(e) => setShowDeleted(e.target.checked)}
+                className="w-4 h-4 text-indigo-600 rounded focus:ring-indigo-500"
+              />
+              <span className="text-sm text-slate-700">Show Deleted</span>
+            </label>
+
+            {/* Create New Button */}
+            <button
+              onClick={() => {
+                setEditingPattern(null);
+                setShowModal(true);
+              }}
+              className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg text-sm font-semibold transition-colors flex items-center justify-center"
+            >
+              <i className="fas fa-plus mr-2"></i>
+              Create New
+            </button>
+          </div>
         </div>
-      </div>
+      ) : (
+        <div className="bg-white rounded-lg shadow-sm border border-slate-200 p-4 mb-6">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            {/* Search */}
+            <input
+              type="text"
+              placeholder="Search by Pattern ID, author, or title..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-full p-2 border border-slate-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 md:col-span-2"
+            />
+
+            {/* Show Deleted Checkbox */}
+            <label className="flex items-center space-x-2 px-2">
+              <input
+                type="checkbox"
+                checked={showDeleted}
+                onChange={(e) => setShowDeleted(e.target.checked)}
+                className="w-4 h-4 text-indigo-600 rounded focus:ring-indigo-500"
+              />
+              <span className="text-sm text-slate-700">Show Deleted</span>
+            </label>
+          </div>
+        </div>
+      )}
 
       {/* Error State */}
       {error && (
@@ -1844,12 +2135,19 @@ const AdminPatternManager = ({
         />
       )}
 
-      {/* Implementations Tab (Placeholder) */}
-      {!loading && activeTab === "implementations" && (
-        <div className="bg-white rounded-xl p-12 text-center">
-          <i className="fas fa-code text-4xl text-slate-300 mb-4"></i>
-          <p className="text-slate-500">Implementation management coming soon...</p>
-        </div>
+      {/* Implementations Tab */}
+      {activeTab === "implementations" && (
+        implementationsLoading ? (
+          <div className="bg-white rounded-xl p-12 text-center">
+            <i className="fas fa-spinner fa-spin text-4xl text-indigo-600 mb-4"></i>
+            <p className="text-slate-500">Loading implementations...</p>
+          </div>
+        ) : (
+          <ImplementationsTable
+            implementations={filteredImplementations}
+            onDelete={handleDeleteImplementation}
+          />
+        )
       )}
 
       {/* Modal */}
@@ -2027,9 +2325,9 @@ const MyContributions = ({
                       </span>
                     </div>
                     <p className="text-sm text-slate-500">
-                      Category: {contribution.patternCategory} | Submitted: {new Date(contribution.createdAt).toLocaleDateString()}
+                      Category: {contribution.patternCategory} | Submitted: {formatRelativeTime(contribution.createdAt)}
                       {contribution.updatedAt !== contribution.createdAt && (
-                        <> | Updated: {new Date(contribution.updatedAt).toLocaleDateString()}</>
+                        <> | Updated: {formatRelativeTime(contribution.updatedAt)}</>
                       )}
                     </p>
                   </div>
