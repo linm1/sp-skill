@@ -83,34 +83,72 @@ async function handleGet(req: VercelRequest, res: VercelResponse) {
     let patterns;
     const shouldIncludeDeleted = includeDeleted === 'true';
 
-    if (category && typeof category === 'string') {
-      // Filter by category
-      if (shouldIncludeDeleted) {
-        patterns = await db
-          .select()
-          .from(patternDefinitions)
-          .where(eq(patternDefinitions.category, category.toUpperCase()));
+    try {
+      if (category && typeof category === 'string') {
+        // Filter by category
+        if (shouldIncludeDeleted) {
+          patterns = await db
+            .select()
+            .from(patternDefinitions)
+            .where(eq(patternDefinitions.category, category.toUpperCase()));
+        } else {
+          patterns = await db
+            .select()
+            .from(patternDefinitions)
+            .where(
+              and(
+                eq(patternDefinitions.category, category.toUpperCase()),
+                eq(patternDefinitions.isDeleted, false)
+              )
+            );
+        }
       } else {
-        patterns = await db
-          .select()
-          .from(patternDefinitions)
-          .where(
-            and(
-              eq(patternDefinitions.category, category.toUpperCase()),
-              eq(patternDefinitions.isDeleted, false)
-            )
-          );
+        // Get all patterns
+        if (shouldIncludeDeleted) {
+          patterns = await db.select().from(patternDefinitions);
+        } else {
+          patterns = await db
+            .select()
+            .from(patternDefinitions)
+            .where(eq(patternDefinitions.isDeleted, false));
+        }
       }
-    } else {
-      // Get all patterns
-      if (shouldIncludeDeleted) {
-        patterns = await db.select().from(patternDefinitions);
-      } else {
-        patterns = await db
-          .select()
-          .from(patternDefinitions)
-          .where(eq(patternDefinitions.isDeleted, false));
+    } catch (dbError: any) {
+      console.error('Database query error:', dbError);
+
+      // Check if it's a column missing error (migration not applied)
+      if (dbError.message?.includes('column') && dbError.message?.includes('does not exist')) {
+        return res.status(500).json({
+          success: false,
+          error: 'Database schema mismatch',
+          message: 'Database migration required. The database schema is missing required columns. Please run: npx drizzle-kit push',
+          details: dbError.message
+        });
       }
+
+      // Check if it's a connection error
+      if (dbError.message?.includes('connection') || dbError.code === 'ECONNREFUSED') {
+        return res.status(500).json({
+          success: false,
+          error: 'Database connection failed',
+          message: 'Unable to connect to database. Please verify POSTGRES_URL environment variable is set correctly.',
+          details: dbError.message
+        });
+      }
+
+      // Generic database error
+      throw dbError;
+    }
+
+    // Handle empty results gracefully
+    if (!patterns || patterns.length === 0) {
+      return res.status(200).json({
+        success: true,
+        count: 0,
+        category: category ? (Array.isArray(category) ? category[0].toUpperCase() : category.toUpperCase()) : 'ALL',
+        patterns: [],
+        message: 'No patterns found. Database may be empty or migration not applied.'
+      });
     }
 
     // For each pattern, get implementation details
@@ -118,27 +156,33 @@ async function handleGet(req: VercelRequest, res: VercelResponse) {
       patterns.map(async (pattern) => {
         // Get only active implementations for this pattern (and exclude soft-deleted unless includeDeleted)
         let implementations;
-        if (shouldIncludeDeleted) {
-          implementations = await db
-            .select()
-            .from(patternImplementations)
-            .where(
-              and(
-                eq(patternImplementations.patternId, pattern.id),
-                eq(patternImplementations.status, 'active')
-              )
-            );
-        } else {
-          implementations = await db
-            .select()
-            .from(patternImplementations)
-            .where(
-              and(
-                eq(patternImplementations.patternId, pattern.id),
-                eq(patternImplementations.status, 'active'),
-                eq(patternImplementations.isDeleted, false)
-              )
-            );
+        try {
+          if (shouldIncludeDeleted) {
+            implementations = await db
+              .select()
+              .from(patternImplementations)
+              .where(
+                and(
+                  eq(patternImplementations.patternId, pattern.id),
+                  eq(patternImplementations.status, 'active')
+                )
+              );
+          } else {
+            implementations = await db
+              .select()
+              .from(patternImplementations)
+              .where(
+                and(
+                  eq(patternImplementations.patternId, pattern.id),
+                  eq(patternImplementations.status, 'active'),
+                  eq(patternImplementations.isDeleted, false)
+                )
+              );
+          }
+        } catch (implError: any) {
+          console.error(`Error fetching implementations for pattern ${pattern.id}:`, implError);
+          // If implementations query fails, continue with empty array
+          implementations = [];
         }
 
         // Extract unique authors

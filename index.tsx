@@ -3,6 +3,7 @@ import { createRoot } from "react-dom/client";
 import { GoogleGenAI, Type } from "@google/genai";
 import JSZip from "jszip";
 import { ClerkProvider, SignInButton, SignUpButton, UserButton, useAuth, useUser } from "@clerk/clerk-react";
+import "./index.css";
 
 // --- Types & Constants ---
 
