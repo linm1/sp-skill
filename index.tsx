@@ -385,13 +385,22 @@ const Layout = ({
               </button>
             )}
             {isLoaded && isSignedIn && userRole === 'admin' && (
-              <button
-                onClick={() => setView("admin-review")}
-                className={`hover:text-indigo-400 flex items-center ${currentView === "admin-review" ? "text-indigo-400" : ""}`}
-              >
-                <i className="fas fa-clipboard-check mr-2"></i>
-                Admin Review
-              </button>
+              <>
+                <button
+                  onClick={() => setView("admin-review")}
+                  className={`hover:text-indigo-400 flex items-center ${currentView === "admin-review" ? "text-indigo-400" : ""}`}
+                >
+                  <i className="fas fa-clipboard-check mr-2"></i>
+                  Admin Review
+                </button>
+                <button
+                  onClick={() => setView("admin-patterns")}
+                  className={`hover:text-indigo-400 flex items-center ${currentView === "admin-patterns" ? "text-indigo-400" : ""}`}
+                >
+                  <i className="fas fa-cog mr-2"></i>
+                  Admin Panel
+                </button>
+              </>
             )}
             <button
               onClick={() => setView("basket")}
@@ -1309,6 +1318,547 @@ const AdminReviewQueue = () => {
           </div>
         ))}
       </div>
+    </div>
+  );
+};
+
+// --- Admin Pattern Management Components ---
+
+const PatternDefinitionModal = ({
+  pattern,
+  onSave,
+  onClose,
+}: {
+  pattern: PatternDefinition | null;
+  onSave: (data: Partial<PatternDefinition>) => Promise<void>;
+  onClose: () => void;
+}) => {
+  const [formData, setFormData] = useState({
+    id: pattern?.id || '',
+    category: pattern?.category || 'IMP',
+    title: pattern?.title || '',
+    problem: pattern?.problem || '',
+    whenToUse: pattern?.whenToUse || '',
+  });
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    // Validation
+    if (!formData.id.match(/^[A-Z]{3}-\d{3}$/)) {
+      setError('Pattern ID must be in format XXX-NNN (e.g., IMP-001)');
+      return;
+    }
+    if (!formData.title || !formData.problem || !formData.whenToUse) {
+      setError('All fields are required');
+      return;
+    }
+
+    setSaving(true);
+    setError(null);
+    try {
+      await onSave(formData);
+      onClose();
+    } catch (err: any) {
+      setError(err.message);
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  return (
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+      <div className="bg-white rounded-xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+        {/* Header */}
+        <div className="bg-indigo-600 px-6 py-4 flex items-center justify-between">
+          <h2 className="text-xl font-bold text-white">
+            {pattern ? 'Edit Pattern Definition' : 'Create New Pattern Definition'}
+          </h2>
+          <button onClick={onClose} className="text-white hover:text-slate-200">
+            <i className="fas fa-times text-xl"></i>
+          </button>
+        </div>
+
+        {/* Form */}
+        <form onSubmit={handleSubmit} className="p-6 space-y-4">
+          {error && (
+            <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
+              {error}
+            </div>
+          )}
+
+          {/* Pattern ID */}
+          <div>
+            <label className="block text-sm font-semibold text-slate-700 mb-1">
+              Pattern ID *
+            </label>
+            <input
+              type="text"
+              value={formData.id}
+              onChange={(e) => setFormData({ ...formData, id: e.target.value.toUpperCase() })}
+              disabled={!!pattern}
+              placeholder="IMP-001"
+              className="w-full p-2 border border-slate-300 rounded-md text-sm disabled:bg-slate-100 disabled:cursor-not-allowed"
+            />
+            <p className="text-xs text-slate-500 mt-1">Format: XXX-NNN (e.g., IMP-001)</p>
+          </div>
+
+          {/* Category */}
+          <div>
+            <label className="block text-sm font-semibold text-slate-700 mb-1">
+              Category *
+            </label>
+            <select
+              value={formData.category}
+              onChange={(e) => setFormData({ ...formData, category: e.target.value })}
+              className="w-full p-2 border border-slate-300 rounded-md text-sm"
+            >
+              <option value="IMP">IMP - Imputation</option>
+              <option value="DER">DER - Derivations</option>
+              <option value="DAT">DAT - Date/Time</option>
+              <option value="RSH">RSH - Reshaping</option>
+              <option value="AGG">AGG - Aggregation</option>
+              <option value="MRG">MRG - Merging</option>
+              <option value="CAT">CAT - Categorization</option>
+              <option value="FLG">FLG - Flagging</option>
+              <option value="SRT">SRT - Sorting</option>
+              <option value="FMT">FMT - Formatting</option>
+              <option value="VAL">VAL - Validation</option>
+              <option value="CDS">CDS - CDISC</option>
+              <option value="STA">STA - Statistics</option>
+              <option value="OPT">OPT - Optimization</option>
+            </select>
+          </div>
+
+          {/* Title */}
+          <div>
+            <label className="block text-sm font-semibold text-slate-700 mb-1">
+              Title *
+            </label>
+            <input
+              type="text"
+              value={formData.title}
+              onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+              className="w-full p-2 border border-slate-300 rounded-md text-sm"
+              placeholder="e.g., Last Observation Carried Forward"
+            />
+          </div>
+
+          {/* Problem */}
+          <div>
+            <label className="block text-sm font-semibold text-slate-700 mb-1">
+              Problem Statement *
+            </label>
+            <textarea
+              value={formData.problem}
+              onChange={(e) => setFormData({ ...formData, problem: e.target.value })}
+              rows={4}
+              className="w-full p-2 border border-slate-300 rounded-md text-sm"
+              placeholder="Describe the problem this pattern solves..."
+            />
+          </div>
+
+          {/* When to Use */}
+          <div>
+            <label className="block text-sm font-semibold text-slate-700 mb-1">
+              When to Use *
+            </label>
+            <textarea
+              value={formData.whenToUse}
+              onChange={(e) => setFormData({ ...formData, whenToUse: e.target.value })}
+              rows={4}
+              className="w-full p-2 border border-slate-300 rounded-md text-sm"
+              placeholder="Describe when to use this pattern..."
+            />
+          </div>
+
+          {/* Buttons */}
+          <div className="flex justify-end space-x-3 pt-4 border-t border-slate-200">
+            <button
+              type="button"
+              onClick={onClose}
+              disabled={saving}
+              className="px-6 py-2 border border-slate-300 text-slate-700 rounded-lg hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              disabled={saving}
+              className="px-6 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg disabled:opacity-50 disabled:cursor-not-allowed flex items-center"
+            >
+              {saving ? (
+                <>
+                  <i className="fas fa-spinner fa-spin mr-2"></i>
+                  Saving...
+                </>
+              ) : (
+                pattern ? 'Update Pattern' : 'Create Pattern'
+              )}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+};
+
+const PatternDefinitionsTable = ({
+  patterns,
+  onEdit,
+  onDelete,
+}: {
+  patterns: Array<PatternDefinition & { isDeleted?: boolean; createdAt?: string }>;
+  onEdit: (pattern: PatternDefinition) => void;
+  onDelete: (patternId: string) => void;
+}) => {
+  if (patterns.length === 0) {
+    return (
+      <div className="bg-white rounded-xl p-12 text-center">
+        <i className="fas fa-folder-open text-4xl text-slate-300 mb-4"></i>
+        <p className="text-slate-500">No patterns found.</p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-4">
+      {patterns.map((pattern) => (
+        <div
+          key={pattern.id}
+          className={`bg-white rounded-xl shadow-sm border border-slate-200 p-6 hover:shadow-md transition-shadow ${
+            pattern.isDeleted ? 'bg-slate-50 opacity-60' : ''
+          }`}
+        >
+          <div className="flex items-start justify-between">
+            {/* Left: Pattern Info */}
+            <div className="flex-grow">
+              <div className="flex items-center space-x-3 mb-2">
+                <span className="px-2 py-1 bg-slate-100 text-slate-700 text-xs font-mono rounded">
+                  {pattern.id}
+                </span>
+                <span className="px-2 py-1 bg-indigo-100 text-indigo-700 text-xs font-semibold rounded">
+                  {pattern.category}
+                </span>
+                {pattern.isDeleted && (
+                  <span className="px-2 py-1 bg-red-100 text-red-700 text-xs font-semibold rounded">
+                    Deleted
+                  </span>
+                )}
+              </div>
+              <h3 className={`text-lg font-bold ${pattern.isDeleted ? 'line-through text-slate-400' : 'text-slate-900'}`}>
+                {pattern.title}
+              </h3>
+              {pattern.createdAt && (
+                <p className="text-sm text-slate-500 mt-1">
+                  Created: {new Date(pattern.createdAt).toLocaleDateString()}
+                </p>
+              )}
+              <p className="text-sm text-slate-600 mt-2 line-clamp-2">
+                {pattern.problem}
+              </p>
+            </div>
+
+            {/* Right: Actions */}
+            {!pattern.isDeleted && (
+              <div className="flex space-x-2 ml-4">
+                <button
+                  onClick={() => onEdit(pattern)}
+                  className="bg-slate-600 hover:bg-slate-700 text-white px-4 py-2 rounded-lg text-sm transition-colors flex items-center"
+                >
+                  <i className="fas fa-edit mr-2"></i>
+                  Edit
+                </button>
+                <button
+                  onClick={() => {
+                    if (window.confirm(`Are you sure you want to delete pattern ${pattern.id}?`)) {
+                      onDelete(pattern.id);
+                    }
+                  }}
+                  className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg text-sm transition-colors flex items-center"
+                >
+                  <i className="fas fa-trash mr-2"></i>
+                  Delete
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+};
+
+const AdminPatternManager = ({
+  onBack,
+  userRole,
+}: {
+  onBack: () => void;
+  userRole: Role;
+}) => {
+  const [patterns, setPatterns] = useState<Array<PatternDefinition & { isDeleted?: boolean; createdAt?: string }>>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [showDeleted, setShowDeleted] = useState(false);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [categoryFilter, setCategoryFilter] = useState("all");
+  const [activeTab, setActiveTab] = useState<"definitions" | "implementations">("definitions");
+  const [editingPattern, setEditingPattern] = useState<PatternDefinition | null>(null);
+  const [showModal, setShowModal] = useState(false);
+
+  const { getToken } = useAuth();
+
+  // Fetch patterns
+  useEffect(() => {
+    fetchPatterns();
+  }, [showDeleted]);
+
+  const fetchPatterns = async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const token = await getToken();
+      if (!token) {
+        setError("Authentication required");
+        setLoading(false);
+        return;
+      }
+
+      const url = `/api/patterns${showDeleted ? '?includeDeleted=true' : ''}`;
+      const response = await fetch(url, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+
+      if (!response.ok) {
+        throw new Error(`Failed to fetch patterns: ${response.statusText}`);
+      }
+
+      const data = await response.json();
+      setPatterns(data.patterns || []);
+    } catch (err: any) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Filter patterns (client-side)
+  const filteredPatterns = patterns.filter(p => {
+    const matchesSearch =
+      p.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      p.title.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesCategory = categoryFilter === "all" || p.category === categoryFilter;
+    return matchesSearch && matchesCategory;
+  });
+
+  // Handle save (create or update)
+  const handleSave = async (data: Partial<PatternDefinition>) => {
+    const token = await getToken();
+    if (!token) throw new Error("Authentication required");
+
+    if (editingPattern) {
+      // Update existing pattern
+      const response = await fetch(`/api/patterns/${editingPattern.id}`, {
+        method: 'PUT',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(data)
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to update pattern');
+      }
+    } else {
+      // Create new pattern
+      const response = await fetch('/api/patterns', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(data)
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to create pattern');
+      }
+    }
+
+    // Refresh patterns list
+    await fetchPatterns();
+  };
+
+  // Handle delete
+  const handleDelete = async (patternId: string) => {
+    try {
+      const token = await getToken();
+      if (!token) throw new Error("Authentication required");
+
+      const response = await fetch(`/api/patterns/${patternId}`, {
+        method: 'DELETE',
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to delete pattern');
+      }
+
+      // Refresh patterns list
+      await fetchPatterns();
+    } catch (err: any) {
+      alert(`Error deleting pattern: ${err.message}`);
+    }
+  };
+
+  if (userRole !== 'admin') {
+    return (
+      <div className="max-w-7xl mx-auto px-4 py-8">
+        <div className="bg-red-100 border border-red-400 text-red-700 px-6 py-4 rounded-lg">
+          <p className="font-semibold">Access Denied</p>
+          <p>Admin role required to access this feature.</p>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="max-w-7xl mx-auto px-4 py-8">
+      {/* Header */}
+      <div className="flex items-center justify-between mb-6">
+        <h1 className="text-3xl font-bold text-slate-900">Admin Pattern Management</h1>
+        <button
+          onClick={onBack}
+          className="bg-slate-600 hover:bg-slate-700 text-white px-6 py-2 rounded-lg text-sm transition-colors flex items-center"
+        >
+          <i className="fas fa-arrow-left mr-2"></i>
+          Back
+        </button>
+      </div>
+
+      {/* Tabs */}
+      <div className="flex space-x-4 mb-6 border-b border-slate-200">
+        <button
+          onClick={() => setActiveTab("definitions")}
+          className={`pb-3 px-1 border-b-2 font-semibold transition-colors ${
+            activeTab === "definitions"
+              ? "border-indigo-600 text-indigo-600"
+              : "border-transparent text-slate-500 hover:text-slate-700"
+          }`}
+        >
+          Pattern Definitions
+        </button>
+        <button
+          onClick={() => setActiveTab("implementations")}
+          className={`pb-3 px-1 border-b-2 font-semibold transition-colors ${
+            activeTab === "implementations"
+              ? "border-indigo-600 text-indigo-600"
+              : "border-transparent text-slate-500 hover:text-slate-700"
+          }`}
+        >
+          Implementations
+        </button>
+      </div>
+
+      {/* Filters & Controls */}
+      <div className="bg-white rounded-lg shadow-sm border border-slate-200 p-4 mb-6">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+          {/* Search */}
+          <input
+            type="text"
+            placeholder="Search by ID or title..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="w-full p-2 border border-slate-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+          />
+
+          {/* Category Filter */}
+          <select
+            value={categoryFilter}
+            onChange={(e) => setCategoryFilter(e.target.value)}
+            className="w-full p-2 border border-slate-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+          >
+            <option value="all">All Categories</option>
+            {CATEGORIES.map(cat => (
+              <option key={cat.code} value={cat.code}>{cat.code} - {cat.name}</option>
+            ))}
+          </select>
+
+          {/* Show Deleted Checkbox */}
+          <label className="flex items-center space-x-2 px-2">
+            <input
+              type="checkbox"
+              checked={showDeleted}
+              onChange={(e) => setShowDeleted(e.target.checked)}
+              className="w-4 h-4 text-indigo-600 rounded focus:ring-indigo-500"
+            />
+            <span className="text-sm text-slate-700">Show Deleted</span>
+          </label>
+
+          {/* Create New Button */}
+          <button
+            onClick={() => {
+              setEditingPattern(null);
+              setShowModal(true);
+            }}
+            className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg text-sm font-semibold transition-colors flex items-center justify-center"
+          >
+            <i className="fas fa-plus mr-2"></i>
+            Create New
+          </button>
+        </div>
+      </div>
+
+      {/* Error State */}
+      {error && (
+        <div className="bg-red-100 border border-red-400 text-red-700 px-6 py-4 rounded-lg mb-6">
+          <p className="font-semibold">Error</p>
+          <p>{error}</p>
+        </div>
+      )}
+
+      {/* Loading State */}
+      {loading && (
+        <div className="bg-white rounded-xl p-12 text-center">
+          <i className="fas fa-spinner fa-spin text-4xl text-indigo-600 mb-4"></i>
+          <p className="text-slate-500">Loading patterns...</p>
+        </div>
+      )}
+
+      {/* Pattern Table */}
+      {!loading && activeTab === "definitions" && (
+        <PatternDefinitionsTable
+          patterns={filteredPatterns}
+          onEdit={(pattern) => {
+            setEditingPattern(pattern);
+            setShowModal(true);
+          }}
+          onDelete={handleDelete}
+        />
+      )}
+
+      {/* Implementations Tab (Placeholder) */}
+      {!loading && activeTab === "implementations" && (
+        <div className="bg-white rounded-xl p-12 text-center">
+          <i className="fas fa-code text-4xl text-slate-300 mb-4"></i>
+          <p className="text-slate-500">Implementation management coming soon...</p>
+        </div>
+      )}
+
+      {/* Modal */}
+      {showModal && (
+        <PatternDefinitionModal
+          pattern={editingPattern}
+          onSave={handleSave}
+          onClose={() => setShowModal(false)}
+        />
+      )}
     </div>
   );
 };
@@ -2277,6 +2827,13 @@ const App = () => {
 
       {view === "admin-review" && (
         <AdminReviewQueue />
+      )}
+
+      {view === "admin-patterns" && (
+        <AdminPatternManager
+          onBack={() => setView("catalog")}
+          userRole={userRole}
+        />
       )}
 
       {view === "basket" && (

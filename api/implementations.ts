@@ -2,7 +2,7 @@ import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { z } from 'zod';
 import { db } from '../db/index.js';
 import { patternDefinitions, patternImplementations } from '../db/schema.js';
-import { eq } from 'drizzle-orm';
+import { eq, and } from 'drizzle-orm';
 import { getAuthenticatedUser } from '../lib/auth.js';
 import { sendAdminNotification } from '../lib/email.js';
 
@@ -10,8 +10,9 @@ import { sendAdminNotification } from '../lib/email.js';
  * Pattern Implementations API
  *
  * POST /api/implementations - Create a new pattern implementation
- * GET /api/implementations?author_id=me - List user's implementations
- * GET /api/implementations?status=pending - List pending implementations (admin only)
+ * GET /api/implementations?author_id=me - List user's implementations (excludes soft-deleted)
+ * GET /api/implementations?status=pending - List pending implementations (admin only, excludes soft-deleted)
+ * GET /api/implementations?includeDeleted=true - Include soft-deleted records (admin-only)
  *
  * Purpose: Allows contributors to submit their own implementations for existing patterns
  *          and enables admins to review pending submissions
@@ -24,6 +25,8 @@ import { sendAdminNotification } from '../lib/email.js';
  * - New implementations default to 'pending' status
  * - Author ID is automatically extracted from authenticated user
  * - Admin role required to query pending implementations
+ * - By default, soft-deleted implementations are excluded from all queries
+ * - includeDeleted=true parameter shows soft-deleted records (admin-only)
  */
 
 // Zod schema for POST request validation
@@ -206,7 +209,16 @@ async function handleGet(req: VercelRequest, res: VercelResponse) {
     }
 
     // 2. Validate query parameters
-    const { author_id, status } = req.query;
+    const { author_id, status, includeDeleted } = req.query;
+
+    // Check if includeDeleted is requested (admin-only)
+    const shouldIncludeDeleted = includeDeleted === 'true';
+    if (shouldIncludeDeleted && user.role !== 'admin') {
+      return res.status(403).json({
+        error: 'Forbidden',
+        message: 'Admin role required to view deleted implementations'
+      });
+    }
 
     // Route 1: Get user's own implementations (author_id=me)
     if (author_id === 'me') {
@@ -232,7 +244,14 @@ async function handleGet(req: VercelRequest, res: VercelResponse) {
           patternDefinitions,
           eq(patternImplementations.patternId, patternDefinitions.id)
         )
-        .where(eq(patternImplementations.authorId, user.id));
+        .where(
+          shouldIncludeDeleted
+            ? eq(patternImplementations.authorId, user.id)
+            : and(
+                eq(patternImplementations.authorId, user.id),
+                eq(patternImplementations.isDeleted, false)
+              )
+        );
 
       return res.status(200).json({
         success: true,
@@ -274,7 +293,14 @@ async function handleGet(req: VercelRequest, res: VercelResponse) {
           patternDefinitions,
           eq(patternImplementations.patternId, patternDefinitions.id)
         )
-        .where(eq(patternImplementations.status, 'pending'));
+        .where(
+          shouldIncludeDeleted
+            ? eq(patternImplementations.status, 'pending')
+            : and(
+                eq(patternImplementations.status, 'pending'),
+                eq(patternImplementations.isDeleted, false)
+              )
+        );
 
       return res.status(200).json({
         success: true,

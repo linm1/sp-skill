@@ -1,17 +1,18 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
+import { z } from 'zod';
 import { db } from '../../db/index.js';
 import { patternDefinitions, patternImplementations } from '../../db/schema.js';
-import { eq } from 'drizzle-orm';
+import { eq, and } from 'drizzle-orm';
+import { getAuthenticatedUser } from '../../lib/auth.js';
 
 /**
  * Pattern Detail API - Single Pattern Endpoint
  *
- * Returns a single pattern with all its implementations (active and pending)
+ * GET /api/patterns/[id] - Returns pattern with all implementations
+ * PUT /api/patterns/[id] - Updates pattern definition (admin-only)
+ * DELETE /api/patterns/[id] - Soft-deletes pattern (admin-only)
  *
- * Usage:
- * GET /api/patterns/IMP-001 - Returns pattern IMP-001 with all implementations
- *
- * Response Schema:
+ * Response Schema (GET):
  * {
  *   success: true,
  *   pattern: {
@@ -40,10 +41,40 @@ import { eq } from 'drizzle-orm';
  * }
  */
 
+// Zod schema for PUT request validation (cannot change ID or category)
+const updatePatternSchema = z.object({
+  title: z.string().min(1, 'Title is required').optional(),
+  problem: z.string().min(1, 'Problem description is required').optional(),
+  whenToUse: z.string().min(1, 'whenToUse description is required').optional(),
+}).refine(
+  (data) => {
+    // At least one field must be provided
+    return data.title || data.problem || data.whenToUse;
+  },
+  {
+    message: 'At least one field (title, problem, or whenToUse) must be provided',
+  }
+);
+
+type UpdatePatternRequest = z.infer<typeof updatePatternSchema>;
+
 export default async function handler(req: VercelRequest, res: VercelResponse) {
-  if (req.method !== 'GET') {
+  if (req.method === 'GET') {
+    return handleGet(req, res);
+  } else if (req.method === 'PUT') {
+    return handlePut(req, res);
+  } else if (req.method === 'DELETE') {
+    return handleDelete(req, res);
+  } else {
     return res.status(405).json({ error: 'Method not allowed' });
   }
+}
+
+/**
+ * GET /api/patterns/[id]
+ * Returns a single pattern with all implementations
+ */
+async function handleGet(req: VercelRequest, res: VercelResponse) {
 
   try {
     // Extract pattern ID from query parameters
@@ -135,6 +166,187 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       success: false,
       error: error instanceof Error ? error.message : String(error),
       message: 'Failed to fetch pattern details'
+    });
+  }
+}
+
+/**
+ * PUT /api/patterns/[id]
+ * Updates a pattern definition (admin-only)
+ */
+async function handlePut(req: VercelRequest, res: VercelResponse) {
+  try {
+    // 1. Authenticate user and check admin role
+    const user = await getAuthenticatedUser(req);
+    if (!user || user.role !== 'admin') {
+      return res.status(403).json({
+        error: 'Forbidden',
+        message: 'Admin access required to update patterns'
+      });
+    }
+
+    // 2. Extract pattern ID from query parameters
+    const { id } = req.query;
+
+    if (!id || typeof id !== 'string') {
+      return res.status(400).json({
+        error: 'Pattern ID is required'
+      });
+    }
+
+    // Validate pattern ID format
+    const patternIdRegex = /^[A-Z]{3}-\d{3}$/;
+    if (!patternIdRegex.test(id)) {
+      return res.status(400).json({
+        error: 'Invalid pattern ID format. Expected format: XXX-NNN (e.g., IMP-001)'
+      });
+    }
+
+    // 3. Validate request body with Zod
+    let validated: UpdatePatternRequest;
+    try {
+      validated = updatePatternSchema.parse(req.body);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({
+          error: 'Validation failed',
+          details: error.issues.map(e => ({
+            field: e.path.join('.'),
+            message: e.message
+          }))
+        });
+      }
+      throw error;
+    }
+
+    // 4. Check if pattern exists and is not deleted
+    const existingPattern = await db
+      .select()
+      .from(patternDefinitions)
+      .where(
+        and(
+          eq(patternDefinitions.id, id),
+          eq(patternDefinitions.isDeleted, false)
+        )
+      )
+      .limit(1);
+
+    if (existingPattern.length === 0) {
+      return res.status(404).json({
+        error: 'Pattern not found',
+        message: `Pattern with ID '${id}' does not exist or has been deleted`
+      });
+    }
+
+    // 5. Update pattern with only provided fields
+    const updateData: any = {};
+    if (validated.title !== undefined) updateData.title = validated.title;
+    if (validated.problem !== undefined) updateData.problem = validated.problem;
+    if (validated.whenToUse !== undefined) updateData.whenToUse = validated.whenToUse;
+
+    const updatedPattern = await db
+      .update(patternDefinitions)
+      .set(updateData)
+      .where(eq(patternDefinitions.id, id))
+      .returning();
+
+    // 6. Return success response
+    return res.status(200).json({
+      success: true,
+      message: 'Pattern updated successfully',
+      pattern: updatedPattern[0]
+    });
+
+  } catch (error) {
+    console.error('[API /patterns/[id]] PUT error:', error);
+    return res.status(500).json({
+      error: 'Internal server error',
+      message: error instanceof Error ? error.message : 'Failed to update pattern'
+    });
+  }
+}
+
+/**
+ * DELETE /api/patterns/[id]
+ * Soft-deletes a pattern definition (admin-only)
+ */
+async function handleDelete(req: VercelRequest, res: VercelResponse) {
+  try {
+    // 1. Authenticate user and check admin role
+    const user = await getAuthenticatedUser(req);
+    if (!user || user.role !== 'admin') {
+      return res.status(403).json({
+        error: 'Forbidden',
+        message: 'Admin access required to delete patterns'
+      });
+    }
+
+    // 2. Extract pattern ID from query parameters
+    const { id } = req.query;
+
+    if (!id || typeof id !== 'string') {
+      return res.status(400).json({
+        error: 'Pattern ID is required'
+      });
+    }
+
+    // Validate pattern ID format
+    const patternIdRegex = /^[A-Z]{3}-\d{3}$/;
+    if (!patternIdRegex.test(id)) {
+      return res.status(400).json({
+        error: 'Invalid pattern ID format. Expected format: XXX-NNN (e.g., IMP-001)'
+      });
+    }
+
+    // 3. Check if pattern exists and is not already deleted
+    const existingPattern = await db
+      .select()
+      .from(patternDefinitions)
+      .where(eq(patternDefinitions.id, id))
+      .limit(1);
+
+    if (existingPattern.length === 0) {
+      return res.status(404).json({
+        error: 'Pattern not found',
+        message: `Pattern with ID '${id}' does not exist`
+      });
+    }
+
+    if (existingPattern[0].isDeleted) {
+      return res.status(400).json({
+        error: 'Pattern already deleted',
+        message: `Pattern with ID '${id}' has already been deleted`
+      });
+    }
+
+    // 4. Soft delete the pattern
+    const deletedPattern = await db
+      .update(patternDefinitions)
+      .set({
+        isDeleted: true,
+        deletedAt: new Date(),
+        deletedBy: user.clerkId
+      })
+      .where(eq(patternDefinitions.id, id))
+      .returning();
+
+    // 5. Return success response
+    return res.status(200).json({
+      success: true,
+      message: 'Pattern soft-deleted successfully',
+      pattern: {
+        id: deletedPattern[0].id,
+        isDeleted: deletedPattern[0].isDeleted,
+        deletedAt: deletedPattern[0].deletedAt,
+        deletedBy: deletedPattern[0].deletedBy
+      }
+    });
+
+  } catch (error) {
+    console.error('[API /patterns/[id]] DELETE error:', error);
+    return res.status(500).json({
+      error: 'Internal server error',
+      message: error instanceof Error ? error.message : 'Failed to delete pattern'
     });
   }
 }

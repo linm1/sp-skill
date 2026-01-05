@@ -24,8 +24,12 @@ export const patternDefinitions = pgTable('pattern_definitions', {
   problem: text('problem').notNull(),
   whenToUse: text('when_to_use').notNull(),
   createdAt: timestamp('created_at').defaultNow(),
+  isDeleted: boolean('is_deleted').default(false).notNull(),
+  deletedAt: timestamp('deleted_at'),
+  deletedBy: varchar('deleted_by', { length: 255 }),  // Clerk user ID
 }, (table) => ({
   categoryIdx: index('idx_pattern_definitions_category').on(table.category),
+  isDeletedIdx: index('idx_pattern_definitions_is_deleted').on(table.isDeleted),
 }));
 
 /**
@@ -45,10 +49,14 @@ export const patternImplementations = pgTable('pattern_implementations', {
   isPremium: boolean('is_premium').default(false),
   createdAt: timestamp('created_at').defaultNow(),
   updatedAt: timestamp('updated_at').defaultNow(),
+  isDeleted: boolean('is_deleted').default(false).notNull(),
+  deletedAt: timestamp('deleted_at'),
+  deletedBy: varchar('deleted_by', { length: 255 }),  // Clerk user ID
 }, (table) => ({
   patternIdIdx: index('idx_pattern_implementations_pattern_id').on(table.patternId),
   statusIdx: index('idx_pattern_implementations_status').on(table.status),
   authorIdIdx: index('idx_pattern_implementations_author_id').on(table.authorId),
+  isDeletedIdx: index('idx_pattern_implementations_is_deleted').on(table.isDeleted),
 }));
 
 // Import integer from drizzle-orm/pg-core
