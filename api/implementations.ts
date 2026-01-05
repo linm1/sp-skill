@@ -222,36 +222,79 @@ async function handleGet(req: VercelRequest, res: VercelResponse) {
 
     // Route 1: Get user's own implementations (author_id=me)
     if (author_id === 'me') {
-      const userImplementations = await db
-        .select({
-          // Implementation fields
-          uuid: patternImplementations.uuid,
-          patternId: patternImplementations.patternId,
-          authorName: patternImplementations.authorName,
-          sasCode: patternImplementations.sasCode,
-          rCode: patternImplementations.rCode,
-          considerations: patternImplementations.considerations,
-          variations: patternImplementations.variations,
-          status: patternImplementations.status,
-          createdAt: patternImplementations.createdAt,
-          updatedAt: patternImplementations.updatedAt,
-          // Pattern definition fields (joined)
-          patternTitle: patternDefinitions.title,
-          patternCategory: patternDefinitions.category,
-        })
-        .from(patternImplementations)
-        .innerJoin(
-          patternDefinitions,
-          eq(patternImplementations.patternId, patternDefinitions.id)
-        )
-        .where(
-          shouldIncludeDeleted
-            ? eq(patternImplementations.authorId, user.id)
-            : and(
-                eq(patternImplementations.authorId, user.id),
-                eq(patternImplementations.isDeleted, false)
-              )
-        );
+      let userImplementations;
+
+      try {
+        userImplementations = await db
+          .select({
+            // Implementation fields
+            uuid: patternImplementations.uuid,
+            patternId: patternImplementations.patternId,
+            authorName: patternImplementations.authorName,
+            sasCode: patternImplementations.sasCode,
+            rCode: patternImplementations.rCode,
+            considerations: patternImplementations.considerations,
+            variations: patternImplementations.variations,
+            status: patternImplementations.status,
+            createdAt: patternImplementations.createdAt,
+            updatedAt: patternImplementations.updatedAt,
+            // Pattern definition fields (joined)
+            patternTitle: patternDefinitions.title,
+            patternCategory: patternDefinitions.category,
+          })
+          .from(patternImplementations)
+          .innerJoin(
+            patternDefinitions,
+            eq(patternImplementations.patternId, patternDefinitions.id)
+          )
+          .where(
+            shouldIncludeDeleted
+              ? eq(patternImplementations.authorId, user.id)
+              : and(
+                  eq(patternImplementations.authorId, user.id),
+                  eq(patternImplementations.isDeleted, false)
+                )
+          );
+      } catch (dbError: any) {
+        console.error('Database query error for user implementations:', dbError);
+
+        // Check if it's a column missing error (migration not applied)
+        const isColumnError =
+          dbError.message?.includes('column') &&
+          (dbError.message?.includes('does not exist') || dbError.message?.includes('isDeleted') || dbError.message?.includes('is_deleted'));
+
+        if (isColumnError) {
+          console.warn('Soft-delete columns not found in implementations table, querying without isDeleted filter');
+
+          // Retry without soft-delete filter
+          userImplementations = await db
+            .select({
+              // Implementation fields
+              uuid: patternImplementations.uuid,
+              patternId: patternImplementations.patternId,
+              authorName: patternImplementations.authorName,
+              sasCode: patternImplementations.sasCode,
+              rCode: patternImplementations.rCode,
+              considerations: patternImplementations.considerations,
+              variations: patternImplementations.variations,
+              status: patternImplementations.status,
+              createdAt: patternImplementations.createdAt,
+              updatedAt: patternImplementations.updatedAt,
+              // Pattern definition fields (joined)
+              patternTitle: patternDefinitions.title,
+              patternCategory: patternDefinitions.category,
+            })
+            .from(patternImplementations)
+            .innerJoin(
+              patternDefinitions,
+              eq(patternImplementations.patternId, patternDefinitions.id)
+            )
+            .where(eq(patternImplementations.authorId, user.id));
+        } else {
+          // Re-throw if different error
+          throw dbError;
+        }
+      }
 
       return res.status(200).json({
         success: true,
@@ -270,37 +313,81 @@ async function handleGet(req: VercelRequest, res: VercelResponse) {
         });
       }
 
-      const pendingImplementations = await db
-        .select({
-          // Implementation fields
-          uuid: patternImplementations.uuid,
-          patternId: patternImplementations.patternId,
-          authorId: patternImplementations.authorId,
-          authorName: patternImplementations.authorName,
-          sasCode: patternImplementations.sasCode,
-          rCode: patternImplementations.rCode,
-          considerations: patternImplementations.considerations,
-          variations: patternImplementations.variations,
-          status: patternImplementations.status,
-          createdAt: patternImplementations.createdAt,
-          updatedAt: patternImplementations.updatedAt,
-          // Pattern definition fields (joined)
-          patternTitle: patternDefinitions.title,
-          patternCategory: patternDefinitions.category,
-        })
-        .from(patternImplementations)
-        .innerJoin(
-          patternDefinitions,
-          eq(patternImplementations.patternId, patternDefinitions.id)
-        )
-        .where(
-          shouldIncludeDeleted
-            ? eq(patternImplementations.status, 'pending')
-            : and(
-                eq(patternImplementations.status, 'pending'),
-                eq(patternImplementations.isDeleted, false)
-              )
-        );
+      let pendingImplementations;
+
+      try {
+        pendingImplementations = await db
+          .select({
+            // Implementation fields
+            uuid: patternImplementations.uuid,
+            patternId: patternImplementations.patternId,
+            authorId: patternImplementations.authorId,
+            authorName: patternImplementations.authorName,
+            sasCode: patternImplementations.sasCode,
+            rCode: patternImplementations.rCode,
+            considerations: patternImplementations.considerations,
+            variations: patternImplementations.variations,
+            status: patternImplementations.status,
+            createdAt: patternImplementations.createdAt,
+            updatedAt: patternImplementations.updatedAt,
+            // Pattern definition fields (joined)
+            patternTitle: patternDefinitions.title,
+            patternCategory: patternDefinitions.category,
+          })
+          .from(patternImplementations)
+          .innerJoin(
+            patternDefinitions,
+            eq(patternImplementations.patternId, patternDefinitions.id)
+          )
+          .where(
+            shouldIncludeDeleted
+              ? eq(patternImplementations.status, 'pending')
+              : and(
+                  eq(patternImplementations.status, 'pending'),
+                  eq(patternImplementations.isDeleted, false)
+                )
+          );
+      } catch (dbError: any) {
+        console.error('Database query error for pending implementations:', dbError);
+
+        // Check if it's a column missing error (migration not applied)
+        const isColumnError =
+          dbError.message?.includes('column') &&
+          (dbError.message?.includes('does not exist') || dbError.message?.includes('isDeleted') || dbError.message?.includes('is_deleted'));
+
+        if (isColumnError) {
+          console.warn('Soft-delete columns not found in implementations table, querying without isDeleted filter');
+
+          // Retry without soft-delete filter
+          pendingImplementations = await db
+            .select({
+              // Implementation fields
+              uuid: patternImplementations.uuid,
+              patternId: patternImplementations.patternId,
+              authorId: patternImplementations.authorId,
+              authorName: patternImplementations.authorName,
+              sasCode: patternImplementations.sasCode,
+              rCode: patternImplementations.rCode,
+              considerations: patternImplementations.considerations,
+              variations: patternImplementations.variations,
+              status: patternImplementations.status,
+              createdAt: patternImplementations.createdAt,
+              updatedAt: patternImplementations.updatedAt,
+              // Pattern definition fields (joined)
+              patternTitle: patternDefinitions.title,
+              patternCategory: patternDefinitions.category,
+            })
+            .from(patternImplementations)
+            .innerJoin(
+              patternDefinitions,
+              eq(patternImplementations.patternId, patternDefinitions.id)
+            )
+            .where(eq(patternImplementations.status, 'pending'));
+        } else {
+          // Re-throw if different error
+          throw dbError;
+        }
+      }
 
       return res.status(200).json({
         success: true,

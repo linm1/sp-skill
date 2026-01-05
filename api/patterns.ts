@@ -84,6 +84,7 @@ async function handleGet(req: VercelRequest, res: VercelResponse) {
     const shouldIncludeDeleted = includeDeleted === 'true';
 
     try {
+      // Try to query with soft-delete filter first
       if (category && typeof category === 'string') {
         // Filter by category
         if (shouldIncludeDeleted) {
@@ -117,27 +118,40 @@ async function handleGet(req: VercelRequest, res: VercelResponse) {
       console.error('Database query error:', dbError);
 
       // Check if it's a column missing error (migration not applied)
-      if (dbError.message?.includes('column') && dbError.message?.includes('does not exist')) {
-        return res.status(500).json({
-          success: false,
-          error: 'Database schema mismatch',
-          message: 'Database migration required. The database schema is missing required columns. Please run: npx drizzle-kit push',
-          details: dbError.message
-        });
-      }
+      // If so, retry without soft-delete filtering
+      const isColumnError =
+        dbError.message?.includes('column') &&
+        (dbError.message?.includes('does not exist') || dbError.message?.includes('isDeleted') || dbError.message?.includes('is_deleted'));
 
-      // Check if it's a connection error
-      if (dbError.message?.includes('connection') || dbError.code === 'ECONNREFUSED') {
+      if (isColumnError) {
+        console.warn('Soft-delete columns not found, querying without isDeleted filter (migration not applied yet)');
+
+        // Retry query without soft-delete filter
+        try {
+          if (category && typeof category === 'string') {
+            patterns = await db
+              .select()
+              .from(patternDefinitions)
+              .where(eq(patternDefinitions.category, category.toUpperCase()));
+          } else {
+            patterns = await db.select().from(patternDefinitions);
+          }
+        } catch (retryError: any) {
+          console.error('Retry query also failed:', retryError);
+          throw retryError;
+        }
+      } else if (dbError.message?.includes('connection') || dbError.code === 'ECONNREFUSED') {
+        // Check if it's a connection error
         return res.status(500).json({
           success: false,
           error: 'Database connection failed',
           message: 'Unable to connect to database. Please verify POSTGRES_URL environment variable is set correctly.',
           details: dbError.message
         });
+      } else {
+        // Generic database error
+        throw dbError;
       }
-
-      // Generic database error
-      throw dbError;
     }
 
     // Handle empty results gracefully
@@ -181,8 +195,34 @@ async function handleGet(req: VercelRequest, res: VercelResponse) {
           }
         } catch (implError: any) {
           console.error(`Error fetching implementations for pattern ${pattern.id}:`, implError);
-          // If implementations query fails, continue with empty array
-          implementations = [];
+
+          // Check if it's a column missing error for isDeleted
+          const isColumnError =
+            implError.message?.includes('column') &&
+            (implError.message?.includes('does not exist') || implError.message?.includes('isDeleted') || implError.message?.includes('is_deleted'));
+
+          if (isColumnError) {
+            console.warn(`Soft-delete columns not found in implementations table, querying without isDeleted filter`);
+            // Retry without soft-delete filter
+            try {
+              implementations = await db
+                .select()
+                .from(patternImplementations)
+                .where(
+                  and(
+                    eq(patternImplementations.patternId, pattern.id),
+                    eq(patternImplementations.status, 'active')
+                  )
+                );
+            } catch (retryError: any) {
+              console.error(`Retry query for implementations also failed:`, retryError);
+              // If retry also fails, continue with empty array
+              implementations = [];
+            }
+          } else {
+            // If not a column error, continue with empty array
+            implementations = [];
+          }
         }
 
         // Extract unique authors
