@@ -8,8 +8,9 @@
     "dev:api": "dotenv -e .env.local -- vercel dev --listen 3001",
     "build": "vite build",
     "preview": "vite preview",
-    "db:push": "drizzle-kit push",
-    "db:studio": "drizzle-kit studio",
+    "db:push": "dotenv -e .env.local -- drizzle-kit push",
+    "db:studio": "dotenv -e .env.local -- drizzle-kit studio",
+    "db:generate": "dotenv -e .env.local -- drizzle-kit generate",
     "db:verify": "dotenv -e .env.local -- tsx scripts/verify-migration.ts"
   },
   "dependencies": {
