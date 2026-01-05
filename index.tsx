@@ -162,7 +162,7 @@ const usePatterns = (refreshTrigger = 0) => {
 
 const generateMarkdown = (def: PatternDefinition, impl: PatternImplementation): string => {
   return `# ${def.title} (${def.id})
-Author: ${impl.author}
+Author: ${impl.authorName}
 
 ## Problem
 ${def.problem}
@@ -205,7 +205,7 @@ const generatePatternMarkdown = (def: PatternDefinition, impl: PatternImplementa
 
 **Pattern ID:** ${def.id}
 **Category:** ${def.category}
-**Author:** ${impl.author}
+**Author:** ${impl.authorName}
 
 ## Problem Statement
 
@@ -606,8 +606,8 @@ const PatternDetail = ({
                 : "text-slate-500 hover:text-slate-700 hover:bg-slate-200/50"
             }`}
           >
-            {impl.author === SYSTEM_AUTHOR && <i className="fas fa-shield-alt mr-1 text-xs"></i>}
-            <span>{impl.author === CURRENT_USER ? "Your Version" : impl.author}</span>
+            {impl.authorName === SYSTEM_AUTHOR && <i className="fas fa-shield-alt mr-1 text-xs"></i>}
+            <span>{impl.authorName === CURRENT_USER ? "Your Version" : impl.authorName}</span>
             {basketSelectedUuid === impl.uuid && (
                <span className="ml-2 w-2 h-2 rounded-full bg-green-500" title="Selected for Export"></span>
             )}
@@ -1453,7 +1453,7 @@ const UnifiedPatternModal = ({
   });
 
   const [implementationForm, setImplementationForm] = useState({
-    author: selectedImpl?.author || '',
+    author: selectedImpl?.authorName || '',
     sasCode: selectedImpl?.sasCode || '',
     rCode: selectedImpl?.rCode || '',
     considerations: selectedImpl?.considerations?.join('\n') || '',
@@ -1470,7 +1470,7 @@ const UnifiedPatternModal = ({
   useEffect(() => {
     if (selectedImpl) {
       setImplementationForm({
-        author: selectedImpl.author,
+        author: selectedImpl.authorName,
         sasCode: selectedImpl.sasCode,
         rCode: selectedImpl.rCode,
         considerations: selectedImpl.considerations?.join('\n') || '',
@@ -1705,7 +1705,7 @@ const UnifiedPatternModal = ({
                   >
                     {implementations.map(impl => (
                       <option key={impl.uuid} value={impl.uuid}>
-                        {impl.author} - {impl.status} ({impl.uuid.substring(0, 8)})
+                        {impl.authorName} - {impl.status} ({impl.uuid.substring(0, 8)})
                       </option>
                     ))}
                   </select>
@@ -2166,7 +2166,7 @@ const AdminPatternManager = ({
     const search = searchTerm.toLowerCase();
     return (
       impl.patternId?.toLowerCase().includes(search) ||
-      impl.author?.toLowerCase().includes(search) ||
+      impl.authorName?.toLowerCase().includes(search) ||
       impl.patternTitle?.toLowerCase().includes(search)
     );
   });
@@ -2314,7 +2314,7 @@ const AdminPatternManager = ({
       const impls = data.implementations || [];
 
       // Prefer System author if exists, otherwise first one
-      const systemImpl = impls.find((impl: any) => impl.author === 'System');
+      const systemImpl = impls.find((impl: any) => impl.authorName === 'System');
       const defaultImpl = systemImpl || impls[0];
 
       setEditingPattern(pattern);
@@ -2833,8 +2833,8 @@ const BasketView = ({
   const stats = useMemo(() => {
     return {
       total: enrichedItems.length,
-      custom: enrichedItems.filter(i => i.impl.author !== SYSTEM_AUTHOR).length,
-      system: enrichedItems.filter(i => i.impl.author === SYSTEM_AUTHOR).length
+      custom: enrichedItems.filter(i => i.impl.authorName !== SYSTEM_AUTHOR).length,
+      system: enrichedItems.filter(i => i.impl.authorName === SYSTEM_AUTHOR).length
     };
   }, [enrichedItems]);
 
@@ -2842,7 +2842,7 @@ const BasketView = ({
   const categoryStats = useMemo(() => {
     return CATEGORIES.map(cat => {
       const itemsInCat = enrichedItems.filter(i => i.def.category === cat.code);
-      const hasCustom = itemsInCat.some(i => i.impl.author !== SYSTEM_AUTHOR);
+      const hasCustom = itemsInCat.some(i => i.impl.authorName !== SYSTEM_AUTHOR);
       return { 
         ...cat, 
         count: itemsInCat.length, 
@@ -2976,7 +2976,7 @@ const BasketView = ({
                ) : (
                   <div className="space-y-3">
                      {displayedItems.map(({def, impl}) => {
-                        const isCustom = impl.author !== SYSTEM_AUTHOR;
+                        const isCustom = impl.authorName !== SYSTEM_AUTHOR;
                         return (
                            <div 
                               key={def.id} 
