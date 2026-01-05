@@ -93,7 +93,7 @@ const PRELOADED_CONTENT: Record<string, Partial<PatternDefinition> & Partial<Pat
 
 // --- API Fetch Hook ---
 
-const usePatterns = () => {
+const usePatterns = (refreshTrigger = 0) => {
   const [patterns, setPatterns] = useState<PatternDefinition[]>([]);
   const [implementations, setImplementations] = useState<PatternImplementation[]>([]);
   const [loading, setLoading] = useState(true);
@@ -153,7 +153,7 @@ const usePatterns = () => {
     };
 
     fetchPatterns();
-  }, []);
+  }, [refreshTrigger]);
 
   return { patterns, implementations, loading, error };
 };
@@ -328,13 +328,15 @@ const Layout = ({
   currentView,
   setView,
   basketCount,
-  onContributeClick
+  onContributeClick,
+  onRefresh
 }: {
   children?: React.ReactNode;
   currentView: string;
   setView: (v: string) => void;
   basketCount: number;
   onContributeClick?: () => void;
+  onRefresh?: () => void;
 }) => {
   const { isSignedIn, isLoaded } = useAuth();
   const { user } = useUser();
@@ -346,7 +348,12 @@ const Layout = ({
     <div className="min-h-screen flex flex-col font-sans text-slate-800">
       <nav className="bg-slate-900 text-white shadow-lg sticky top-0 z-50">
         <div className="container mx-auto px-6 py-4 flex justify-between items-center">
-          <div className="flex items-center space-x-4 cursor-pointer" onClick={() => setView("catalog")}>
+          <div className="flex items-center space-x-4 cursor-pointer" onClick={() => {
+            if (currentView === "admin-patterns" || currentView === "admin-review") {
+              onRefresh?.();
+            }
+            setView("catalog");
+          }}>
             <div className="w-10 h-10 bg-indigo-500 rounded-lg flex items-center justify-center font-bold text-xl">
               SPH
             </div>
@@ -357,7 +364,12 @@ const Layout = ({
           </div>
           <div className="flex items-center space-x-6">
             <button
-              onClick={() => setView("catalog")}
+              onClick={() => {
+                if (currentView === "admin-patterns" || currentView === "admin-review") {
+                  onRefresh?.();
+                }
+                setView("catalog");
+              }}
               className={`hover:text-indigo-400 ${currentView === "catalog" ? "text-indigo-400" : ""}`}
             >
               Catalog
@@ -1408,42 +1420,111 @@ const AdminReviewQueue = () => {
 
 // --- Admin Pattern Management Components ---
 
-const PatternDefinitionModal = ({
+const UnifiedPatternModal = ({
   pattern,
+  implementations,
+  initialTab,
+  initialImplementationUuid,
+  userRole,
   onSave,
   onClose,
 }: {
   pattern: PatternDefinition | null;
-  onSave: (data: Partial<PatternDefinition>) => Promise<void>;
+  implementations: Array<PatternImplementation & { authorId?: string }>;
+  initialTab?: 'definition' | 'implementation';
+  initialImplementationUuid?: string;
+  userRole: Role;
+  onSave: (definitionData?: Partial<PatternDefinition>, implementationData?: { uuid: string; data: any }) => Promise<void>;
   onClose: () => void;
 }) => {
-  const [formData, setFormData] = useState({
+  const [activeTab, setActiveTab] = useState<'definition' | 'implementation'>(initialTab || 'definition');
+  const [selectedImplUuid, setSelectedImplUuid] = useState<string>(
+    initialImplementationUuid || implementations[0]?.uuid || ''
+  );
+
+  const selectedImpl = implementations.find(impl => impl.uuid === selectedImplUuid);
+
+  const [definitionForm, setDefinitionForm] = useState({
     id: pattern?.id || '',
     category: pattern?.category || 'IMP',
     title: pattern?.title || '',
     problem: pattern?.problem || '',
     whenToUse: pattern?.whenToUse || '',
   });
+
+  const [implementationForm, setImplementationForm] = useState({
+    author: selectedImpl?.author || '',
+    sasCode: selectedImpl?.sasCode || '',
+    rCode: selectedImpl?.rCode || '',
+    considerations: selectedImpl?.considerations?.join('\n') || '',
+    variations: selectedImpl?.variations?.join('\n') || '',
+    status: selectedImpl?.status || 'pending',
+  });
+
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [definitionDirty, setDefinitionDirty] = useState(false);
+  const [implementationDirty, setImplementationDirty] = useState(false);
+
+  // Update implementation form when selection changes
+  useEffect(() => {
+    if (selectedImpl) {
+      setImplementationForm({
+        author: selectedImpl.author,
+        sasCode: selectedImpl.sasCode,
+        rCode: selectedImpl.rCode,
+        considerations: selectedImpl.considerations?.join('\n') || '',
+        variations: selectedImpl.variations?.join('\n') || '',
+        status: selectedImpl.status,
+      });
+      setImplementationDirty(false);
+    }
+  }, [selectedImplUuid, selectedImpl]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setError(null);
 
-    // Validation
-    if (!formData.id.match(/^[A-Z]{3}-\d{3}$/)) {
-      setError('Pattern ID must be in format XXX-NNN (e.g., IMP-001)');
-      return;
+    // Validate based on which tab(s) are dirty
+    if (definitionDirty) {
+      if (!definitionForm.id.match(/^[A-Z]{3}-\d{3}$/)) {
+        setError('Pattern ID must be in format XXX-NNN (e.g., IMP-001)');
+        return;
+      }
+      if (!definitionForm.title || !definitionForm.problem || !definitionForm.whenToUse) {
+        setError('All definition fields are required');
+        return;
+      }
     }
-    if (!formData.title || !formData.problem || !formData.whenToUse) {
-      setError('All fields are required');
-      return;
+
+    if (implementationDirty && activeTab === 'implementation') {
+      if (!implementationForm.sasCode || !implementationForm.rCode) {
+        setError('Both SAS Code and R Code are required');
+        return;
+      }
     }
 
     setSaving(true);
-    setError(null);
     try {
-      await onSave(formData);
+      const defData = definitionDirty ? definitionForm : undefined;
+      const implData = implementationDirty && selectedImplUuid ? {
+        uuid: selectedImplUuid,
+        data: {
+          sasCode: implementationForm.sasCode,
+          rCode: implementationForm.rCode,
+          considerations: implementationForm.considerations
+            .split('\n')
+            .map(s => s.trim())
+            .filter(Boolean),
+          variations: implementationForm.variations
+            .split('\n')
+            .map(s => s.trim())
+            .filter(Boolean),
+          status: userRole === 'admin' ? implementationForm.status : undefined,
+        }
+      } : undefined;
+
+      await onSave(defData, implData);
       onClose();
     } catch (err: any) {
       setError(err.message);
@@ -1454,16 +1535,46 @@ const PatternDefinitionModal = ({
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-white rounded-xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+      <div className="bg-white rounded-xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
         {/* Header */}
         <div className="bg-indigo-600 px-6 py-4 flex items-center justify-between">
           <h2 className="text-xl font-bold text-white">
-            {pattern ? 'Edit Pattern Definition' : 'Create New Pattern Definition'}
+            {pattern ? `Edit Pattern: ${pattern.id}` : 'Create New Pattern'}
           </h2>
           <button onClick={onClose} className="text-white hover:text-slate-200">
             <i className="fas fa-times text-xl"></i>
           </button>
         </div>
+
+        {/* Tab Navigation */}
+        {pattern && implementations.length > 0 && (
+          <div className="flex border-b border-slate-200 bg-slate-50">
+            <button
+              onClick={() => setActiveTab('definition')}
+              className={`px-6 py-3 font-semibold transition-colors ${
+                activeTab === 'definition'
+                  ? 'border-b-2 border-indigo-600 text-indigo-600 bg-white'
+                  : 'text-slate-600 hover:text-slate-900'
+              }`}
+            >
+              <i className="fas fa-file-alt mr-2"></i>
+              Definition
+              {definitionDirty && <span className="ml-2 text-orange-500">*</span>}
+            </button>
+            <button
+              onClick={() => setActiveTab('implementation')}
+              className={`px-6 py-3 font-semibold transition-colors ${
+                activeTab === 'implementation'
+                  ? 'border-b-2 border-indigo-600 text-indigo-600 bg-white'
+                  : 'text-slate-600 hover:text-slate-900'
+              }`}
+            >
+              <i className="fas fa-code mr-2"></i>
+              Implementation
+              {implementationDirty && <span className="ml-2 text-orange-500">*</span>}
+            </button>
+          </div>
+        )}
 
         {/* Form */}
         <form onSubmit={handleSubmit} className="p-6 space-y-4">
@@ -1473,90 +1584,238 @@ const PatternDefinitionModal = ({
             </div>
           )}
 
-          {/* Pattern ID */}
-          <div>
-            <label className="block text-sm font-semibold text-slate-700 mb-1">
-              Pattern ID *
-            </label>
-            <input
-              type="text"
-              value={formData.id}
-              onChange={(e) => setFormData({ ...formData, id: e.target.value.toUpperCase() })}
-              disabled={!!pattern}
-              placeholder="IMP-001"
-              className="w-full p-2 border border-slate-300 rounded-md text-sm disabled:bg-slate-100 disabled:cursor-not-allowed"
-            />
-            <p className="text-xs text-slate-500 mt-1">Format: XXX-NNN (e.g., IMP-001)</p>
-          </div>
+          {/* DEFINITION TAB */}
+          {activeTab === 'definition' && (
+            <>
+              {/* Pattern ID */}
+              <div>
+                <label className="block text-sm font-semibold text-slate-700 mb-1">
+                  Pattern ID *
+                </label>
+                <input
+                  type="text"
+                  value={definitionForm.id}
+                  onChange={(e) => {
+                    setDefinitionForm({ ...definitionForm, id: e.target.value.toUpperCase() });
+                    setDefinitionDirty(true);
+                  }}
+                  disabled={!!pattern}
+                  placeholder="IMP-001"
+                  className="w-full p-2 border border-slate-300 rounded-md text-sm disabled:bg-slate-100 disabled:cursor-not-allowed"
+                />
+                <p className="text-xs text-slate-500 mt-1">Format: XXX-NNN (e.g., IMP-001)</p>
+              </div>
 
-          {/* Category */}
-          <div>
-            <label className="block text-sm font-semibold text-slate-700 mb-1">
-              Category *
-            </label>
-            <select
-              value={formData.category}
-              onChange={(e) => setFormData({ ...formData, category: e.target.value })}
-              className="w-full p-2 border border-slate-300 rounded-md text-sm"
-            >
-              <option value="IMP">IMP - Imputation</option>
-              <option value="DER">DER - Derivations</option>
-              <option value="DAT">DAT - Date/Time</option>
-              <option value="RSH">RSH - Reshaping</option>
-              <option value="AGG">AGG - Aggregation</option>
-              <option value="MRG">MRG - Merging</option>
-              <option value="CAT">CAT - Categorization</option>
-              <option value="FLG">FLG - Flagging</option>
-              <option value="SRT">SRT - Sorting</option>
-              <option value="FMT">FMT - Formatting</option>
-              <option value="VAL">VAL - Validation</option>
-              <option value="CDS">CDS - CDISC</option>
-              <option value="STA">STA - Statistics</option>
-              <option value="OPT">OPT - Optimization</option>
-            </select>
-          </div>
+              {/* Category */}
+              <div>
+                <label className="block text-sm font-semibold text-slate-700 mb-1">
+                  Category *
+                </label>
+                <select
+                  value={definitionForm.category}
+                  onChange={(e) => {
+                    setDefinitionForm({ ...definitionForm, category: e.target.value });
+                    setDefinitionDirty(true);
+                  }}
+                  className="w-full p-2 border border-slate-300 rounded-md text-sm"
+                >
+                  <option value="IMP">IMP - Imputation</option>
+                  <option value="DER">DER - Derivations</option>
+                  <option value="DAT">DAT - Date/Time</option>
+                  <option value="RSH">RSH - Reshaping</option>
+                  <option value="AGG">AGG - Aggregation</option>
+                  <option value="MRG">MRG - Merging</option>
+                  <option value="CAT">CAT - Categorization</option>
+                  <option value="FLG">FLG - Flagging</option>
+                  <option value="SRT">SRT - Sorting</option>
+                  <option value="FMT">FMT - Formatting</option>
+                  <option value="VAL">VAL - Validation</option>
+                  <option value="CDS">CDS - CDISC</option>
+                  <option value="STA">STA - Statistics</option>
+                  <option value="OPT">OPT - Optimization</option>
+                </select>
+              </div>
 
-          {/* Title */}
-          <div>
-            <label className="block text-sm font-semibold text-slate-700 mb-1">
-              Title *
-            </label>
-            <input
-              type="text"
-              value={formData.title}
-              onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-              className="w-full p-2 border border-slate-300 rounded-md text-sm"
-              placeholder="e.g., Last Observation Carried Forward"
-            />
-          </div>
+              {/* Title */}
+              <div>
+                <label className="block text-sm font-semibold text-slate-700 mb-1">
+                  Title *
+                </label>
+                <input
+                  type="text"
+                  value={definitionForm.title}
+                  onChange={(e) => {
+                    setDefinitionForm({ ...definitionForm, title: e.target.value });
+                    setDefinitionDirty(true);
+                  }}
+                  className="w-full p-2 border border-slate-300 rounded-md text-sm"
+                  placeholder="e.g., Last Observation Carried Forward"
+                />
+              </div>
 
-          {/* Problem */}
-          <div>
-            <label className="block text-sm font-semibold text-slate-700 mb-1">
-              Problem Statement *
-            </label>
-            <textarea
-              value={formData.problem}
-              onChange={(e) => setFormData({ ...formData, problem: e.target.value })}
-              rows={4}
-              className="w-full p-2 border border-slate-300 rounded-md text-sm"
-              placeholder="Describe the problem this pattern solves..."
-            />
-          </div>
+              {/* Problem */}
+              <div>
+                <label className="block text-sm font-semibold text-slate-700 mb-1">
+                  Problem Statement *
+                </label>
+                <textarea
+                  value={definitionForm.problem}
+                  onChange={(e) => {
+                    setDefinitionForm({ ...definitionForm, problem: e.target.value });
+                    setDefinitionDirty(true);
+                  }}
+                  rows={4}
+                  className="w-full p-2 border border-slate-300 rounded-md text-sm"
+                  placeholder="Describe the problem this pattern solves..."
+                />
+              </div>
 
-          {/* When to Use */}
-          <div>
-            <label className="block text-sm font-semibold text-slate-700 mb-1">
-              When to Use *
-            </label>
-            <textarea
-              value={formData.whenToUse}
-              onChange={(e) => setFormData({ ...formData, whenToUse: e.target.value })}
-              rows={4}
-              className="w-full p-2 border border-slate-300 rounded-md text-sm"
-              placeholder="Describe when to use this pattern..."
-            />
-          </div>
+              {/* When to Use */}
+              <div>
+                <label className="block text-sm font-semibold text-slate-700 mb-1">
+                  When to Use *
+                </label>
+                <textarea
+                  value={definitionForm.whenToUse}
+                  onChange={(e) => {
+                    setDefinitionForm({ ...definitionForm, whenToUse: e.target.value });
+                    setDefinitionDirty(true);
+                  }}
+                  rows={4}
+                  className="w-full p-2 border border-slate-300 rounded-md text-sm"
+                  placeholder="Describe when to use this pattern..."
+                />
+              </div>
+            </>
+          )}
+
+          {/* IMPLEMENTATION TAB */}
+          {activeTab === 'implementation' && implementations.length > 0 && (
+            <>
+              {/* Implementation Selector */}
+              {implementations.length > 1 && (
+                <div>
+                  <label className="block text-sm font-semibold text-slate-700 mb-1">
+                    Select Implementation
+                  </label>
+                  <select
+                    value={selectedImplUuid}
+                    onChange={(e) => setSelectedImplUuid(e.target.value)}
+                    className="w-full p-2 border border-slate-300 rounded-md text-sm"
+                  >
+                    {implementations.map(impl => (
+                      <option key={impl.uuid} value={impl.uuid}>
+                        {impl.author} - {impl.status} ({impl.uuid.substring(0, 8)})
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              )}
+
+              {/* Author (read-only) */}
+              <div>
+                <label className="block text-sm font-semibold text-slate-700 mb-1">
+                  Author
+                </label>
+                <input
+                  type="text"
+                  value={implementationForm.author}
+                  disabled
+                  className="w-full p-2 border border-slate-300 rounded-md text-sm bg-slate-100 cursor-not-allowed"
+                />
+              </div>
+
+              {/* SAS Code */}
+              <div>
+                <label className="block text-sm font-semibold text-slate-700 mb-1">
+                  SAS Code *
+                </label>
+                <textarea
+                  value={implementationForm.sasCode}
+                  onChange={(e) => {
+                    setImplementationForm({ ...implementationForm, sasCode: e.target.value });
+                    setImplementationDirty(true);
+                  }}
+                  rows={10}
+                  className="w-full p-2 border border-slate-300 rounded-md text-sm font-mono"
+                  placeholder="/* SAS code here */"
+                />
+              </div>
+
+              {/* R Code */}
+              <div>
+                <label className="block text-sm font-semibold text-slate-700 mb-1">
+                  R Code *
+                </label>
+                <textarea
+                  value={implementationForm.rCode}
+                  onChange={(e) => {
+                    setImplementationForm({ ...implementationForm, rCode: e.target.value });
+                    setImplementationDirty(true);
+                  }}
+                  rows={10}
+                  className="w-full p-2 border border-slate-300 rounded-md text-sm font-mono"
+                  placeholder="# R code here"
+                />
+              </div>
+
+              {/* Considerations */}
+              <div>
+                <label className="block text-sm font-semibold text-slate-700 mb-1">
+                  Key Considerations
+                </label>
+                <textarea
+                  value={implementationForm.considerations}
+                  onChange={(e) => {
+                    setImplementationForm({ ...implementationForm, considerations: e.target.value });
+                    setImplementationDirty(true);
+                  }}
+                  rows={4}
+                  className="w-full p-2 border border-slate-300 rounded-md text-sm"
+                  placeholder="One consideration per line..."
+                />
+                <p className="text-xs text-slate-500 mt-1">Enter each consideration on a new line</p>
+              </div>
+
+              {/* Variations */}
+              <div>
+                <label className="block text-sm font-semibold text-slate-700 mb-1">
+                  Common Variations
+                </label>
+                <textarea
+                  value={implementationForm.variations}
+                  onChange={(e) => {
+                    setImplementationForm({ ...implementationForm, variations: e.target.value });
+                    setImplementationDirty(true);
+                  }}
+                  rows={4}
+                  className="w-full p-2 border border-slate-300 rounded-md text-sm"
+                  placeholder="One variation per line..."
+                />
+                <p className="text-xs text-slate-500 mt-1">Enter each variation on a new line</p>
+              </div>
+
+              {/* Status (admin only) */}
+              {userRole === 'admin' && (
+                <div>
+                  <label className="block text-sm font-semibold text-slate-700 mb-1">
+                    Status
+                  </label>
+                  <select
+                    value={implementationForm.status}
+                    onChange={(e) => {
+                      setImplementationForm({ ...implementationForm, status: e.target.value as 'active' | 'pending' });
+                      setImplementationDirty(true);
+                    }}
+                    className="w-full p-2 border border-slate-300 rounded-md text-sm"
+                  >
+                    <option value="pending">Pending</option>
+                    <option value="active">Active</option>
+                  </select>
+                </div>
+              )}
+            </>
+          )}
 
           {/* Buttons */}
           <div className="flex justify-end space-x-3 pt-4 border-t border-slate-200">
@@ -1570,7 +1829,7 @@ const PatternDefinitionModal = ({
             </button>
             <button
               type="submit"
-              disabled={saving}
+              disabled={saving || (!definitionDirty && !implementationDirty)}
               className="px-6 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg disabled:opacity-50 disabled:cursor-not-allowed flex items-center"
             >
               {saving ? (
@@ -1579,7 +1838,10 @@ const PatternDefinitionModal = ({
                   Saving...
                 </>
               ) : (
-                pattern ? 'Update Pattern' : 'Create Pattern'
+                <>
+                  <i className="fas fa-save mr-2"></i>
+                  Save Changes
+                </>
               )}
             </button>
           </div>
@@ -1589,8 +1851,10 @@ const PatternDefinitionModal = ({
   );
 };
 
+
 const ImplementationsTable = ({
   implementations,
+  onEdit,
   onDelete,
 }: {
   implementations: Array<PatternImplementation & {
@@ -1599,6 +1863,7 @@ const ImplementationsTable = ({
     patternCategory?: string;
     createdAt?: string;
   }>;
+  onEdit: (implementation: PatternImplementation & { patternId?: string }) => void;
   onDelete: (uuid: string) => void;
 }) => {
   if (implementations.length === 0) {
@@ -1674,6 +1939,13 @@ const ImplementationsTable = ({
             {/* Right: Actions */}
             {!implementation.isDeleted && (
               <div className="flex space-x-2 ml-4">
+                <button
+                  onClick={() => onEdit(implementation)}
+                  className="bg-slate-600 hover:bg-slate-700 text-white px-4 py-2 rounded-lg text-sm transition-colors flex items-center"
+                >
+                  <i className="fas fa-edit mr-2"></i>
+                  Edit
+                </button>
                 <button
                   onClick={() => {
                     if (window.confirm(`Are you sure you want to delete this implementation?`)) {
@@ -1796,6 +2068,9 @@ const AdminPatternManager = ({
   const [activeTab, setActiveTab] = useState<"definitions" | "implementations">("definitions");
   const [editingPattern, setEditingPattern] = useState<PatternDefinition | null>(null);
   const [showModal, setShowModal] = useState(false);
+  const [modalInitialTab, setModalInitialTab] = useState<'definition' | 'implementation'>('definition');
+  const [modalInitialImplUuid, setModalInitialImplUuid] = useState<string | undefined>(undefined);
+  const [modalImplementations, setModalImplementations] = useState<Array<PatternImplementation & { authorId?: string }>>([]);
   const [implementations, setImplementations] = useState<Array<PatternImplementation & {
     isDeleted?: boolean;
     patternTitle?: string;
@@ -1896,45 +2171,82 @@ const AdminPatternManager = ({
     );
   });
 
-  // Handle save (create or update)
-  const handleSave = async (data: Partial<PatternDefinition>) => {
+  // Handle save (create or update) - supports both definitions and implementations
+  const handleSave = async (
+    definitionData?: Partial<PatternDefinition>,
+    implementationData?: { uuid: string; data: any }
+  ) => {
     const token = await getToken();
     if (!token) throw new Error("Authentication required");
 
-    if (editingPattern) {
-      // Update existing pattern
-      const response = await fetch(`/api/patterns/${editingPattern.id}`, {
-        method: 'PUT',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(data)
-      });
+    const promises = [];
 
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || 'Failed to update pattern');
-      }
-    } else {
-      // Create new pattern
-      const response = await fetch('/api/patterns', {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(data)
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || 'Failed to create pattern');
+    // Update pattern definition if provided
+    if (definitionData) {
+      if (editingPattern) {
+        // Update existing pattern
+        promises.push(
+          fetch(`/api/patterns/${editingPattern.id}`, {
+            method: 'PUT',
+            headers: {
+              'Authorization': `Bearer ${token}`,
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(definitionData)
+          }).then(async (response) => {
+            if (!response.ok) {
+              const errorData = await response.json();
+              throw new Error(errorData.error || 'Failed to update pattern');
+            }
+          })
+        );
+      } else {
+        // Create new pattern
+        promises.push(
+          fetch('/api/patterns', {
+            method: 'POST',
+            headers: {
+              'Authorization': `Bearer ${token}`,
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(definitionData)
+          }).then(async (response) => {
+            if (!response.ok) {
+              const errorData = await response.json();
+              throw new Error(errorData.error || 'Failed to create pattern');
+            }
+          })
+        );
       }
     }
 
-    // Refresh patterns list
-    await fetchPatterns();
+    // Update implementation if provided
+    if (implementationData) {
+      promises.push(
+        fetch(`/api/implementations/${implementationData.uuid}`, {
+          method: 'PUT',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(implementationData.data)
+        }).then(async (response) => {
+          if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.error || 'Failed to update implementation');
+          }
+        })
+      );
+    }
+
+    // Execute all updates in parallel
+    await Promise.all(promises);
+
+    // Refresh both lists
+    await Promise.all([
+      fetchPatterns(),
+      activeTab === 'implementations' ? fetchImplementations() : Promise.resolve()
+    ]);
   };
 
   // Handle delete
@@ -1980,6 +2292,76 @@ const AdminPatternManager = ({
       await fetchImplementations();
     } catch (err: any) {
       alert(`Error deleting implementation: ${err.message}`);
+    }
+  };
+
+  // Handle edit pattern - opens modal on Definition tab
+  const handleEditPattern = async (pattern: PatternDefinition) => {
+    try {
+      const token = await getToken();
+      if (!token) throw new Error("Authentication required");
+
+      // Fetch implementations for this pattern
+      const response = await fetch(`/api/implementations?patternId=${pattern.id}`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to fetch implementations');
+      }
+
+      const data = await response.json();
+      const impls = data.implementations || [];
+
+      // Prefer System author if exists, otherwise first one
+      const systemImpl = impls.find((impl: any) => impl.author === 'System');
+      const defaultImpl = systemImpl || impls[0];
+
+      setEditingPattern(pattern);
+      setModalImplementations(impls);
+      setModalInitialTab('definition');
+      setModalInitialImplUuid(defaultImpl?.uuid);
+      setShowModal(true);
+    } catch (err: any) {
+      alert(`Error loading pattern: ${err.message}`);
+    }
+  };
+
+  // Handle edit implementation - opens modal on Implementation tab
+  const handleEditImplementation = async (implementation: PatternImplementation & { patternId?: string }) => {
+    try {
+      const token = await getToken();
+      if (!token) throw new Error("Authentication required");
+
+      // Fetch the pattern definition for context
+      const patternResponse = await fetch(`/api/patterns/${implementation.patternId}`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+
+      if (!patternResponse.ok) {
+        throw new Error('Failed to fetch pattern definition');
+      }
+
+      const patternData = await patternResponse.json();
+
+      // Fetch all implementations for this pattern
+      const implResponse = await fetch(`/api/implementations?patternId=${implementation.patternId}`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+
+      if (!implResponse.ok) {
+        throw new Error('Failed to fetch implementations');
+      }
+
+      const implData = await implResponse.json();
+
+      setEditingPattern(patternData.pattern);
+      setModalImplementations(implData.implementations || []);
+      setModalInitialTab('implementation');
+      setModalInitialImplUuid(implementation.uuid);
+      setShowModal(true);
+    } catch (err: any) {
+      alert(`Error loading implementation: ${err.message}`);
     }
   };
 
@@ -2127,10 +2509,7 @@ const AdminPatternManager = ({
       {!loading && activeTab === "definitions" && (
         <PatternDefinitionsTable
           patterns={filteredPatterns}
-          onEdit={(pattern) => {
-            setEditingPattern(pattern);
-            setShowModal(true);
-          }}
+          onEdit={handleEditPattern}
           onDelete={handleDelete}
         />
       )}
@@ -2145,6 +2524,7 @@ const AdminPatternManager = ({
         ) : (
           <ImplementationsTable
             implementations={filteredImplementations}
+            onEdit={handleEditImplementation}
             onDelete={handleDeleteImplementation}
           />
         )
@@ -2152,8 +2532,12 @@ const AdminPatternManager = ({
 
       {/* Modal */}
       {showModal && (
-        <PatternDefinitionModal
+        <UnifiedPatternModal
           pattern={editingPattern}
+          implementations={modalImplementations}
+          initialTab={modalInitialTab}
+          initialImplementationUuid={modalInitialImplUuid}
+          userRole={userRole}
           onSave={handleSave}
           onClose={() => setShowModal(false)}
         />
@@ -2660,10 +3044,12 @@ const Catalog = ({
   defs,
   impls,
   onPatternClick,
+  onRefresh,
 }: {
   defs: PatternDefinition[];
   impls: PatternImplementation[];
   onPatternClick: (d: PatternDefinition) => void;
+  onRefresh?: () => void;
 }) => {
   const [filter, setFilter] = useState("ALL");
   const [search, setSearch] = useState("");
@@ -2703,15 +3089,27 @@ const Catalog = ({
             </button>
           ))}
         </div>
-        <div className="relative w-full md:w-64">
-          <i className="fas fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 text-xs"></i>
-          <input
-            type="text"
-            placeholder="Search patterns..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="w-full pl-8 pr-4 py-2 border border-slate-300 rounded-full text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
-          />
+        <div className="flex items-center gap-2 w-full md:w-auto">
+          <div className="relative flex-1 md:w-64">
+            <i className="fas fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 text-xs"></i>
+            <input
+              type="text"
+              placeholder="Search patterns..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="w-full pl-8 pr-4 py-2 border border-slate-300 rounded-full text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            />
+          </div>
+          {onRefresh && (
+            <button
+              onClick={onRefresh}
+              className="px-4 py-2 bg-white border border-slate-300 rounded-full text-sm font-medium text-slate-600 hover:bg-indigo-50 hover:text-indigo-600 hover:border-indigo-300 transition-colors flex items-center gap-2"
+              title="Refresh catalog data"
+            >
+              <i className="fas fa-sync-alt"></i>
+              <span className="hidden md:inline">Refresh</span>
+            </button>
+          )}
         </div>
       </div>
 
@@ -2742,12 +3140,13 @@ const App = () => {
   const { user } = useUser();
   const { getToken } = useAuth();
   const [view, setView] = useState("catalog");
+  const [refreshTrigger, setRefreshTrigger] = useState(0);
 
   // SECURITY: Read role from Clerk metadata - defaults to contributor
   const userRole = (user?.publicMetadata?.role as Role) || 'contributor';
 
   // Fetch patterns from API
-  const { patterns, implementations, loading, error } = usePatterns();
+  const { patterns, implementations, loading, error } = usePatterns(refreshTrigger);
 
   // Data State
   const [definitions, setDefinitions] = useState<PatternDefinition[]>([]);
@@ -3062,12 +3461,14 @@ const App = () => {
           setEditingImpl(null);
           setView("contribute");
         }}
+        onRefresh={() => setRefreshTrigger(prev => prev + 1)}
     >
       {view === "catalog" && (
         <Catalog
             defs={definitions}
             impls={implementationsList}
             onPatternClick={handlePatternClick}
+            onRefresh={() => setRefreshTrigger(prev => prev + 1)}
         />
       )}
 
@@ -3130,7 +3531,10 @@ const App = () => {
 
       {view === "admin-patterns" && (
         <AdminPatternManager
-          onBack={() => setView("catalog")}
+          onBack={() => {
+            setRefreshTrigger(prev => prev + 1);
+            setView("catalog");
+          }}
           userRole={userRole}
         />
       )}

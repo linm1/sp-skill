@@ -243,7 +243,8 @@ async function handlePut(req: VercelRequest, res: VercelResponse) {
       rCode,
       considerations,
       variations,
-      isPremium
+      isPremium,
+      status: requestedStatus
     } = req.body;
 
     // 4. Validate required fields
@@ -256,12 +257,15 @@ async function handlePut(req: VercelRequest, res: VercelResponse) {
     // 5. Determine new status based on business rules
     let newStatus = implementation.status;
 
-    if (!isAdmin && implementation.status === 'active') {
+    if (isAdmin && requestedStatus) {
+      // Admin can explicitly set status
+      newStatus = requestedStatus;
+    } else if (!isAdmin && implementation.status === 'active') {
       // Non-admin editing active implementation → needs re-approval
       newStatus = 'pending';
     }
     // Otherwise: status stays the same
-    // - Admins can edit without changing status
+    // - Admins can edit without changing status (if not explicitly provided)
     // - Editing pending/rejected implementations keeps same status
 
     // 6. Update implementation in database
