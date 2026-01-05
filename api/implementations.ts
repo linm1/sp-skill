@@ -12,10 +12,11 @@ import { sendAdminNotification } from '../lib/email.js';
  * POST /api/implementations - Create a new pattern implementation
  * GET /api/implementations?author_id=me - List user's implementations (excludes soft-deleted)
  * GET /api/implementations?status=pending - List pending implementations (admin only, excludes soft-deleted)
+ * GET /api/implementations?patternId=XXX-NNN - List implementations for a specific pattern (admin only, excludes soft-deleted)
  * GET /api/implementations?includeDeleted=true - Include soft-deleted records (admin-only)
  *
  * Purpose: Allows contributors to submit their own implementations for existing patterns
- *          and enables admins to review pending submissions
+ *          and enables admins to review pending submissions and edit pattern implementations
  *
  * Authentication: Required (Clerk JWT)
  *
@@ -24,7 +25,7 @@ import { sendAdminNotification } from '../lib/email.js';
  * - Pattern ID must exist in pattern_definitions table
  * - New implementations default to 'pending' status
  * - Author ID is automatically extracted from authenticated user
- * - Admin role required to query pending implementations
+ * - Admin role required to query pending implementations or by pattern ID
  * - By default, soft-deleted implementations are excluded from all queries
  * - includeDeleted=true parameter shows soft-deleted records (admin-only)
  */
@@ -195,6 +196,7 @@ async function handlePost(req: VercelRequest, res: VercelResponse) {
 /**
  * GET /api/implementations?author_id=me
  * GET /api/implementations?status=pending (admin only)
+ * GET /api/implementations?patternId=XXX-NNN (admin only)
  * Lists implementations based on query parameters
  */
 async function handleGet(req: VercelRequest, res: VercelResponse) {
@@ -209,7 +211,7 @@ async function handleGet(req: VercelRequest, res: VercelResponse) {
     }
 
     // 2. Validate query parameters
-    const { author_id, status, includeDeleted } = req.query;
+    const { author_id, status, patternId, includeDeleted } = req.query;
 
     // Check if includeDeleted is requested (admin-only)
     const shouldIncludeDeleted = includeDeleted === 'true';
@@ -396,10 +398,91 @@ async function handleGet(req: VercelRequest, res: VercelResponse) {
       });
     }
 
+    // Route 3: Get implementations by pattern ID (admin only)
+    if (patternId && typeof patternId === 'string') {
+      // Check if user has admin role
+      if (user.role !== 'admin') {
+        return res.status(403).json({
+          error: 'Forbidden',
+          message: 'Admin role required to query implementations by pattern ID'
+        });
+      }
+
+      let patternImplementationsList;
+
+      try {
+        patternImplementationsList = await db
+          .select({
+            // Implementation fields
+            uuid: patternImplementations.uuid,
+            patternId: patternImplementations.patternId,
+            authorId: patternImplementations.authorId,
+            authorName: patternImplementations.authorName,
+            sasCode: patternImplementations.sasCode,
+            rCode: patternImplementations.rCode,
+            considerations: patternImplementations.considerations,
+            variations: patternImplementations.variations,
+            status: patternImplementations.status,
+            isPremium: patternImplementations.isPremium,
+            createdAt: patternImplementations.createdAt,
+            updatedAt: patternImplementations.updatedAt,
+          })
+          .from(patternImplementations)
+          .where(
+            shouldIncludeDeleted
+              ? eq(patternImplementations.patternId, patternId)
+              : and(
+                  eq(patternImplementations.patternId, patternId),
+                  eq(patternImplementations.isDeleted, false)
+                )
+          );
+      } catch (dbError: any) {
+        console.error('Database query error for pattern implementations:', dbError);
+
+        // Check if it's a column missing error (migration not applied)
+        const isColumnError =
+          dbError.message?.includes('column') &&
+          (dbError.message?.includes('does not exist') || dbError.message?.includes('isDeleted') || dbError.message?.includes('is_deleted'));
+
+        if (isColumnError) {
+          console.warn('Soft-delete columns not found in implementations table, querying without isDeleted filter');
+
+          // Retry without soft-delete filter
+          patternImplementationsList = await db
+            .select({
+              // Implementation fields
+              uuid: patternImplementations.uuid,
+              patternId: patternImplementations.patternId,
+              authorId: patternImplementations.authorId,
+              authorName: patternImplementations.authorName,
+              sasCode: patternImplementations.sasCode,
+              rCode: patternImplementations.rCode,
+              considerations: patternImplementations.considerations,
+              variations: patternImplementations.variations,
+              status: patternImplementations.status,
+              isPremium: patternImplementations.isPremium,
+              createdAt: patternImplementations.createdAt,
+              updatedAt: patternImplementations.updatedAt,
+            })
+            .from(patternImplementations)
+            .where(eq(patternImplementations.patternId, patternId));
+        } else {
+          // Re-throw if different error
+          throw dbError;
+        }
+      }
+
+      return res.status(200).json({
+        success: true,
+        count: patternImplementationsList.length,
+        implementations: patternImplementationsList
+      });
+    }
+
     // Invalid query parameters
     return res.status(400).json({
       error: 'Invalid query parameter',
-      message: 'Supported query parameters: author_id=me or status=pending (admin only)'
+      message: 'Supported query parameters: author_id=me, status=pending (admin only), or patternId=XXX-NNN (admin only)'
     });
 
   } catch (error) {
