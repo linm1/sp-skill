@@ -220,16 +220,36 @@ async function handlePut(req: VercelRequest, res: VercelResponse) {
     }
 
     // 4. Check if pattern exists and is not deleted
-    const existingPattern = await db
-      .select()
-      .from(patternDefinitions)
-      .where(
-        and(
-          eq(patternDefinitions.id, id),
-          eq(patternDefinitions.isDeleted, false)
+    let existingPattern;
+    try {
+      existingPattern = await db
+        .select()
+        .from(patternDefinitions)
+        .where(
+          and(
+            eq(patternDefinitions.id, id),
+            eq(patternDefinitions.isDeleted, false)
+          )
         )
-      )
-      .limit(1);
+        .limit(1);
+    } catch (dbError: any) {
+      // Check if it's a column missing error (migration not applied)
+      const isColumnError =
+        dbError.message?.includes('column') &&
+        (dbError.message?.includes('does not exist') || dbError.message?.includes('isDeleted') || dbError.message?.includes('is_deleted'));
+
+      if (isColumnError) {
+        console.warn('Soft-delete columns not found, querying without isDeleted filter');
+        // Retry without soft-delete filter
+        existingPattern = await db
+          .select()
+          .from(patternDefinitions)
+          .where(eq(patternDefinitions.id, id))
+          .limit(1);
+      } else {
+        throw dbError;
+      }
+    }
 
     if (existingPattern.length === 0) {
       return res.status(404).json({
@@ -299,11 +319,19 @@ async function handleDelete(req: VercelRequest, res: VercelResponse) {
     }
 
     // 3. Check if pattern exists and is not already deleted
-    const existingPattern = await db
-      .select()
-      .from(patternDefinitions)
-      .where(eq(patternDefinitions.id, id))
-      .limit(1);
+    let existingPattern;
+    let hasIsDeletedColumn = true;
+
+    try {
+      existingPattern = await db
+        .select()
+        .from(patternDefinitions)
+        .where(eq(patternDefinitions.id, id))
+        .limit(1);
+    } catch (dbError: any) {
+      console.error('Error querying pattern for deletion:', dbError);
+      throw dbError;
+    }
 
     if (existingPattern.length === 0) {
       return res.status(404).json({
@@ -312,14 +340,29 @@ async function handleDelete(req: VercelRequest, res: VercelResponse) {
       });
     }
 
-    if (existingPattern[0].isDeleted) {
-      return res.status(400).json({
-        error: 'Pattern already deleted',
-        message: `Pattern with ID '${id}' has already been deleted`
+    // Check if pattern is already deleted (only if column exists)
+    try {
+      if (existingPattern[0].isDeleted) {
+        return res.status(400).json({
+          error: 'Pattern already deleted',
+          message: `Pattern with ID '${id}' has already been deleted`
+        });
+      }
+    } catch (propError) {
+      // isDeleted column doesn't exist yet
+      hasIsDeletedColumn = false;
+      console.warn('isDeleted column not available - soft-delete feature requires database migration');
+    }
+
+    // 4. Soft delete the pattern (or return error if migration not applied)
+    if (!hasIsDeletedColumn) {
+      return res.status(500).json({
+        error: 'Feature not available',
+        message: 'Soft-delete feature requires database migration. Please run: npx drizzle-kit push',
+        details: 'The isDeleted column does not exist in the database schema'
       });
     }
 
-    // 4. Soft delete the pattern
     const deletedPattern = await db
       .update(patternDefinitions)
       .set({
