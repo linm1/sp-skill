@@ -162,7 +162,7 @@ const usePatterns = (refreshTrigger = 0) => {
 
 const generateMarkdown = (def: PatternDefinition, impl: PatternImplementation): string => {
   return `# ${def.title} (${def.id})
-Author: ${impl.authorName}
+Author: ${impl.author}
 
 ## Problem
 ${def.problem}
@@ -205,7 +205,7 @@ const generatePatternMarkdown = (def: PatternDefinition, impl: PatternImplementa
 
 **Pattern ID:** ${def.id}
 **Category:** ${def.category}
-**Author:** ${impl.authorName}
+**Author:** ${impl.author}
 
 ## Problem Statement
 
@@ -550,10 +550,26 @@ const PatternDetail = ({
 
   const activeImpl = impls.find(i => i.uuid === activeImplUuid) || impls[0];
 
+  // Add null safety check
+  if (!activeImpl) {
+    return (
+      <div className="max-w-5xl mx-auto">
+        <button onClick={onBack} className="text-sm text-slate-500 hover:text-indigo-600 flex items-center mb-6">
+          <i className="fas fa-arrow-left mr-2"></i> Back to Catalog
+        </button>
+        <div className="bg-white rounded-xl shadow-lg border border-slate-200 p-8 text-center">
+          <i className="fas fa-exclamation-circle text-4xl text-slate-300 mb-4"></i>
+          <h3 className="text-xl font-semibold text-slate-700 mb-2">No Implementations Available</h3>
+          <p className="text-slate-500">This pattern doesn't have any implementations yet. Contribute one to get started!</p>
+        </div>
+      </div>
+    );
+  }
+
   const canEdit =
     role === "admin" ||
     role === "premier" ||
-    (role === "contributor" && activeImpl.author === CURRENT_USER);
+    (role === "contributor" && activeImpl?.author === CURRENT_USER);
 
   const markdown = generateMarkdown(def, activeImpl);
 
@@ -606,8 +622,8 @@ const PatternDetail = ({
                 : "text-slate-500 hover:text-slate-700 hover:bg-slate-200/50"
             }`}
           >
-            {impl.authorName === SYSTEM_AUTHOR && <i className="fas fa-shield-alt mr-1 text-xs"></i>}
-            <span>{impl.authorName === CURRENT_USER ? "Your Version" : impl.authorName}</span>
+            {impl.author === SYSTEM_AUTHOR && <i className="fas fa-shield-alt mr-1 text-xs"></i>}
+            <span>{impl.author === CURRENT_USER ? "Your Version" : impl.author}</span>
             {basketSelectedUuid === impl.uuid && (
                <span className="ml-2 w-2 h-2 rounded-full bg-green-500" title="Selected for Export"></span>
             )}
@@ -621,7 +637,7 @@ const PatternDetail = ({
         {/* Action Bar */}
         <div className="bg-slate-50 border-b border-slate-200 p-4 flex justify-between items-center">
             <div className="text-sm text-slate-500">
-               Showing implementation by <span className="font-semibold text-slate-800">{activeImpl.author}</span>
+               Showing implementation by <span className="font-semibold text-slate-800">{activeImpl?.author}</span>
             </div>
             <div className="flex space-x-3">
                {canEdit && (
@@ -685,7 +701,7 @@ const PatternDetail = ({
 
           <div className="bg-slate-900 text-slate-300 overflow-auto h-full max-h-[800px]">
             <div className="p-4 bg-slate-800 border-b border-slate-700 flex justify-between items-center sticky top-0">
-               <span className="text-xs font-mono">{`${def.id}_${activeImpl.author.toLowerCase().replace(' ','-')}.md`}</span>
+               <span className="text-xs font-mono">{`${def.id}_${activeImpl?.author?.toLowerCase().replace(' ','-') ?? 'unknown'}.md`}</span>
                <button onClick={copyToClipboard} className="text-slate-400 hover:text-white">
                  <i className="fas fa-copy"></i>
                </button>
@@ -1705,7 +1721,7 @@ const UnifiedPatternModal = ({
                   >
                     {implementations.map(impl => (
                       <option key={impl.uuid} value={impl.uuid}>
-                        {impl.authorName} - {impl.status} ({impl.uuid.substring(0, 8)})
+                        {impl.author} - {impl.status} ({impl.uuid.substring(0, 8)})
                       </option>
                     ))}
                   </select>
@@ -2166,7 +2182,7 @@ const AdminPatternManager = ({
     const search = searchTerm.toLowerCase();
     return (
       impl.patternId?.toLowerCase().includes(search) ||
-      impl.authorName?.toLowerCase().includes(search) ||
+      impl.author?.toLowerCase().includes(search) ||
       impl.patternTitle?.toLowerCase().includes(search)
     );
   });
@@ -2314,7 +2330,7 @@ const AdminPatternManager = ({
       const impls = data.implementations || [];
 
       // Prefer System author if exists, otherwise first one
-      const systemImpl = impls.find((impl: any) => impl.authorName === 'System');
+      const systemImpl = impls.find((impl: any) => impl.author === 'System');
       const defaultImpl = systemImpl || impls[0];
 
       setEditingPattern(pattern);
@@ -2833,8 +2849,8 @@ const BasketView = ({
   const stats = useMemo(() => {
     return {
       total: enrichedItems.length,
-      custom: enrichedItems.filter(i => i.impl.authorName !== SYSTEM_AUTHOR).length,
-      system: enrichedItems.filter(i => i.impl.authorName === SYSTEM_AUTHOR).length
+      custom: enrichedItems.filter(i => i.impl.author !== SYSTEM_AUTHOR).length,
+      system: enrichedItems.filter(i => i.impl.author === SYSTEM_AUTHOR).length
     };
   }, [enrichedItems]);
 
@@ -2842,7 +2858,7 @@ const BasketView = ({
   const categoryStats = useMemo(() => {
     return CATEGORIES.map(cat => {
       const itemsInCat = enrichedItems.filter(i => i.def.category === cat.code);
-      const hasCustom = itemsInCat.some(i => i.impl.authorName !== SYSTEM_AUTHOR);
+      const hasCustom = itemsInCat.some(i => i.impl.author !== SYSTEM_AUTHOR);
       return { 
         ...cat, 
         count: itemsInCat.length, 
@@ -2976,7 +2992,7 @@ const BasketView = ({
                ) : (
                   <div className="space-y-3">
                      {displayedItems.map(({def, impl}) => {
-                        const isCustom = impl.authorName !== SYSTEM_AUTHOR;
+                        const isCustom = impl.author !== SYSTEM_AUTHOR;
                         return (
                            <div 
                               key={def.id} 
