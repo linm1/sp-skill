@@ -3,6 +3,7 @@ import { createClerkClient, verifyToken } from '@clerk/backend';
 import { db } from '../db/index.js';
 import { users } from '../db/schema.js';
 import { eq } from 'drizzle-orm';
+import { cache } from './cache.js';
 
 // Initialize Clerk client
 const clerkClient = createClerkClient({
@@ -39,6 +40,16 @@ export async function getAuthenticatedUser(req: VercelRequest) {
 
     // Get the user ID from the token payload
     const userId = payload.sub;
+
+    // 2.5. Check cache first
+    const cacheKey = `user:clerk:${userId}`;
+    const cachedUser = await cache.get<typeof users.$inferSelect>(cacheKey);
+    if (cachedUser) {
+      console.log('[AUTH CACHE HIT]', userId);
+      return cachedUser;
+    }
+
+    console.log('[AUTH CACHE MISS]', userId);
 
     // Fetch full user details from Clerk
     const clerkUser = await clerkClient.users.getUser(userId);
@@ -93,6 +104,11 @@ export async function getAuthenticatedUser(req: VercelRequest) {
           throw insertError;
         }
       }
+    }
+
+    // Store user in cache before returning (TTL: 15 minutes)
+    if (dbUser[0]) {
+      await cache.set(cacheKey, dbUser[0], 900);
     }
 
     return dbUser[0];
