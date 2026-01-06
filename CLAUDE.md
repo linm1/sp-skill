@@ -12,7 +12,7 @@ The system functions as a **Data Warehouse for code logic** - ingesting unstruct
 - **Build Tool**: Vite 6
 - **Backend**: Vercel Serverless Functions (Node.js)
 - **AI Integration**: Google Gemini API (`@google/genai`) - server-side only
-- **Styling**: Tailwind CSS (inline classes)
+- **Styling**: Tailwind CSS v4 (PostCSS plugin, compiled at build time)
 - **Icons**: Font Awesome (CDN)
 - **Deployment**: Vercel (https://sp-skill.vercel.app/)
 
@@ -23,6 +23,11 @@ npm install
 npm run dev        # Starts frontend dev server on http://localhost:3000
 npm run dev:api    # Starts backend API server on http://localhost:3001
 npm run build      # Production build
+
+# Database operations
+npm run db:push    # Push schema to database (apply migrations)
+npm run db:verify  # Verify database schema is up to date
+npm run db:studio  # Open Drizzle Studio (database GUI)
 ```
 
 ### Environment Setup
@@ -65,16 +70,31 @@ ADMIN_EMAIL=admin@example.com
 
 ```
 sp-skill/
-├── CLAUDE.md           # This file - project guide
-├── index.html          # Entry HTML
-├── index.tsx           # Main React application (single-file architecture)
-├── package.json        # Dependencies and scripts
-├── tsconfig.json       # TypeScript configuration
-├── vite.config.ts      # Vite build configuration
-├── vercel.json         # Vercel deployment configuration
-├── metadata.json       # App metadata
-└── api/
-    └── analyze.ts      # Serverless function for Gemini API calls
+├── CLAUDE.md               # This file - project guide
+├── DEPLOYMENT.md           # Production deployment guide
+├── index.html              # Entry HTML
+├── index.tsx               # Main React application (single-file architecture)
+├── index.css               # Tailwind CSS entry point
+├── package.json            # Dependencies and scripts
+├── tsconfig.json           # TypeScript configuration
+├── vite.config.ts          # Vite build configuration
+├── vercel.json             # Vercel deployment configuration
+├── tailwind.config.js      # Tailwind CSS configuration
+├── postcss.config.js       # PostCSS configuration
+├── metadata.json           # App metadata
+├── api/                    # Serverless functions
+│   ├── analyze.ts          # Gemini API integration
+│   ├── patterns.ts         # Pattern CRUD operations
+│   └── implementations.ts  # Implementation CRUD operations
+├── db/                     # Database layer
+│   ├── index.ts            # Drizzle ORM instance
+│   └── schema.ts           # Database schema definitions
+├── drizzle/                # Database migrations
+│   └── *.sql               # Migration files
+├── lib/                    # Shared utilities
+│   └── auth.ts             # Authentication helpers
+└── scripts/                # Utility scripts
+    └── verify-migration.ts # Database verification
 ```
 
 ## Security
