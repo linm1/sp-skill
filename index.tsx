@@ -3449,28 +3449,60 @@ const BasketView = ({
   return (
     <div className="max-w-6xl mx-auto h-[calc(100vh-140px)] flex flex-col">
         {/* Dashboard Header */}
-        <div className="bg-white border border-ink p-8 mb-6 flex justify-between items-center shrink-0">
+        <div className="bg-white border border-ink p-4 md:p-8 mb-4 md:mb-6 flex flex-col md:flex-row justify-between md:items-center gap-4 shrink-0">
             <div>
-               <h2 className="text-2xl font-bold text-ink mb-2 font-mono uppercase tracking-tight-mono">Skill Basket Review</h2>
-               <div className="flex space-x-6 text-sm text-ink">
-                  <span className="font-mono">Total Patterns: <strong className="text-ink">{stats.total}</strong></span>
-                  <span className="font-mono">System Default: <strong className="text-ink">{stats.system}</strong></span>
-                  <span className="font-mono">Custom Overrides: <strong className="text-link-blue">{stats.custom}</strong></span>
+               <h2 className="text-lg md:text-2xl font-bold text-ink mb-2 font-mono uppercase tracking-tight-mono">Skill Basket Review</h2>
+               <div className="flex flex-col sm:flex-row sm:space-x-6 space-y-1 sm:space-y-0 text-xs md:text-sm text-ink">
+                  <span className="font-mono">Total: <strong className="text-ink">{stats.total}</strong></span>
+                  <span className="font-mono">System: <strong className="text-ink">{stats.system}</strong></span>
+                  <span className="font-mono">Custom: <strong className="text-link-blue">{stats.custom}</strong></span>
                </div>
             </div>
-            <div className="flex space-x-3">
-                 <button onClick={onClear} className="text-terminal-red hover:text-terminal-red px-4 py-2 text-sm font-medium font-mono uppercase border border-terminal-red hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-brutal transition-all duration-brutal">Clear All</button>
-                 <button onClick={exportData} className="bg-ink hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-brutal text-white px-6 py-2 font-semibold font-mono uppercase transition-all duration-brutal border border-ink">
-                    <i className="fas fa-download mr-2"></i> Export for Agent
+            <div className="flex space-x-2 md:space-x-3">
+                 <button onClick={onClear} className="text-terminal-red hover:text-terminal-red px-3 md:px-4 py-2 text-xs md:text-sm font-medium font-mono uppercase border border-terminal-red hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-brutal transition-all duration-brutal flex items-center">
+                    <i className="fas fa-trash md:mr-2"></i>
+                    <span className="hidden md:inline">Clear All</span>
+                 </button>
+                 <button onClick={exportData} className="bg-ink hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-brutal text-white px-3 md:px-6 py-2 text-xs md:text-sm font-semibold font-mono uppercase transition-all duration-brutal border border-ink flex items-center">
+                    <i className="fas fa-download md:mr-2"></i>
+                    <span className="hidden md:inline">Export for Agent</span>
                  </button>
             </div>
         </div>
 
+        {/* Mobile Category Tabs - Only visible on small screens */}
+        <div className="md:hidden mb-4 overflow-x-auto">
+          <div className="flex gap-2 pb-2">
+            <button
+              onClick={() => setActiveCategory("ALL")}
+              className={`px-3 py-2 text-xs font-semibold whitespace-nowrap transition-all duration-brutal font-mono uppercase border border-ink flex items-center gap-2 ${
+                activeCategory === "ALL" ? "bg-ink text-white shadow-brutal" : "bg-white text-ink"
+              }`}
+            >
+              ALL
+              <span className="bg-white text-ink text-xs px-1.5 py-0.5 border border-ink">{enrichedItems.length}</span>
+            </button>
+            {categoryStats.filter(cat => cat.count > 0).map((cat) => (
+              <button
+                key={cat.code}
+                onClick={() => setActiveCategory(cat.code)}
+                className={`px-3 py-2 text-xs font-semibold whitespace-nowrap transition-all duration-brutal font-mono uppercase border border-ink flex items-center gap-2 ${
+                  activeCategory === cat.code ? "bg-ink text-white shadow-brutal" : "bg-white text-ink"
+                }`}
+              >
+                {cat.hasCustom && <span className="w-1.5 h-1.5 rounded-full bg-link-blue"></span>}
+                {cat.code}
+                <span className={`${activeCategory === cat.code ? "bg-white text-ink" : "bg-ink text-white"} text-xs px-1.5 py-0.5 border border-ink`}>{cat.count}</span>
+              </button>
+            ))}
+          </div>
+        </div>
+
         {/* Split Pane */}
         <div className="flex flex-grow overflow-hidden bg-white border border-ink">
-            
-            {/* Left Sidebar: Categories */}
-            <div className="w-64 border-r border-ink bg-canvas overflow-y-auto flex flex-col">
+
+            {/* Left Sidebar: Categories - Hidden on mobile */}
+            <div className="hidden md:flex w-64 border-r border-ink bg-canvas overflow-y-auto flex-col">
                <div className="p-4 border-b border-ink sticky top-0 bg-canvas z-10">
                   <h3 className="text-xs font-bold text-ink uppercase tracking-wider font-mono">Categories</h3>
                </div>
@@ -3505,12 +3537,12 @@ const BasketView = ({
             </div>
 
             {/* Right Pane: List */}
-            <div className="flex-grow overflow-y-auto p-6">
-               <div className="mb-4 flex justify-between items-end">
-                   <h3 className="text-lg font-bold text-ink font-mono uppercase">
+            <div className="flex-grow overflow-y-auto p-3 md:p-6">
+               <div className="mb-3 md:mb-4 flex flex-col sm:flex-row justify-between sm:items-end gap-2">
+                   <h3 className="text-base md:text-lg font-bold text-ink font-mono uppercase">
                       {activeCategory === "ALL" ? "All Patterns" : CATEGORIES.find(c => c.code === activeCategory)?.name}
                    </h3>
-                   <span className="text-xs text-ink font-mono">{displayedItems.length} items shown</span>
+                   <span className="text-xs text-ink font-mono">{displayedItems.length} items</span>
                </div>
 
                {displayedItems.length === 0 ? (
@@ -3518,51 +3550,52 @@ const BasketView = ({
                      <p className="font-mono">No patterns in this category.</p>
                   </div>
                ) : (
-                  <div className="space-y-3">
+                  <div className="space-y-2 md:space-y-3">
                      {displayedItems.map(({def, impl}) => {
                         const isCustom = impl.author !== SYSTEM_AUTHOR;
                         return (
                            <div
                               key={def.id}
-                              className={`p-4 border flex justify-between items-center transition-all duration-brutal ${
+                              className={`p-3 md:p-4 border flex flex-col md:flex-row md:justify-between md:items-center gap-3 transition-all duration-brutal ${
                                  isCustom
                                  ? "bg-white border-2 border-link-blue shadow-brutal-lg"
                                  : "bg-white border border-ink"
                               }`}
                            >
                               <div className="flex-grow">
-                                 <div className="flex items-center space-x-3 mb-1">
+                                 <div className="flex items-center flex-wrap gap-2 md:space-x-3 mb-2">
                                     <span className={`text-xs font-mono font-bold px-2 py-1 border border-ink ${
                                        isCustom ? "bg-link-blue text-white" : "bg-white text-ink"
                                     }`}>
                                        {def.id}
                                     </span>
-                                    <h4 className={`font-semibold ${isCustom ? "text-link-blue" : "text-ink"}`}>{def.title}</h4>
+                                    <h4 className={`text-sm md:text-base font-semibold ${isCustom ? "text-link-blue" : "text-ink"}`}>{def.title}</h4>
                                  </div>
-                                 <div className="flex items-center text-sm">
-                                    <span className="text-ink mr-2 font-mono">Implementation:</span>
+                                 <div className="flex items-center text-xs md:text-sm flex-wrap gap-2">
+                                    <span className="text-ink font-mono hidden sm:inline">Implementation:</span>
                                     {isCustom ? (
-                                       <span className="flex items-center text-link-blue font-bold font-mono uppercase px-2 py-1 border border-ink bg-white">
+                                       <span className="flex items-center text-link-blue font-bold font-mono uppercase px-2 py-1 border border-ink bg-white text-xs">
                                           <i className="fas fa-user-circle mr-1.5"></i>
                                           {impl.author}
                                        </span>
                                     ) : (
-                                       <span className="text-ink flex items-center font-mono uppercase">
+                                       <span className="text-ink flex items-center font-mono uppercase text-xs">
                                           <i className="fas fa-shield-alt mr-1.5 text-xs"></i>
-                                          System Default
+                                          System
                                        </span>
                                     )}
                                  </div>
                               </div>
 
-                              <div className="flex items-center space-x-2">
+                              <div className="flex items-center space-x-2 self-end md:self-center">
                                  {isCustom && (
                                     <button
                                        onClick={() => onReset(def.id)}
-                                       className="text-xs text-ink hover:text-link-blue px-3 py-1 font-medium font-mono uppercase border border-ink hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-brutal transition-all duration-brutal"
+                                       className="text-xs text-ink hover:text-link-blue px-2 md:px-3 py-1 font-medium font-mono uppercase border border-ink hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-brutal transition-all duration-brutal flex items-center"
                                        title="Revert to System Default"
                                     >
-                                       Reset to System
+                                       <i className="fas fa-undo md:mr-1.5"></i>
+                                       <span className="hidden sm:inline">Reset</span>
                                     </button>
                                  )}
                                  <button
