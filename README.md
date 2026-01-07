@@ -1,14 +1,8 @@
-<div align="center">
-<img width="1200" height="475" alt="GHBanner" src="https://github.com/user-attachments/assets/0aa67016-6eaf-458a-adb2-6e31a0763ed6" />
-</div>
-
 # StatPatternHub - Clinical Programming Pattern Library
 
 A knowledge management platform and ETL engine for clinical programming patterns. Aggregates, standardizes, and serves SAS and R code patterns for clinical statistical programmers, data scientists, and AI coding agents.
 
 **Live Demo**: https://sp-skill.vercel.app/
-
-View in AI Studio: https://ai.studio/apps/drive/1Z1tYsu-VI85piqEJB8VTMMsFHCKgyng3
 
 ## Features
 
