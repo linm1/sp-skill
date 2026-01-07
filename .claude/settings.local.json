@@ -2,7 +2,9 @@
   "permissions": {
     "allow": [
       "Skill(scrum-master)",
-      "Skill(scrum-master:*)"
+      "Skill(scrum-master:*)",
+      "Skill(ax-llm)",
+      "mcp__deepwiki__ask_question"
     ]
   }
 }

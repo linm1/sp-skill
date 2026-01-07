@@ -1103,6 +1103,7 @@ const SmartEtlForm = ({
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [rawInput, setRawInput] = useState("");
   const [selectedPatternId, setSelectedPatternId] = useState(definition?.id || "");
+  const [extractLanguage, setExtractLanguage] = useState<'sas' | 'r' | 'both'>('both');
   const [formData, setFormData] = useState<Partial<PatternImplementation>>({
     sasCode: "",
     rCode: "",
@@ -1134,31 +1135,71 @@ const SmartEtlForm = ({
   }, [currentPattern, definition]);
 
   const analyzeWithGemini = async () => {
-    if (!rawInput.trim()) return;
+    if (!rawInput.trim() || !currentPattern) return;
 
     setIsAnalyzing(true);
     try {
-      const response = await fetch('/api/analyze', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          patternTitle: currentPattern?.title || "",
-          rawInput: rawInput,
-        }),
-      });
+      const languagesToExtract = extractLanguage === 'both' ? ['sas', 'r'] : [extractLanguage];
+      const results: { sasCode?: string; rCode?: string; warnings?: string[] } = {};
 
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData.error || 'API request failed');
+      // Extract code for each selected language
+      for (const lang of languagesToExtract) {
+        const response = await fetch('/api/extract-code', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            rawCode: rawInput,
+            language: lang,
+            patternTitle: currentPattern.title,
+            problemStatement: currentPattern.problem,
+            whenToUse: currentPattern.whenToUse,
+          }),
+        });
+
+        if (!response.ok) {
+          const errorData = await response.json().catch(() => ({}));
+          console.error(`${lang.toUpperCase()} extraction failed:`, errorData);
+
+          // Show user-friendly error
+          if (response.status === 422) {
+            alert(`${lang.toUpperCase()} code extraction failed validation:\n${errorData.details || errorData.error}`);
+          } else {
+            throw new Error(errorData.error || `${lang.toUpperCase()} extraction failed`);
+          }
+          continue;
+        }
+
+        const extracted = await response.json();
+
+        if (lang === 'sas') {
+          results.sasCode = extracted.code;
+        } else {
+          results.rCode = extracted.code;
+        }
+
+        // Collect warnings
+        if (extracted.warnings && extracted.warnings.length > 0) {
+          results.warnings = [...(results.warnings || []), ...extracted.warnings];
+        }
       }
 
-      const extracted = await response.json();
-      setFormData((prev) => ({ ...prev, ...extracted }));
-    } catch (e) {
-      console.error("Analysis Error:", e);
-      alert("Failed to analyze text. Please fill manually.");
+      // Update form with extracted code
+      setFormData((prev) => ({
+        ...prev,
+        sasCode: results.sasCode || prev.sasCode || "",
+        rCode: results.rCode || prev.rCode || "",
+      }));
+
+      // Show warnings if any
+      if (results.warnings && results.warnings.length > 0) {
+        alert(`Code extracted successfully!\n\nWarnings:\n${results.warnings.join('\n')}`);
+      }
+
+    } catch (e: any) {
+      console.error("Extraction Error:", e);
+      alert(`Failed to extract code: ${e.message}\n\nPlease check the input and try again, or fill manually.`);
     } finally {
       setIsAnalyzing(false);
     }
@@ -1244,27 +1285,79 @@ const SmartEtlForm = ({
       )}
 
       {!isEditMode && (
-        <div className="p-6 bg-white border-b border-ink">
-          <label className="block text-xs font-bold text-ink uppercase mb-2 font-mono">
-            <i className="fas fa-magic mr-1 text-link-blue"></i> AI Smart Fill
-          </label>
+        <div className="p-6 bg-white border-b border-ink space-y-4">
+          <div className="flex justify-between items-center mb-2">
+            <label className="block text-xs font-bold text-ink uppercase font-mono">
+              <i className="fas fa-magic mr-1 text-link-blue"></i> AI Smart Fill
+            </label>
+
+            {/* Language Selector */}
+            <div className="flex items-center gap-2">
+              <span className="text-xs text-ink font-mono">Extract:</span>
+              <select
+                value={extractLanguage}
+                onChange={(e) => setExtractLanguage(e.target.value as 'sas' | 'r' | 'both')}
+                className="text-xs border border-ink px-2 py-1 focus:outline-none focus:border-link-blue font-mono"
+              >
+                <option value="both">SAS & R</option>
+                <option value="sas">SAS Only</option>
+                <option value="r">R Only</option>
+              </select>
+            </div>
+          </div>
+
+          {/* File Upload Option */}
+          <div className="bg-canvas border border-ink p-4">
+            <label className="block text-xs font-medium text-ink mb-2 font-mono">
+              <i className="fas fa-file-upload mr-1"></i> Upload Script File
+            </label>
+            <input
+              type="file"
+              accept=".sas,.r,.txt"
+              onChange={async (e) => {
+                const file = e.target.files?.[0];
+                if (file) {
+                  const text = await file.text();
+                  setRawInput(text);
+
+                  // Auto-detect language from file extension
+                  if (file.name.endsWith('.sas')) {
+                    setExtractLanguage('sas');
+                  } else if (file.name.endsWith('.r') || file.name.endsWith('.R')) {
+                    setExtractLanguage('r');
+                  }
+                }
+              }}
+              className="block w-full text-sm text-ink file:mr-4 file:py-2 file:px-4 file:border file:border-ink file:text-sm file:font-mono file:font-medium file:bg-white file:text-ink hover:file:bg-canvas file:cursor-pointer"
+            />
+            <p className="text-xs text-ink mt-2 font-mono">Supported: .sas, .r, .txt files</p>
+          </div>
+
+          {/* Text Input Option */}
           <div className="flex gap-2">
             <textarea
               className="flex-grow p-3 text-sm border border-ink focus:outline-none focus:border-2 focus:border-link-blue font-mono transition-all duration-brutal"
-              rows={3}
-              placeholder="Paste raw text or documentation here to extract code..."
+              rows={4}
+              placeholder="Or paste SAS/R code here to extract pattern-specific implementation..."
               value={rawInput}
               onChange={(e) => setRawInput(e.target.value)}
             />
             <button
               onClick={analyzeWithGemini}
-              disabled={isAnalyzing || !rawInput}
+              disabled={isAnalyzing || !rawInput || !currentPattern}
               className="px-4 bg-ink hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-brutal disabled:bg-canvas disabled:text-ink disabled:border-ink text-white text-sm font-medium font-mono uppercase transition-all duration-brutal border border-ink flex flex-col justify-center items-center min-w-[100px]"
             >
               {isAnalyzing ? <i className="fas fa-spinner fa-spin mb-1"></i> : <i className="fas fa-robot mb-1"></i>}
-              {isAnalyzing ? "Thinking..." : "Analyze"}
+              {isAnalyzing ? "Extracting..." : "Extract Code"}
             </button>
           </div>
+
+          {/* Helper Text */}
+          {!currentPattern && (
+            <p className="text-xs text-terminal-red font-mono">
+              <i className="fas fa-exclamation-triangle mr-1"></i> Select a pattern above before extracting code
+            </p>
+          )}
         </div>
       )}
 

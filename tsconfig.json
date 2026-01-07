@@ -10,6 +10,7 @@
       "DOM.Iterable"
     ],
     "skipLibCheck": true,
+    "skipDefaultLibCheck": true,
     "types": [
       "node"
     ],
@@ -25,6 +26,8 @@
     },
     "noEmit": true,
     "esModuleInterop": true,
-    "resolveJsonModule": true
+    "resolveJsonModule": true,
+    "strict": false,
+    "noImplicitAny": false
   }
 }
