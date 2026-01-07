@@ -1901,43 +1901,43 @@ const UnifiedPatternModal = ({
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-white rounded-xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+      <div className="bg-white border border-ink shadow-terminal max-w-4xl w-full max-h-[90vh] overflow-y-auto">
         {/* Header */}
-        <div className="bg-indigo-600 px-6 py-4 flex items-center justify-between">
-          <h2 className="text-xl font-bold text-white">
+        <div className="bg-ink px-6 py-4 flex items-center justify-between">
+          <h2 className="text-xl font-mono uppercase font-semibold text-white tracking-tight-mono">
             {pattern ? `Edit Pattern: ${pattern.id}` : 'Create New Pattern'}
           </h2>
-          <button onClick={onClose} className="text-white hover:text-slate-200">
+          <button onClick={onClose} className="text-white hover:text-duck-yellow transition-colors duration-brutal">
             <i className="fas fa-times text-xl"></i>
           </button>
         </div>
 
         {/* Tab Navigation */}
         {pattern && implementations.length > 0 && (
-          <div className="flex border-b border-slate-200 bg-slate-50">
+          <div className="flex border-b border-ink bg-canvas">
             <button
               onClick={() => setActiveTab('definition')}
-              className={`px-6 py-3 font-semibold transition-colors ${
+              className={`px-6 py-3 font-mono uppercase text-xs font-semibold tracking-tight-mono transition-colors duration-brutal ${
                 activeTab === 'definition'
-                  ? 'border-b-2 border-indigo-600 text-indigo-600 bg-white'
-                  : 'text-slate-600 hover:text-slate-900'
+                  ? 'border-b-2 border-ink text-ink bg-white'
+                  : 'text-ink hover:text-link-blue'
               }`}
             >
               <i className="fas fa-file-alt mr-2"></i>
               Definition
-              {definitionDirty && <span className="ml-2 text-orange-500">*</span>}
+              {definitionDirty && <span className="ml-2 text-duck-yellow">*</span>}
             </button>
             <button
               onClick={() => setActiveTab('implementation')}
-              className={`px-6 py-3 font-semibold transition-colors ${
+              className={`px-6 py-3 font-mono uppercase text-xs font-semibold tracking-tight-mono transition-colors duration-brutal ${
                 activeTab === 'implementation'
-                  ? 'border-b-2 border-indigo-600 text-indigo-600 bg-white'
-                  : 'text-slate-600 hover:text-slate-900'
+                  ? 'border-b-2 border-ink text-ink bg-white'
+                  : 'text-ink hover:text-link-blue'
               }`}
             >
               <i className="fas fa-code mr-2"></i>
               Implementation
-              {implementationDirty && <span className="ml-2 text-orange-500">*</span>}
+              {implementationDirty && <span className="ml-2 text-duck-yellow">*</span>}
             </button>
           </div>
         )}
@@ -1945,7 +1945,8 @@ const UnifiedPatternModal = ({
         {/* Form */}
         <form onSubmit={handleSubmit} className="p-6 space-y-4">
           {error && (
-            <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
+            <div className="bg-white border-2 border-terminal-red text-ink px-4 py-3 font-sans">
+              <i className="fas fa-exclamation-triangle text-terminal-red mr-2"></i>
               {error}
             </div>
           )}
@@ -1955,7 +1956,7 @@ const UnifiedPatternModal = ({
             <>
               {/* Pattern ID */}
               <div>
-                <label className="block text-sm font-semibold text-slate-700 mb-1">
+                <label className="block text-xs font-mono uppercase tracking-tight-mono text-ink font-semibold mb-1">
                   Pattern ID *
                 </label>
                 <input
@@ -1967,14 +1968,14 @@ const UnifiedPatternModal = ({
                   }}
                   disabled={!!pattern}
                   placeholder="IMP-001"
-                  className="w-full p-2 border border-slate-300 rounded-md text-sm disabled:bg-slate-100 disabled:cursor-not-allowed"
+                  className="w-full p-2 border border-ink text-sm font-sans disabled:bg-canvas disabled:cursor-not-allowed"
                 />
-                <p className="text-xs text-slate-500 mt-1">Format: XXX-NNN (e.g., IMP-001)</p>
+                <p className="text-xs text-ink mt-1 font-sans">Format: XXX-NNN (e.g., IMP-001)</p>
               </div>
 
               {/* Category */}
               <div>
-                <label className="block text-sm font-semibold text-slate-700 mb-1">
+                <label className="block text-xs font-mono uppercase tracking-tight-mono text-ink font-semibold mb-1">
                   Category *
                 </label>
                 <select
@@ -1983,7 +1984,7 @@ const UnifiedPatternModal = ({
                     setDefinitionForm({ ...definitionForm, category: e.target.value });
                     setDefinitionDirty(true);
                   }}
-                  className="w-full p-2 border border-slate-300 rounded-md text-sm"
+                  className="w-full p-2 border border-ink text-sm font-sans"
                 >
                   <option value="IMP">IMP - Imputation</option>
                   <option value="DER">DER - Derivations</option>
@@ -2004,7 +2005,7 @@ const UnifiedPatternModal = ({
 
               {/* Title */}
               <div>
-                <label className="block text-sm font-semibold text-slate-700 mb-1">
+                <label className="block text-xs font-mono uppercase tracking-tight-mono text-ink font-semibold mb-1">
                   Title *
                 </label>
                 <input
@@ -2014,14 +2015,14 @@ const UnifiedPatternModal = ({
                     setDefinitionForm({ ...definitionForm, title: e.target.value });
                     setDefinitionDirty(true);
                   }}
-                  className="w-full p-2 border border-slate-300 rounded-md text-sm"
+                  className="w-full p-2 border border-ink text-sm font-sans"
                   placeholder="e.g., Last Observation Carried Forward"
                 />
               </div>
 
               {/* Problem */}
               <div>
-                <label className="block text-sm font-semibold text-slate-700 mb-1">
+                <label className="block text-xs font-mono uppercase tracking-tight-mono text-ink font-semibold mb-1">
                   Problem Statement *
                 </label>
                 <textarea
@@ -2031,14 +2032,14 @@ const UnifiedPatternModal = ({
                     setDefinitionDirty(true);
                   }}
                   rows={4}
-                  className="w-full p-2 border border-slate-300 rounded-md text-sm"
+                  className="w-full p-2 border border-ink text-sm font-sans"
                   placeholder="Describe the problem this pattern solves..."
                 />
               </div>
 
               {/* When to Use */}
               <div>
-                <label className="block text-sm font-semibold text-slate-700 mb-1">
+                <label className="block text-xs font-mono uppercase tracking-tight-mono text-ink font-semibold mb-1">
                   When to Use *
                 </label>
                 <textarea
@@ -2048,7 +2049,7 @@ const UnifiedPatternModal = ({
                     setDefinitionDirty(true);
                   }}
                   rows={4}
-                  className="w-full p-2 border border-slate-300 rounded-md text-sm"
+                  className="w-full p-2 border border-ink text-sm font-sans"
                   placeholder="Describe when to use this pattern..."
                 />
               </div>
@@ -2061,13 +2062,13 @@ const UnifiedPatternModal = ({
               {/* Implementation Selector */}
               {implementations.length > 1 && (
                 <div>
-                  <label className="block text-sm font-semibold text-slate-700 mb-1">
+                  <label className="block text-xs font-mono uppercase tracking-tight-mono text-ink font-semibold mb-1">
                     Select Implementation
                   </label>
                   <select
                     value={selectedImplUuid}
                     onChange={(e) => setSelectedImplUuid(e.target.value)}
-                    className="w-full p-2 border border-slate-300 rounded-md text-sm"
+                    className="w-full p-2 border border-ink text-sm font-sans"
                   >
                     {implementations.map(impl => (
                       <option key={impl.uuid} value={impl.uuid}>
@@ -2080,20 +2081,20 @@ const UnifiedPatternModal = ({
 
               {/* Author (read-only) */}
               <div>
-                <label className="block text-sm font-semibold text-slate-700 mb-1">
+                <label className="block text-xs font-mono uppercase tracking-tight-mono text-ink font-semibold mb-1">
                   Author
                 </label>
                 <input
                   type="text"
                   value={implementationForm.author}
                   disabled
-                  className="w-full p-2 border border-slate-300 rounded-md text-sm bg-slate-100 cursor-not-allowed"
+                  className="w-full p-2 border border-ink text-sm font-sans bg-canvas cursor-not-allowed"
                 />
               </div>
 
               {/* SAS Code */}
               <div>
-                <label className="block text-sm font-semibold text-slate-700 mb-1">
+                <label className="block text-xs font-mono uppercase tracking-tight-mono text-ink font-semibold mb-1">
                   SAS Code *
                 </label>
                 <textarea
@@ -2103,14 +2104,14 @@ const UnifiedPatternModal = ({
                     setImplementationDirty(true);
                   }}
                   rows={10}
-                  className="w-full p-2 border border-slate-300 rounded-md text-sm font-mono"
+                  className="w-full p-2 border border-ink text-sm font-mono bg-white"
                   placeholder="/* SAS code here */"
                 />
               </div>
 
               {/* R Code */}
               <div>
-                <label className="block text-sm font-semibold text-slate-700 mb-1">
+                <label className="block text-xs font-mono uppercase tracking-tight-mono text-ink font-semibold mb-1">
                   R Code *
                 </label>
                 <textarea
@@ -2120,14 +2121,14 @@ const UnifiedPatternModal = ({
                     setImplementationDirty(true);
                   }}
                   rows={10}
-                  className="w-full p-2 border border-slate-300 rounded-md text-sm font-mono"
+                  className="w-full p-2 border border-ink text-sm font-mono bg-white"
                   placeholder="# R code here"
                 />
               </div>
 
               {/* Considerations */}
               <div>
-                <label className="block text-sm font-semibold text-slate-700 mb-1">
+                <label className="block text-xs font-mono uppercase tracking-tight-mono text-ink font-semibold mb-1">
                   Key Considerations
                 </label>
                 <textarea
@@ -2137,15 +2138,15 @@ const UnifiedPatternModal = ({
                     setImplementationDirty(true);
                   }}
                   rows={4}
-                  className="w-full p-2 border border-slate-300 rounded-md text-sm"
+                  className="w-full p-2 border border-ink text-sm font-sans"
                   placeholder="One consideration per line..."
                 />
-                <p className="text-xs text-slate-500 mt-1">Enter each consideration on a new line</p>
+                <p className="text-xs text-ink mt-1 font-sans">Enter each consideration on a new line</p>
               </div>
 
               {/* Variations */}
               <div>
-                <label className="block text-sm font-semibold text-slate-700 mb-1">
+                <label className="block text-xs font-mono uppercase tracking-tight-mono text-ink font-semibold mb-1">
                   Common Variations
                 </label>
                 <textarea
@@ -2155,16 +2156,16 @@ const UnifiedPatternModal = ({
                     setImplementationDirty(true);
                   }}
                   rows={4}
-                  className="w-full p-2 border border-slate-300 rounded-md text-sm"
+                  className="w-full p-2 border border-ink text-sm font-sans"
                   placeholder="One variation per line..."
                 />
-                <p className="text-xs text-slate-500 mt-1">Enter each variation on a new line</p>
+                <p className="text-xs text-ink mt-1 font-sans">Enter each variation on a new line</p>
               </div>
 
               {/* Status (admin only) */}
               {userRole === 'admin' && (
                 <div>
-                  <label className="block text-sm font-semibold text-slate-700 mb-1">
+                  <label className="block text-xs font-mono uppercase tracking-tight-mono text-ink font-semibold mb-1">
                     Status
                   </label>
                   <select
@@ -2173,7 +2174,7 @@ const UnifiedPatternModal = ({
                       setImplementationForm({ ...implementationForm, status: e.target.value as 'active' | 'pending' });
                       setImplementationDirty(true);
                     }}
-                    className="w-full p-2 border border-slate-300 rounded-md text-sm"
+                    className="w-full p-2 border border-ink text-sm font-sans"
                   >
                     <option value="pending">Pending</option>
                     <option value="active">Active</option>
@@ -2184,19 +2185,19 @@ const UnifiedPatternModal = ({
           )}
 
           {/* Buttons */}
-          <div className="flex justify-end space-x-3 pt-4 border-t border-slate-200">
+          <div className="flex justify-end space-x-3 pt-4 border-t border-ink">
             <button
               type="button"
               onClick={onClose}
               disabled={saving}
-              className="px-6 py-2 border border-slate-300 text-slate-700 rounded-lg hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="px-6 py-3 border border-ink text-ink bg-white font-mono uppercase text-sm font-semibold hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-brutal transition-all duration-brutal disabled:opacity-50 disabled:cursor-not-allowed"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={saving || (!definitionDirty && !implementationDirty)}
-              className="px-6 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg disabled:opacity-50 disabled:cursor-not-allowed flex items-center"
+              className="px-6 py-3 bg-ink text-white border border-ink font-mono uppercase text-sm font-semibold hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-brutal transition-all duration-brutal disabled:opacity-50 disabled:cursor-not-allowed flex items-center"
             >
               {saving ? (
                 <>
@@ -3044,13 +3045,13 @@ const MyContributions = ({
   const getStatusBadgeClass = (status: string) => {
     switch (status) {
       case 'pending':
-        return 'bg-yellow-100 text-yellow-800 border-yellow-200';
+        return 'bg-white text-ink border-2 border-duck-yellow';
       case 'active':
-        return 'bg-green-100 text-green-800 border-green-200';
+        return 'bg-white text-ink border-2 border-terminal-green';
       case 'rejected':
-        return 'bg-red-100 text-red-800 border-red-200';
+        return 'bg-white text-ink border-2 border-terminal-red';
       default:
-        return 'bg-slate-100 text-slate-800 border-slate-200';
+        return 'bg-white text-ink border-2 border-ink';
     }
   };
 
@@ -3064,8 +3065,8 @@ const MyContributions = ({
     return (
       <div className="max-w-6xl mx-auto">
         <div className="text-center py-20">
-          <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 mb-4"></div>
-          <div className="text-slate-700 text-lg">Loading your contributions...</div>
+          <div className="inline-block animate-spin h-12 w-12 border-b-2 border-ink mb-4"></div>
+          <div className="text-ink text-lg font-sans">Loading your contributions...</div>
         </div>
       </div>
     );
@@ -3074,10 +3075,10 @@ const MyContributions = ({
   if (error) {
     return (
       <div className="max-w-6xl mx-auto">
-        <div className="bg-red-50 border border-red-200 rounded-xl p-6 text-center">
-          <i className="fas fa-exclamation-triangle text-red-500 text-3xl mb-3"></i>
-          <h3 className="text-lg font-semibold text-red-900 mb-2">Error Loading Contributions</h3>
-          <p className="text-red-700">{error}</p>
+        <div className="bg-white border-2 border-terminal-red shadow-brutal-lg p-6 text-center">
+          <i className="fas fa-exclamation-triangle text-terminal-red text-3xl mb-3"></i>
+          <h3 className="text-lg font-mono uppercase text-ink mb-2">Error Loading Contributions</h3>
+          <p className="text-ink font-sans">{error}</p>
         </div>
       </div>
     );
@@ -3086,17 +3087,17 @@ const MyContributions = ({
   if (contributions.length === 0) {
     return (
       <div className="max-w-6xl mx-auto">
-        <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-12 text-center">
-          <div className="w-20 h-20 bg-indigo-50 rounded-full flex items-center justify-center mx-auto mb-6">
-            <i className="fas fa-folder-open text-indigo-500 text-3xl"></i>
+        <div className="bg-white border border-ink p-12 text-center">
+          <div className="w-20 h-20 bg-canvas border border-ink flex items-center justify-center mx-auto mb-6">
+            <i className="fas fa-folder-open text-ink text-3xl"></i>
           </div>
-          <h3 className="text-2xl font-bold text-slate-900 mb-3">No Contributions Yet</h3>
-          <p className="text-slate-600 mb-6 max-w-md mx-auto">
+          <h3 className="text-2xl font-mono uppercase text-ink mb-3">No Contributions Yet</h3>
+          <p className="text-ink font-sans mb-6 max-w-md mx-auto">
             You haven't submitted any pattern implementations yet. Share your expertise with the community!
           </p>
           <button
             onClick={onContribute}
-            className="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-3 rounded-lg font-medium transition-colors shadow-sm inline-flex items-center"
+            className="bg-ink text-white border border-ink px-6 py-3 font-mono uppercase font-semibold hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-brutal transition-all duration-brutal inline-flex items-center"
           >
             <i className="fas fa-plus-circle mr-2"></i>
             Contribute Now
@@ -3109,8 +3110,8 @@ const MyContributions = ({
   return (
     <div className="max-w-6xl mx-auto">
       <div className="mb-6">
-        <h2 className="text-3xl font-bold text-slate-900 mb-2">My Contributions</h2>
-        <p className="text-slate-600">
+        <h2 className="text-3xl font-mono uppercase tracking-wide-head text-ink mb-2">My Contributions</h2>
+        <p className="text-ink font-sans">
           You have submitted {contributions.length} pattern implementation{contributions.length !== 1 ? 's' : ''}
         </p>
       </div>
@@ -3124,23 +3125,23 @@ const MyContributions = ({
           return (
             <div
               key={contribution.uuid}
-              className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden hover:shadow-md transition-shadow"
+              className="bg-white border border-ink overflow-hidden hover:-translate-y-1 hover:shadow-brutal-lg transition-transform duration-brutal"
             >
               <div className="p-6">
                 <div className="flex items-start justify-between mb-4">
                   <div className="flex-grow">
                     <div className="flex items-center space-x-3 mb-2">
-                      <span className="px-2 py-1 bg-slate-100 text-slate-700 text-xs font-mono font-semibold rounded">
+                      <span className="px-2 py-1 bg-ink text-white text-xs font-mono font-semibold uppercase">
                         {contribution.patternId}
                       </span>
-                      <h3 className="text-lg font-bold text-slate-900">
+                      <h3 className="text-lg font-bold text-ink font-sans">
                         {contribution.patternTitle}
                       </h3>
-                      <span className={`px-3 py-1 text-xs font-semibold rounded-full border ${getStatusBadgeClass(contribution.status)}`}>
+                      <span className={`px-3 py-1 text-xs font-mono font-semibold uppercase border ${getStatusBadgeClass(contribution.status)}`}>
                         {contribution.status.charAt(0).toUpperCase() + contribution.status.slice(1)}
                       </span>
                     </div>
-                    <p className="text-sm text-slate-500">
+                    <p className="text-sm text-ink font-sans">
                       Category: {contribution.patternCategory} | Submitted: {formatRelativeTime(contribution.createdAt)}
                       {contribution.updatedAt !== contribution.createdAt && (
                         <> | Updated: {formatRelativeTime(contribution.updatedAt)}</>
@@ -3165,14 +3166,14 @@ const MyContributions = ({
                           };
                           onEdit(impl);
                         }}
-                        className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors shadow-sm"
+                        className="bg-ink text-white border border-ink px-4 py-2 text-sm font-mono uppercase font-semibold hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-brutal transition-all duration-brutal"
                       >
                         <i className="fas fa-edit mr-2"></i>
                         Edit
                       </button>
                     )}
                     {(isActive || isRejected) && (
-                      <span className="text-sm text-slate-500 italic">
+                      <span className="text-sm text-ink font-sans italic">
                         {isActive ? 'Published' : 'View Only'}
                       </span>
                     )}
@@ -3180,48 +3181,48 @@ const MyContributions = ({
                 </div>
 
                 {/* SAS Code Preview */}
-                <div className="bg-slate-50 rounded-lg p-4 border border-slate-200">
-                  <h4 className="text-xs font-semibold text-slate-700 uppercase mb-2">SAS Code Preview</h4>
+                <div className="bg-white border border-ink p-4 shadow-terminal">
+                  <h4 className="text-xs font-mono uppercase tracking-tight-mono text-ink font-semibold mb-2">SAS Code Preview</h4>
                   {contribution.sasCode ? (
                     <>
-                      <pre className="text-xs font-mono text-slate-700 whitespace-pre-wrap overflow-hidden">
+                      <pre className="text-xs font-mono text-ink whitespace-pre-wrap overflow-hidden">
                         {contribution.sasCode.split('\n').filter(l => l.trim()).slice(0, 3).join('\n')}
                       </pre>
                       {contribution.sasCode.split('\n').length > 3 && (
-                        <p className="text-xs text-slate-500 mt-2 italic">...</p>
+                        <p className="text-xs text-ink mt-2 italic font-sans">...</p>
                       )}
                     </>
                   ) : (
-                    <p className="text-xs text-slate-500 italic">(Not provided)</p>
+                    <p className="text-xs text-ink italic font-sans">(Not provided)</p>
                   )}
                 </div>
 
                 {/* R Code Preview */}
-                <div className="bg-slate-50 rounded-lg p-4 border border-slate-200 mt-4">
-                  <h4 className="text-xs font-semibold text-slate-700 uppercase mb-2">R Code Preview</h4>
+                <div className="bg-white border border-ink p-4 shadow-terminal mt-4">
+                  <h4 className="text-xs font-mono uppercase tracking-tight-mono text-ink font-semibold mb-2">R Code Preview</h4>
                   {contribution.rCode ? (
                     <>
-                      <pre className="text-xs font-mono text-slate-700 whitespace-pre-wrap overflow-hidden">
+                      <pre className="text-xs font-mono text-ink whitespace-pre-wrap overflow-hidden">
                         {contribution.rCode.split('\n').filter(l => l.trim()).slice(0, 3).join('\n')}
                       </pre>
                       {contribution.rCode.split('\n').length > 3 && (
-                        <p className="text-xs text-slate-500 mt-2 italic">...</p>
+                        <p className="text-xs text-ink mt-2 italic font-sans">...</p>
                       )}
                     </>
                   ) : (
-                    <p className="text-xs text-slate-500 italic">(Not provided)</p>
+                    <p className="text-xs text-ink italic font-sans">(Not provided)</p>
                   )}
                 </div>
 
                 {contribution.considerations.length > 0 && (
                   <div className="mt-4">
-                    <h4 className="text-xs font-semibold text-slate-700 uppercase mb-1">Considerations</h4>
-                    <ul className="list-disc list-inside text-sm text-slate-600 space-y-1">
+                    <h4 className="text-xs font-mono uppercase tracking-tight-mono text-ink font-semibold mb-1">Considerations</h4>
+                    <ul className="list-disc list-inside text-sm text-ink font-sans space-y-1">
                       {contribution.considerations.slice(0, 2).map((c, i) => (
                         <li key={i}>{c}</li>
                       ))}
                       {contribution.considerations.length > 2 && (
-                        <li className="text-slate-500 italic">+ {contribution.considerations.length - 2} more...</li>
+                        <li className="text-ink italic">+ {contribution.considerations.length - 2} more...</li>
                       )}
                     </ul>
                   </div>
