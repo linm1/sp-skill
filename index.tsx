@@ -345,21 +345,21 @@ const Layout = ({
   const userRole = (user?.publicMetadata?.role as Role) || 'contributor';
 
   return (
-    <div className="min-h-screen flex flex-col font-sans text-slate-800">
-      <nav className="bg-slate-900 text-white shadow-lg sticky top-0 z-50">
-        <div className="container mx-auto px-6 py-4 flex justify-between items-center">
+    <div className="min-h-screen flex flex-col font-sans text-ink">
+      <nav className="bg-white text-ink border-b border-ink sticky top-0 z-50">
+        <div className="container mx-auto px-6 py-4 flex justify-between items-center" style={{ height: '70px' }}>
           <div className="flex items-center space-x-4 cursor-pointer" onClick={() => {
             if (currentView === "admin-patterns" || currentView === "admin-review") {
               onRefresh?.();
             }
             setView("catalog");
           }}>
-            <div className="w-10 h-10 bg-indigo-500 rounded-lg flex items-center justify-center font-bold text-xl">
+            <div className="w-10 h-10 bg-duck-yellow rounded-full flex items-center justify-center font-bold text-xl border border-ink">
               SPH
             </div>
             <div>
-              <h1 className="text-xl font-bold tracking-tight">StatPatternHub</h1>
-              <p className="text-xs text-slate-400">Clinical Knowledge Warehouse</p>
+              <h1 className="text-xl font-bold font-mono uppercase tracking-tight-mono">StatPatternHub</h1>
+              <p className="text-xs text-ink">Clinical Knowledge Warehouse</p>
             </div>
           </div>
           <div className="flex items-center space-x-6">
@@ -370,7 +370,7 @@ const Layout = ({
                 }
                 setView("catalog");
               }}
-              className={`hover:text-indigo-400 ${currentView === "catalog" ? "text-indigo-400" : ""}`}
+              className={`font-mono uppercase text-sm font-medium tracking-tight-mono hover:text-link-blue transition-colors duration-brutal ${currentView === "catalog" ? "text-link-blue" : "text-ink"}`}
             >
               Catalog
             </button>
@@ -383,7 +383,7 @@ const Layout = ({
                     setView("contribute");
                   }
                 }}
-                className={`hover:text-indigo-400 flex items-center ${currentView === "contribute" ? "text-indigo-400" : ""}`}
+                className={`font-mono uppercase text-sm font-medium tracking-tight-mono hover:text-link-blue transition-colors duration-brutal flex items-center ${currentView === "contribute" ? "text-link-blue" : "text-ink"}`}
               >
                 <i className="fas fa-plus-circle mr-2"></i>
                 Contribute
@@ -392,7 +392,7 @@ const Layout = ({
             {isLoaded && isSignedIn && userRole !== 'guest' && (
               <button
                 onClick={() => setView("my-contributions")}
-                className={`hover:text-indigo-400 flex items-center ${currentView === "my-contributions" ? "text-indigo-400" : ""}`}
+                className={`font-mono uppercase text-sm font-medium tracking-tight-mono hover:text-link-blue transition-colors duration-brutal flex items-center ${currentView === "my-contributions" ? "text-link-blue" : "text-ink"}`}
               >
                 <i className="fas fa-folder-open mr-2"></i>
                 My Contributions
@@ -402,14 +402,14 @@ const Layout = ({
               <>
                 <button
                   onClick={() => setView("admin-review")}
-                  className={`hover:text-indigo-400 flex items-center ${currentView === "admin-review" ? "text-indigo-400" : ""}`}
+                  className={`font-mono uppercase text-sm font-medium tracking-tight-mono hover:text-link-blue transition-colors duration-brutal flex items-center ${currentView === "admin-review" ? "text-link-blue" : "text-ink"}`}
                 >
                   <i className="fas fa-clipboard-check mr-2"></i>
                   Admin Review
                 </button>
                 <button
                   onClick={() => setView("admin-patterns")}
-                  className={`hover:text-indigo-400 flex items-center ${currentView === "admin-patterns" ? "text-indigo-400" : ""}`}
+                  className={`font-mono uppercase text-sm font-medium tracking-tight-mono hover:text-link-blue transition-colors duration-brutal flex items-center ${currentView === "admin-patterns" ? "text-link-blue" : "text-ink"}`}
                 >
                   <i className="fas fa-cog mr-2"></i>
                   Admin Panel
@@ -418,17 +418,17 @@ const Layout = ({
             )}
             <button
               onClick={() => setView("basket")}
-              className={`hover:text-indigo-400 flex items-center ${currentView === "basket" ? "text-indigo-400" : ""}`}
+              className={`font-mono uppercase text-sm font-medium tracking-tight-mono hover:text-link-blue transition-colors duration-brutal flex items-center ${currentView === "basket" ? "text-link-blue" : "text-ink"}`}
             >
               <i className="fas fa-suitcase mr-2"></i>
               Skill Basket
-              <span className="ml-2 bg-indigo-600 text-white text-xs font-bold px-2 py-0.5 rounded-full">{basketCount}</span>
+              <span className="ml-2 bg-ink text-white text-xs font-bold px-2 py-1 border border-ink">{basketCount}</span>
             </button>
-            <div className="border-l border-slate-700 pl-6 flex items-center space-x-4">
+            <div className="border-l border-ink pl-6 flex items-center space-x-4">
               {isLoaded && isSignedIn ? (
                 <>
                   <div className="flex items-center space-x-2">
-                    <span className="text-sm text-slate-300">
+                    <span className="text-sm text-ink">
                       {user?.firstName || user?.username || "User"}
                     </span>
                     <UserButton
@@ -441,12 +441,12 @@ const Layout = ({
                     />
                   </div>
                   <div className="flex flex-col items-end">
-                    <span className="text-xs text-slate-500 uppercase">Role</span>
-                    <span className={`text-sm font-semibold ${
-                      userRole === 'admin' ? 'text-amber-400' :
-                      userRole === 'premier' ? 'text-purple-400' :
-                      userRole === 'contributor' ? 'text-indigo-400' :
-                      'text-slate-400'
+                    <span className="text-xs text-ink uppercase font-mono">Role</span>
+                    <span className={`text-sm font-semibold font-mono uppercase ${
+                      userRole === 'admin' ? 'text-terminal-red' :
+                      userRole === 'premier' ? 'text-link-blue' :
+                      userRole === 'contributor' ? 'text-terminal-green' :
+                      'text-ink'
                     }`}>
                       {userRole.charAt(0).toUpperCase() + userRole.slice(1)}
                     </span>
@@ -455,12 +455,12 @@ const Layout = ({
               ) : (
                 <div className="flex items-center space-x-3">
                   <SignInButton mode="modal">
-                    <button className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors">
+                    <button className="bg-ink hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-brutal text-white px-4 py-2 text-sm font-medium font-mono uppercase transition-all duration-brutal border border-ink">
                       Sign In
                     </button>
                   </SignInButton>
                   <SignUpButton mode="modal">
-                    <button className="bg-white hover:bg-slate-100 text-slate-900 px-4 py-2 rounded-lg text-sm font-medium transition-colors">
+                    <button className="bg-white hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-brutal text-ink px-4 py-2 text-sm font-medium font-mono uppercase transition-all duration-brutal border border-ink">
                       Sign Up
                     </button>
                   </SignUpButton>
@@ -471,8 +471,8 @@ const Layout = ({
         </div>
       </nav>
       <main className="flex-grow container mx-auto px-6 py-8">{children}</main>
-      <footer className="bg-slate-100 border-t border-slate-200 mt-auto">
-        <div className="container mx-auto px-6 py-6 text-center text-sm text-slate-500">
+      <footer className="bg-canvas border-t border-ink mt-auto">
+        <div className="container mx-auto px-6 py-6 text-center text-sm text-ink font-mono">
           StatPatternHub v1.0.0 | Adheres to SKILL_MANIFEST.md Schema
         </div>
       </footer>
@@ -494,26 +494,284 @@ const PatternCard: React.FC<PatternCardProps> = ({
   return (
     <div
       onClick={onClick}
-      className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden hover:shadow-md transition-shadow flex flex-col h-full cursor-pointer group"
+      className="bg-white border border-black overflow-hidden hover:-translate-y-1 hover:shadow-brutal-lg transition-transform duration-brutal flex flex-col h-full cursor-pointer group"
     >
-      <div className="p-5 flex-grow">
-        <div className="flex justify-between items-start mb-2">
-          <span className="inline-block px-2 py-1 text-xs font-semibold bg-indigo-50 text-indigo-700 rounded-md">
+      <div className="p-8 flex-grow">
+        <div className="flex justify-between items-start mb-3">
+          <span className="inline-block px-2 py-1 text-xs font-semibold bg-ink text-white font-mono uppercase border border-ink">
             {def.id}
           </span>
           {implCount > 1 && (
-             <span className="text-xs bg-slate-100 text-slate-600 px-2 py-1 rounded-full border border-slate-200">
+             <span className="text-xs bg-white text-ink px-2 py-1 border border-ink font-mono">
                 {implCount} Variations
              </span>
           )}
         </div>
-        <h3 className="text-lg font-bold text-slate-900 mb-2 leading-tight group-hover:text-indigo-600 transition-colors">{def.title}</h3>
-        <p className="text-sm text-slate-600 line-clamp-2 mb-4">{def.problem}</p>
+        <h3 className="text-lg font-bold text-ink mb-3 leading-tight group-hover:text-link-blue transition-colors duration-brutal">{def.title}</h3>
+        <p className="text-sm text-ink line-clamp-2 mb-4">{def.problem}</p>
       </div>
-      <div className="px-5 py-3 bg-slate-50 border-t border-slate-100 flex justify-between items-center text-xs text-slate-500">
+      <div className="px-8 py-3 bg-canvas border-t border-ink flex justify-between items-center text-xs text-ink font-mono uppercase">
           <span>{def.category}</span>
           <span>View Container &rarr;</span>
       </div>
+    </div>
+  );
+};
+
+// --- Admin Card Components ---
+
+interface PatternCardAdminProps {
+  def: PatternDefinition & { isDeleted?: boolean };
+  implCount: number;
+  onView: () => void;
+  onEdit: () => void;
+  onDelete: () => void;
+}
+
+const PatternCardAdmin: React.FC<PatternCardAdminProps> = ({
+  def, implCount, onView, onEdit, onDelete
+}) => {
+  return (
+    <div className={`bg-white border border-ink hover:-translate-y-1 hover:shadow-brutal-lg transition-transform duration-brutal h-full flex flex-col ${
+      def.isDeleted ? 'opacity-60' : ''
+    }`}>
+      {/* Header: Pattern ID Badge */}
+      <div className="bg-ink text-white px-4 py-2 flex justify-between items-center">
+        <span className="font-mono text-xs uppercase tracking-tight-mono">
+          {def.id}
+        </span>
+        {def.isDeleted && (
+          <span className="bg-terminal-red text-white px-2 py-1 text-xs font-mono uppercase tracking-tight-mono">
+            DELETED
+          </span>
+        )}
+      </div>
+
+      {/* Body: Pattern Info (click to view) */}
+      <div className="p-8 flex-grow cursor-pointer" onClick={onView}>
+        {/* Category */}
+        <div className="text-xs font-mono uppercase tracking-tight-mono text-ink/60 mb-2">
+          {def.category}
+        </div>
+
+        {/* Title */}
+        <h3 className={`text-xl font-sans font-semibold text-ink mb-3 ${def.isDeleted ? 'line-through' : ''}`}>
+          {def.title}
+        </h3>
+
+        {/* Problem (truncated) */}
+        <p className="text-sm font-sans text-ink/80 line-clamp-2 mb-4">
+          {def.problem}
+        </p>
+
+        {/* Implementation Count */}
+        <div className="text-xs font-mono text-ink/60">
+          {implCount} implementation{implCount !== 1 ? 's' : ''}
+        </div>
+      </div>
+
+      {/* Footer: Action Buttons */}
+      {!def.isDeleted && (
+        <div className="border-t border-ink bg-canvas flex">
+          <button
+            onClick={(e) => { e.stopPropagation(); onView(); }}
+            className="flex-1 py-3 font-mono uppercase text-xs tracking-tight-mono text-ink hover:bg-link-blue hover:text-white transition-colors duration-brutal border-r border-ink"
+          >
+            View
+          </button>
+          <button
+            onClick={(e) => { e.stopPropagation(); onEdit(); }}
+            className="flex-1 py-3 font-mono uppercase text-xs tracking-tight-mono text-link-blue hover:bg-link-blue hover:text-white transition-colors duration-brutal border-r border-ink"
+          >
+            Edit
+          </button>
+          <button
+            onClick={(e) => { e.stopPropagation(); onDelete(); }}
+            className="flex-1 py-3 font-mono uppercase text-xs tracking-tight-mono text-terminal-red hover:bg-terminal-red hover:text-white transition-colors duration-brutal"
+          >
+            Delete
+          </button>
+        </div>
+      )}
+    </div>
+  );
+};
+
+interface PendingImplementationCardProps {
+  impl: {
+    uuid: string;
+    patternId: string;
+    patternTitle: string;
+    patternCategory: string;
+    authorName: string;
+    sasCode: string;
+    rCode: string;
+  };
+  onApprove: () => void;
+  onReject: () => void;
+  onViewCode: () => void;
+}
+
+const PendingImplementationCard: React.FC<PendingImplementationCardProps> = ({
+  impl, onApprove, onReject, onViewCode
+}) => {
+  return (
+    <div className="bg-white border-2 border-ink hover:-translate-y-1 hover:shadow-brutal-lg transition-transform duration-brutal h-full flex flex-col">
+      {/* Header: Pattern ID + Pending Badge */}
+      <div className="flex justify-between items-center px-4 py-2 border-b border-ink">
+        <span className="font-mono text-xs uppercase tracking-tight-mono text-ink">
+          {impl.patternId}
+        </span>
+        <span className="bg-duck-yellow text-ink px-3 py-1 font-mono text-xs uppercase tracking-tight-mono">
+          PENDING
+        </span>
+      </div>
+
+      {/* Body: Implementation Info (click to view code) */}
+      <div className="p-8 flex-grow cursor-pointer" onClick={onViewCode}>
+        {/* Category */}
+        <div className="text-xs font-mono uppercase tracking-tight-mono text-ink/60 mb-2">
+          {impl.patternCategory}
+        </div>
+
+        {/* Title */}
+        <h3 className="text-xl font-sans font-semibold text-ink mb-3">
+          {impl.patternTitle}
+        </h3>
+
+        {/* Author */}
+        <div className="text-sm font-mono text-ink/80 mb-3">
+          by {impl.authorName}
+        </div>
+
+        {/* Code indicators */}
+        <div className="flex gap-2 text-xs font-mono text-ink/60">
+          {impl.sasCode && <span className="border border-ink px-2 py-1">SAS</span>}
+          {impl.rCode && <span className="border border-ink px-2 py-1">R</span>}
+        </div>
+      </div>
+
+      {/* Footer: Action Buttons */}
+      <div className="border-t border-ink bg-canvas flex">
+        <button
+          onClick={(e) => { e.stopPropagation(); onViewCode(); }}
+          className="flex-1 py-3 font-mono uppercase text-xs tracking-tight-mono text-ink hover:bg-link-blue hover:text-white transition-colors duration-brutal border-r border-ink"
+        >
+          View Code
+        </button>
+        <button
+          onClick={(e) => { e.stopPropagation(); onApprove(); }}
+          className="flex-1 py-3 font-mono uppercase text-xs tracking-tight-mono text-terminal-green hover:bg-terminal-green hover:text-white transition-colors duration-brutal border-r border-ink"
+        >
+          Approve
+        </button>
+        <button
+          onClick={(e) => { e.stopPropagation(); onReject(); }}
+          className="flex-1 py-3 font-mono uppercase text-xs tracking-tight-mono text-terminal-red hover:bg-terminal-red hover:text-white transition-colors duration-brutal"
+        >
+          Reject
+        </button>
+      </div>
+    </div>
+  );
+};
+
+interface ImplementationCardAdminProps {
+  impl: PatternImplementation & {
+    isDeleted?: boolean;
+    patternTitle?: string;
+    patternCategory?: string;
+  };
+  onEdit: () => void;
+  onDelete: () => void;
+  onToggleStatus?: () => void;
+}
+
+const ImplementationCardAdmin: React.FC<ImplementationCardAdminProps> = ({
+  impl, onEdit, onDelete, onToggleStatus
+}) => {
+  const isActive = impl.status === 'active';
+
+  return (
+    <div className={`bg-white border border-ink hover:-translate-y-1 hover:shadow-brutal-lg transition-transform duration-brutal h-full flex flex-col ${
+      impl.isDeleted ? 'opacity-60' : ''
+    }`}>
+      {/* Header: Pattern ID + Status */}
+      <div className="flex justify-between items-center px-4 py-2 border-b border-ink">
+        <span className="font-mono text-xs uppercase tracking-tight-mono text-ink">
+          {impl.patternId}
+        </span>
+        <div className="flex gap-2 items-center">
+          {onToggleStatus && !impl.isDeleted && (
+            <button
+              onClick={onToggleStatus}
+              className={`px-3 py-1 font-mono text-xs uppercase tracking-tight-mono transition-colors duration-brutal ${
+                isActive
+                  ? 'bg-terminal-green text-white hover:bg-terminal-green/80'
+                  : 'bg-duck-yellow text-ink hover:bg-duck-yellow/80'
+              }`}
+            >
+              {isActive ? 'ACTIVE' : 'PENDING'}
+            </button>
+          )}
+          {!onToggleStatus && (
+            <span className={`px-3 py-1 font-mono text-xs uppercase tracking-tight-mono ${
+              isActive
+                ? 'bg-terminal-green text-white'
+                : 'bg-duck-yellow text-ink'
+            }`}>
+              {isActive ? 'ACTIVE' : 'PENDING'}
+            </span>
+          )}
+          {impl.isDeleted && (
+            <span className="bg-terminal-red text-white px-2 py-1 text-xs font-mono uppercase tracking-tight-mono">
+              DELETED
+            </span>
+          )}
+        </div>
+      </div>
+
+      {/* Body: Implementation Info */}
+      <div className="p-8 flex-grow">
+        {/* Category */}
+        <div className="text-xs font-mono uppercase tracking-tight-mono text-ink/60 mb-2">
+          {impl.patternCategory || impl.patternId.split('-')[0]}
+        </div>
+
+        {/* Title */}
+        <h3 className={`text-xl font-sans font-semibold text-ink mb-3 ${impl.isDeleted ? 'line-through' : ''}`}>
+          {impl.patternTitle || impl.patternId}
+        </h3>
+
+        {/* Author */}
+        <div className="text-sm font-mono text-ink/80 mb-3">
+          by {impl.author}
+        </div>
+
+        {/* Has Code Indicators */}
+        <div className="flex gap-2 text-xs font-mono text-ink/60">
+          {impl.sasCode && <span className="border border-ink px-2 py-1">SAS</span>}
+          {impl.rCode && <span className="border border-ink px-2 py-1">R</span>}
+        </div>
+      </div>
+
+      {/* Footer: Action Buttons */}
+      {!impl.isDeleted && (
+        <div className="border-t border-ink bg-canvas flex">
+          <button
+            onClick={onEdit}
+            className="flex-1 py-3 font-mono uppercase text-xs tracking-tight-mono text-link-blue hover:bg-link-blue hover:text-white transition-colors duration-brutal border-r border-ink"
+          >
+            Edit
+          </button>
+          <button
+            onClick={onDelete}
+            className="flex-1 py-3 font-mono uppercase text-xs tracking-tight-mono text-terminal-red hover:bg-terminal-red hover:text-white transition-colors duration-brutal"
+          >
+            Delete
+          </button>
+        </div>
+      )}
     </div>
   );
 };
@@ -554,13 +812,13 @@ const PatternDetail = ({
   if (!activeImpl) {
     return (
       <div className="max-w-5xl mx-auto">
-        <button onClick={onBack} className="text-sm text-slate-500 hover:text-indigo-600 flex items-center mb-6">
+        <button onClick={onBack} className="text-sm text-ink hover:text-link-blue flex items-center mb-6 font-mono uppercase transition-colors duration-brutal">
           <i className="fas fa-arrow-left mr-2"></i> Back to Catalog
         </button>
-        <div className="bg-white rounded-xl shadow-lg border border-slate-200 p-8 text-center">
-          <i className="fas fa-exclamation-circle text-4xl text-slate-300 mb-4"></i>
-          <h3 className="text-xl font-semibold text-slate-700 mb-2">No Implementations Available</h3>
-          <p className="text-slate-500">This pattern doesn't have any implementations yet. Contribute one to get started!</p>
+        <div className="bg-white border-2 border-ink p-8 text-center shadow-terminal">
+          <i className="fas fa-exclamation-circle text-4xl text-ink mb-4"></i>
+          <h3 className="text-xl font-semibold font-mono uppercase text-ink mb-2">No Implementations Available</h3>
+          <p className="text-ink">This pattern doesn't have any implementations yet. Contribute one to get started!</p>
         </div>
       </div>
     );
@@ -581,14 +839,14 @@ const PatternDetail = ({
   return (
     <div className="max-w-5xl mx-auto">
       <div className="mb-6 flex items-center justify-between">
-         <button onClick={onBack} className="text-sm text-slate-500 hover:text-indigo-600 flex items-center">
+         <button onClick={onBack} className="text-sm text-ink hover:text-link-blue flex items-center font-mono uppercase transition-colors duration-brutal">
             <i className="fas fa-arrow-left mr-2"></i> Back to Catalog
           </button>
 
           {isSignedIn && (role === "contributor" || role === "premier" || role === "admin") && (
             <button
               onClick={onAddImplementation}
-              className="bg-indigo-600 text-white hover:bg-indigo-700 px-4 py-2 rounded-lg text-sm font-medium transition-colors shadow-sm"
+              className="bg-ink text-white hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-brutal px-4 py-2 text-sm font-medium font-mono uppercase transition-all duration-brutal border border-ink"
             >
               <i className="fas fa-plus mr-2"></i> Contribute Alternative
             </button>
@@ -596,54 +854,54 @@ const PatternDetail = ({
       </div>
 
       {/* Container Header (Immutable Definition) */}
-      <div className="bg-white rounded-t-xl shadow-sm border border-slate-200 p-8">
+      <div className="bg-white border border-ink p-8">
         <div className="flex items-center space-x-3 mb-3">
-          <span className="text-2xl font-bold text-slate-900">{def.title}</span>
-          <span className="px-2 py-1 bg-slate-100 text-slate-600 text-xs font-mono rounded">
+          <span className="text-2xl font-bold text-ink font-mono uppercase">{def.title}</span>
+          <span className="px-2 py-1 bg-ink text-white text-xs font-mono uppercase border border-ink">
             {def.id}
           </span>
         </div>
-        <p className="text-slate-600 text-lg mb-4">{def.problem}</p>
-        <div className="bg-indigo-50 border border-indigo-100 p-4 rounded-lg">
-             <h5 className="text-xs font-bold text-indigo-800 uppercase mb-1">When to Use</h5>
-             <p className="text-sm text-indigo-900">{def.whenToUse}</p>
+        <p className="text-ink text-lg mb-4">{def.problem}</p>
+        <div className="bg-white border-2 border-ink p-8">
+             <h5 className="text-xs font-bold text-ink uppercase mb-2 font-mono tracking-tight-mono">When to Use</h5>
+             <p className="text-sm text-ink">{def.whenToUse}</p>
         </div>
       </div>
 
       {/* Tabs for Implementations */}
-      <div className="bg-slate-100 border-x border-slate-200 px-8 pt-4 flex space-x-2 overflow-x-auto">
+      <div className="bg-canvas border-x border-ink border-b border-ink px-8 pt-4 flex space-x-2 overflow-x-auto">
         {impls.map((impl) => (
           <button
             key={impl.uuid}
             onClick={() => setActiveImplUuid(impl.uuid)}
-            className={`px-4 py-3 text-sm font-medium rounded-t-lg transition-all flex items-center space-x-2 ${
-              activeImplUuid === impl.uuid 
-                ? "bg-white text-indigo-600 border-t border-x border-slate-200 -mb-[1px] shadow-[0_-2px_5px_rgba(0,0,0,0.02)]" 
-                : "text-slate-500 hover:text-slate-700 hover:bg-slate-200/50"
+            className={`px-4 py-3 text-sm font-medium transition-all duration-brutal flex items-center space-x-2 font-mono uppercase tracking-tight-mono ${
+              activeImplUuid === impl.uuid
+                ? "bg-white text-link-blue border-t-2 border-x-2 border-ink -mb-[2px]"
+                : "text-ink hover:text-link-blue hover:bg-white/50"
             }`}
           >
             {impl.author === SYSTEM_AUTHOR && <i className="fas fa-shield-alt mr-1 text-xs"></i>}
             <span>{impl.author === CURRENT_USER ? "Your Version" : impl.author}</span>
             {basketSelectedUuid === impl.uuid && (
-               <span className="ml-2 w-2 h-2 rounded-full bg-green-500" title="Selected for Export"></span>
+               <span className="ml-2 w-2 h-2 rounded-full bg-terminal-green" title="Selected for Export"></span>
             )}
           </button>
         ))}
       </div>
 
       {/* Content Area */}
-      <div className="bg-white rounded-b-xl shadow-lg border border-slate-200 overflow-hidden min-h-[500px] flex flex-col">
-        
+      <div className="bg-white border border-ink border-t-0 overflow-hidden min-h-[500px] flex flex-col">
+
         {/* Action Bar */}
-        <div className="bg-slate-50 border-b border-slate-200 p-4 flex justify-between items-center">
-            <div className="text-sm text-slate-500">
-               Showing implementation by <span className="font-semibold text-slate-800">{activeImpl?.author}</span>
+        <div className="bg-canvas border-b border-ink p-4 flex justify-between items-center">
+            <div className="text-sm text-ink font-mono">
+               Showing implementation by <span className="font-semibold text-ink uppercase">{activeImpl?.author}</span>
             </div>
             <div className="flex space-x-3">
                {canEdit && (
-                 <button 
+                 <button
                    onClick={() => onEditImplementation(activeImpl)}
-                   className="text-slate-600 hover:text-indigo-600 text-sm font-medium px-3 py-2 rounded border border-transparent hover:border-slate-200"
+                   className="text-ink hover:text-link-blue text-sm font-medium font-mono uppercase px-3 py-2 border border-ink hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-brutal transition-all duration-brutal"
                  >
                    <i className="fas fa-edit mr-1"></i> Edit Code
                  </button>
@@ -651,10 +909,10 @@ const PatternDetail = ({
                <button
                  onClick={() => onAddToBasket(activeImpl.uuid)}
                  disabled={basketSelectedUuid === activeImpl.uuid}
-                 className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors shadow-sm flex items-center ${
+                 className={`px-4 py-2 text-sm font-medium font-mono uppercase transition-all duration-brutal flex items-center border border-ink ${
                     basketSelectedUuid === activeImpl.uuid
-                    ? "bg-green-100 text-green-700 cursor-default border border-green-200"
-                    : "bg-white border border-slate-300 text-slate-700 hover:bg-slate-50"
+                    ? "bg-terminal-green text-white cursor-default"
+                    : "bg-white text-ink hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-brutal"
                  }`}
                >
                  {basketSelectedUuid === activeImpl.uuid ? (
@@ -672,41 +930,46 @@ const PatternDetail = ({
 
         {/* Code Content */}
         <div className="grid grid-cols-1 md:grid-cols-2 flex-grow">
-          <div className="p-8 border-r border-slate-200">
+          <div className="p-8 border-r border-ink">
              <div className="mb-6">
-              <h5 className="text-xs font-semibold text-indigo-600 uppercase mb-2">Considerations</h5>
+              <h5 className="text-xs font-semibold text-ink uppercase mb-2 font-mono tracking-tight-mono">Considerations</h5>
               {activeImpl.considerations.length > 0 ? (
-                <ul className="list-disc list-inside text-sm text-slate-700 space-y-1">
+                <ul className="list-disc list-inside text-sm text-ink space-y-1">
                   {activeImpl.considerations.map((c, i) => (
                     <li key={i}>{c}</li>
                   ))}
                 </ul>
               ) : (
-                <p className="text-sm text-slate-400 italic">None specified.</p>
+                <p className="text-sm text-ink italic">None specified.</p>
               )}
             </div>
             <div>
-              <h5 className="text-xs font-semibold text-indigo-600 uppercase mb-2">Variations</h5>
+              <h5 className="text-xs font-semibold text-ink uppercase mb-2 font-mono tracking-tight-mono">Variations</h5>
               {activeImpl.variations.length > 0 ? (
-                <ul className="list-disc list-inside text-sm text-slate-700 space-y-1">
+                <ul className="list-disc list-inside text-sm text-ink space-y-1">
                   {activeImpl.variations.map((c, i) => (
                     <li key={i}>{c}</li>
                   ))}
                 </ul>
               ) : (
-                <p className="text-sm text-slate-400 italic">None specified.</p>
+                <p className="text-sm text-ink italic">None specified.</p>
               )}
             </div>
           </div>
 
-          <div className="bg-slate-900 text-slate-300 overflow-auto h-full max-h-[800px]">
-            <div className="p-4 bg-slate-800 border-b border-slate-700 flex justify-between items-center sticky top-0">
-               <span className="text-xs font-mono">{`${def.id}_${activeImpl?.author?.toLowerCase().replace(' ','-') ?? 'unknown'}.md`}</span>
-               <button onClick={copyToClipboard} className="text-slate-400 hover:text-white">
+          <div className="bg-white text-ink overflow-auto h-full max-h-[800px] border-l border-ink">
+            <div className="p-4 bg-white border-b border-ink flex justify-between items-center sticky top-0 shadow-terminal">
+               <div className="flex items-center space-x-2">
+                 <div className="w-3 h-3 rounded-full bg-terminal-red"></div>
+                 <div className="w-3 h-3 rounded-full bg-yellow-400"></div>
+                 <div className="w-3 h-3 rounded-full bg-terminal-green"></div>
+                 <span className="text-xs font-mono ml-4">{`${def.id}_${activeImpl?.author?.toLowerCase().replace(' ','-') ?? 'unknown'}.md`}</span>
+               </div>
+               <button onClick={copyToClipboard} className="text-ink hover:text-link-blue transition-colors duration-brutal">
                  <i className="fas fa-copy"></i>
                </button>
             </div>
-            <pre className="p-6 text-xs font-mono leading-relaxed whitespace-pre-wrap">
+            <pre className="p-6 text-xs font-mono leading-relaxed whitespace-pre-wrap border border-ink m-4">
               {markdown}
             </pre>
           </div>
@@ -928,19 +1191,19 @@ const SmartEtlForm = ({
   };
 
   return (
-    <div className="max-w-3xl mx-auto bg-white rounded-xl shadow-lg border border-slate-200 overflow-hidden">
-      <div className="bg-indigo-600 px-6 py-4 flex justify-between items-center">
+    <div className="max-w-3xl mx-auto bg-white border-2 border-ink overflow-hidden shadow-terminal">
+      <div className="bg-ink px-6 py-4 flex justify-between items-center border-b border-white">
         <div>
-           <h2 className="text-white font-bold text-lg">{isEditMode ? "Edit Implementation" : "Contribute New Pattern Implementation"}</h2>
-           {currentPattern && <p className="text-indigo-200 text-xs">For Pattern: {currentPattern.id} - {currentPattern.title}</p>}
+           <h2 className="text-white font-bold text-lg font-mono uppercase tracking-tight-mono">{isEditMode ? "Edit Implementation" : "Contribute New Pattern Implementation"}</h2>
+           {currentPattern && <p className="text-white text-xs font-mono">For Pattern: {currentPattern.id} - {currentPattern.title}</p>}
         </div>
-        {!isEditMode && <span className="text-indigo-200 text-xs uppercase font-semibold tracking-wider">Smart Ingest Active</span>}
+        {!isEditMode && <span className="text-white text-xs uppercase font-semibold tracking-wider font-mono">Smart Ingest Active</span>}
       </div>
 
       {/* Pattern Selection Dropdown (only show if no definition provided) */}
       {!definition && !isEditMode && (
-        <div className="p-6 bg-slate-50 border-b border-slate-200">
-          <label className="block text-sm font-medium text-slate-700 mb-2">
+        <div className="p-6 bg-white border-b border-ink">
+          <label className="block text-sm font-medium text-ink mb-2 font-mono uppercase">
             <i className="fas fa-list-alt mr-2"></i>Select Pattern to Contribute To
           </label>
           <select
@@ -948,7 +1211,7 @@ const SmartEtlForm = ({
             required
             value={selectedPatternId}
             onChange={(e) => setSelectedPatternId(e.target.value)}
-            className="w-full p-3 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+            className="w-full p-3 border border-ink text-sm focus:outline-none focus:border-2 focus:border-link-blue font-mono"
           >
             <option value="">Choose a pattern...</option>
             {CATEGORIES.map(cat => (
@@ -967,13 +1230,13 @@ const SmartEtlForm = ({
       )}
 
       {!isEditMode && (
-        <div className="p-6 bg-slate-50 border-b border-slate-200">
-          <label className="block text-xs font-bold text-slate-500 uppercase mb-2">
-            <i className="fas fa-magic mr-1 text-indigo-500"></i> AI Smart Fill
+        <div className="p-6 bg-white border-b border-ink">
+          <label className="block text-xs font-bold text-ink uppercase mb-2 font-mono">
+            <i className="fas fa-magic mr-1 text-link-blue"></i> AI Smart Fill
           </label>
           <div className="flex gap-2">
             <textarea
-              className="flex-grow p-3 text-sm border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+              className="flex-grow p-3 text-sm border border-ink focus:outline-none focus:border-2 focus:border-link-blue font-mono transition-all duration-brutal"
               rows={3}
               placeholder="Paste raw text or documentation here to extract code..."
               value={rawInput}
@@ -982,7 +1245,7 @@ const SmartEtlForm = ({
             <button
               onClick={analyzeWithGemini}
               disabled={isAnalyzing || !rawInput}
-              className="px-4 bg-indigo-600 hover:bg-indigo-700 disabled:bg-slate-300 text-white rounded-lg text-sm font-medium transition-colors flex flex-col justify-center items-center min-w-[100px]"
+              className="px-4 bg-ink hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-brutal disabled:bg-canvas disabled:text-ink disabled:border-ink text-white text-sm font-medium font-mono uppercase transition-all duration-brutal border border-ink flex flex-col justify-center items-center min-w-[100px]"
             >
               {isAnalyzing ? <i className="fas fa-spinner fa-spin mb-1"></i> : <i className="fas fa-robot mb-1"></i>}
               {isAnalyzing ? "Thinking..." : "Analyze"}
@@ -995,45 +1258,45 @@ const SmartEtlForm = ({
 
         {/* Pattern Definition Fields (Read-only when pattern selected from dropdown) */}
         {currentPattern && (
-          <div className="bg-slate-50 border border-slate-200 rounded-lg p-4 space-y-4">
-            <h3 className="text-sm font-semibold text-slate-700 uppercase tracking-wide mb-2">
-              <i className="fas fa-info-circle mr-2"></i>Pattern Definition {!definition && <span className="text-xs text-slate-500 font-normal">(Read-only)</span>}
+          <div className="bg-white border-2 border-ink p-6 space-y-4">
+            <h3 className="text-sm font-semibold text-ink uppercase tracking-wide mb-2 font-mono">
+              <i className="fas fa-info-circle mr-2"></i>Pattern Definition {!definition && <span className="text-xs text-ink font-normal">(Read-only)</span>}
             </h3>
 
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1">Pattern Title</label>
+              <label className="block text-sm font-medium text-ink mb-1 font-mono uppercase">Pattern Title</label>
               <input
                 type="text"
                 required
                 value={defData.title}
                 onChange={(e) => setDefData({ ...defData, title: e.target.value })}
-                className="w-full p-2 border border-slate-300 rounded-md text-sm bg-slate-100"
+                className="w-full p-2 border border-ink text-sm bg-canvas focus:outline-none focus:border-2 focus:border-link-blue transition-all duration-brutal"
                 placeholder="e.g., Last Observation Carried Forward (LOCF)"
                 disabled={!definition}
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1">Problem Statement</label>
+              <label className="block text-sm font-medium text-ink mb-1 font-mono uppercase">Problem Statement</label>
               <textarea
                 required
                 rows={2}
                 value={defData.problem}
                 onChange={(e) => setDefData({ ...defData, problem: e.target.value })}
-                className="w-full p-2 border border-slate-300 rounded-md text-sm bg-slate-100"
+                className="w-full p-2 border border-ink text-sm bg-canvas focus:outline-none focus:border-2 focus:border-link-blue transition-all duration-brutal"
                 placeholder="Describe what problem this pattern solves..."
                 disabled={!definition}
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1">When to Use</label>
+              <label className="block text-sm font-medium text-ink mb-1 font-mono uppercase">When to Use</label>
               <textarea
                 required
                 rows={2}
                 value={defData.whenToUse}
                 onChange={(e) => setDefData({ ...defData, whenToUse: e.target.value })}
-                className="w-full p-2 border border-slate-300 rounded-md text-sm bg-slate-100"
+                className="w-full p-2 border border-ink text-sm bg-canvas focus:outline-none focus:border-2 focus:border-link-blue transition-all duration-brutal"
                 placeholder="Specify scenarios and triggers for using this pattern..."
                 disabled={!definition}
               />
@@ -1044,26 +1307,26 @@ const SmartEtlForm = ({
         {/* Implementation Fields */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1">
-              SAS Implementation {!formData.rCode && <span className="text-red-500 text-xs">(Required if R code not provided)</span>}
+            <label className="block text-sm font-medium text-ink mb-1 font-mono uppercase">
+              SAS Implementation {!formData.rCode && <span className="text-terminal-red text-xs">(Required if R code not provided)</span>}
             </label>
             <textarea
               rows={8}
               value={formData.sasCode}
               onChange={(e) => setFormData({ ...formData, sasCode: e.target.value })}
-              className="w-full p-2 border border-slate-300 rounded-md text-sm font-mono bg-slate-50"
+              className="w-full p-3 border border-ink text-sm font-mono bg-white focus:outline-none focus:border-2 focus:border-link-blue transition-all duration-brutal"
               placeholder="Enter SAS code..."
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1">
-              R Implementation {!formData.sasCode && <span className="text-red-500 text-xs">(Required if SAS code not provided)</span>}
+            <label className="block text-sm font-medium text-ink mb-1 font-mono uppercase">
+              R Implementation {!formData.sasCode && <span className="text-terminal-red text-xs">(Required if SAS code not provided)</span>}
             </label>
             <textarea
               rows={8}
               value={formData.rCode}
               onChange={(e) => setFormData({ ...formData, rCode: e.target.value })}
-              className="w-full p-2 border border-slate-300 rounded-md text-sm font-mono bg-slate-50"
+              className="w-full p-3 border border-ink text-sm font-mono bg-white focus:outline-none focus:border-2 focus:border-link-blue transition-all duration-brutal"
               placeholder="Enter R code..."
             />
           </div>
@@ -1085,19 +1348,19 @@ const SmartEtlForm = ({
           maxEntries={10}
         />
 
-        <div className="flex justify-end space-x-3 pt-4 border-t border-slate-100">
+        <div className="flex justify-end space-x-3 pt-4 border-t border-ink">
           <button
             type="button"
             onClick={onCancel}
             disabled={isSaving}
-            className="px-4 py-2 border border-slate-300 rounded-md text-sm font-medium text-slate-700 hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="px-4 py-2 border border-ink text-sm font-medium font-mono uppercase text-ink hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-brutal disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-brutal"
           >
             Cancel
           </button>
           <button
             type="submit"
             disabled={isSaving}
-            className="px-4 py-2 bg-indigo-600 rounded-md text-sm font-medium text-white hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center"
+            className="px-4 py-2 bg-ink text-sm font-medium font-mono uppercase text-white hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-brutal disabled:opacity-50 disabled:cursor-not-allowed flex items-center border border-ink transition-all duration-brutal"
           >
             {isSaving ? (
               <>
@@ -1135,6 +1398,10 @@ const AdminReviewQueue = () => {
     updatedAt: string;
   }>>([]);
   const [processingUuid, setProcessingUuid] = useState<string | null>(null);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+  const [selectedImpl, setSelectedImpl] = useState<typeof pendingImplementations[0] | null>(null);
+  const [showCodeModal, setShowCodeModal] = useState(false);
 
   // Check if user is admin
   const userRole = (user?.publicMetadata?.role as Role) || 'contributor';
@@ -1187,6 +1454,20 @@ const AdminReviewQueue = () => {
 
     fetchPendingImplementations();
   }, [getToken, isAdmin, user]);
+
+  // Filter logic
+  const filteredPending = useMemo(() => {
+    return pendingImplementations.filter(impl => {
+      const matchesSearch = !searchQuery ||
+        impl.patternTitle.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        impl.patternId.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        impl.authorName.toLowerCase().includes(searchQuery.toLowerCase());
+
+      const matchesCategory = !selectedCategory || impl.patternCategory === selectedCategory;
+
+      return matchesSearch && matchesCategory;
+    });
+  }, [pendingImplementations, searchQuery, selectedCategory]);
 
   const handleApprove = async (uuid: string) => {
     try {
@@ -1288,10 +1569,10 @@ const AdminReviewQueue = () => {
 
   if (loading) {
     return (
-      <div className="max-w-6xl mx-auto">
+      <div className="max-w-7xl mx-auto">
         <div className="text-center py-20">
-          <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 mb-4"></div>
-          <div className="text-slate-700 text-lg">Loading pending submissions...</div>
+          <div className="inline-block animate-spin w-12 h-12 border-2 border-ink border-t-transparent mb-4"></div>
+          <div className="text-ink text-lg font-mono uppercase tracking-tight-mono">Loading pending submissions...</div>
         </div>
       </div>
     );
@@ -1299,137 +1580,206 @@ const AdminReviewQueue = () => {
 
   if (error) {
     return (
-      <div className="max-w-6xl mx-auto">
-        <div className="bg-red-50 border border-red-200 rounded-xl p-6 text-center">
-          <i className="fas fa-exclamation-triangle text-red-500 text-3xl mb-3"></i>
-          <h3 className="text-lg font-semibold text-red-900 mb-2">Access Denied</h3>
-          <p className="text-red-700">{error}</p>
-        </div>
-      </div>
-    );
-  }
-
-  if (pendingImplementations.length === 0) {
-    return (
-      <div className="max-w-6xl mx-auto">
-        <div className="mb-6">
-          <h2 className="text-3xl font-bold text-slate-900 mb-2">Admin Review Queue</h2>
-          <p className="text-slate-600">Review and approve pattern implementations submitted by contributors</p>
-        </div>
-        <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-12 text-center">
-          <div className="w-20 h-20 bg-green-50 rounded-full flex items-center justify-center mx-auto mb-6">
-            <i className="fas fa-check-circle text-green-500 text-3xl"></i>
-          </div>
-          <h3 className="text-2xl font-bold text-slate-900 mb-3">No Pending Submissions</h3>
-          <p className="text-slate-600 mb-6 max-w-md mx-auto">
-            All pattern implementations have been reviewed. Great job!
-          </p>
+      <div className="max-w-7xl mx-auto">
+        <div className="bg-white border-2 border-terminal-red p-8 text-center shadow-brutal">
+          <i className="fas fa-exclamation-triangle text-terminal-red text-4xl mb-4"></i>
+          <h3 className="text-xl font-semibold font-mono uppercase text-ink mb-2 tracking-tight-mono">Access Denied</h3>
+          <p className="text-ink">{error}</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="max-w-6xl mx-auto">
-      <div className="mb-6">
-        <h2 className="text-3xl font-bold text-slate-900 mb-2">Admin Review Queue</h2>
-        <p className="text-slate-600">
-          {pendingImplementations.length} pending submission{pendingImplementations.length !== 1 ? 's' : ''} awaiting review
+    <div className="max-w-7xl mx-auto">
+      {/* Header */}
+      <div className="mb-8">
+        <h2 className="text-4xl font-bold font-mono uppercase text-ink mb-2 tracking-wide-head">Admin Review Queue</h2>
+        <p className="text-ink font-sans">
+          {filteredPending.length} pending submission{filteredPending.length !== 1 ? 's' : ''} {searchQuery || selectedCategory ? 'matching filters' : 'awaiting review'}
         </p>
       </div>
 
-      <div className="space-y-4">
-        {pendingImplementations.map((implementation) => (
-          <div
-            key={implementation.uuid}
-            className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden hover:shadow-md transition-shadow"
+      {/* Filter Bar */}
+      <div className="mb-8">
+        {/* Category Filters */}
+        <div className="flex gap-2 overflow-x-auto pb-4 mb-4">
+          <button
+            onClick={() => setSelectedCategory(null)}
+            className={`px-4 py-2 font-mono uppercase text-xs tracking-tight-mono transition-all duration-brutal whitespace-nowrap ${
+              selectedCategory === null
+                ? 'bg-ink text-white shadow-brutal'
+                : 'bg-white border border-ink text-ink hover:-translate-y-0.5 hover:shadow-brutal'
+            }`}
           >
-            <div className="p-6">
-              <div className="flex items-start justify-between mb-4">
-                <div className="flex-grow">
-                  <div className="flex items-center space-x-3 mb-2">
-                    <span className="px-2 py-1 bg-slate-100 text-slate-700 text-xs font-mono font-semibold rounded">
-                      {implementation.patternId}
-                    </span>
-                    <h3 className="text-lg font-bold text-slate-900">
-                      {implementation.patternTitle}
-                    </h3>
-                    <span className="px-3 py-1 text-xs font-semibold rounded-full border bg-yellow-100 text-yellow-800 border-yellow-200">
-                      Pending Review
-                    </span>
-                  </div>
-                  <p className="text-sm text-slate-500">
-                    Category: {implementation.patternCategory} |
-                    Contributor: <span className="font-medium text-slate-700">{implementation.authorName}</span> |
-                    Submitted: {formatRelativeTime(implementation.createdAt)}
-                  </p>
+            All Categories
+          </button>
+          {CATEGORIES.map(cat => (
+            <button
+              key={cat.code}
+              onClick={() => setSelectedCategory(cat.code)}
+              className={`px-4 py-2 font-mono uppercase text-xs tracking-tight-mono transition-all duration-brutal whitespace-nowrap ${
+                selectedCategory === cat.code
+                  ? 'bg-ink text-white shadow-brutal'
+                  : 'bg-white border border-ink text-ink hover:-translate-y-0.5 hover:shadow-brutal'
+              }`}
+            >
+              {cat.code}
+            </button>
+          ))}
+        </div>
+
+        {/* Search Input */}
+        <input
+          type="text"
+          placeholder="Search pending patterns..."
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          className="w-full px-4 py-3 border-2 border-ink font-mono text-sm focus:border-link-blue focus:outline-none transition-colors duration-brutal"
+        />
+      </div>
+
+      {/* Grid Layout or Empty State */}
+      {filteredPending.length === 0 ? (
+        <div className="bg-white border-2 border-ink p-16 text-center shadow-brutal">
+          <i className="fas fa-check-circle text-terminal-green text-5xl mb-6"></i>
+          <h3 className="text-2xl font-bold font-mono uppercase text-ink mb-3 tracking-tight-mono">
+            {pendingImplementations.length === 0 ? 'No Pending Submissions' : 'No Results Found'}
+          </h3>
+          <p className="text-ink font-sans max-w-md mx-auto">
+            {pendingImplementations.length === 0
+              ? 'All pattern implementations have been reviewed. Great job!'
+              : 'Try adjusting your search or filter criteria.'}
+          </p>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {filteredPending.map(impl => (
+            <PendingImplementationCard
+              key={impl.uuid}
+              impl={impl}
+              onApprove={() => handleApprove(impl.uuid)}
+              onReject={() => handleReject(impl.uuid)}
+              onViewCode={() => {
+                setSelectedImpl(impl);
+                setShowCodeModal(true);
+              }}
+            />
+          ))}
+        </div>
+      )}
+
+      {/* Code Preview Modal */}
+      {showCodeModal && selectedImpl && (
+        <div className="fixed inset-0 bg-ink/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white border-2 border-ink shadow-terminal max-w-4xl w-full max-h-[90vh] overflow-auto">
+            {/* Modal Header */}
+            <div className="bg-ink text-white px-6 py-4 flex justify-between items-center border-b-2 border-ink sticky top-0">
+              <div>
+                <h3 className="text-xl font-mono uppercase tracking-tight-mono">{selectedImpl.patternId} - Code Preview</h3>
+                <p className="text-sm font-sans text-white/80">by {selectedImpl.authorName}</p>
+              </div>
+              <button
+                onClick={() => setShowCodeModal(false)}
+                className="text-white hover:text-terminal-red transition-colors duration-brutal text-2xl"
+              >
+                <i className="fas fa-times"></i>
+              </button>
+            </div>
+
+            {/* Modal Body */}
+            <div className="p-8 space-y-6">
+              {/* SAS Code */}
+              {selectedImpl.sasCode && (
+                <div>
+                  <h4 className="text-sm font-mono uppercase tracking-tight-mono text-ink mb-2 border-b border-ink pb-2">SAS Implementation</h4>
+                  <pre className="bg-canvas border border-ink p-4 text-xs font-mono text-ink overflow-x-auto">
+                    {selectedImpl.sasCode}
+                  </pre>
                 </div>
-              </div>
+              )}
 
-              <div className="bg-slate-50 rounded-lg p-4 border border-slate-200 mb-4">
-                <h4 className="text-xs font-semibold text-slate-700 uppercase mb-2">Code Preview (First 5 lines)</h4>
-                <pre className="text-xs font-mono text-slate-700 whitespace-pre-wrap overflow-hidden">
-                  {getCodePreview(implementation.sasCode, implementation.rCode)}
-                </pre>
-                {(implementation.sasCode.split('\n').length > 5 || implementation.rCode.split('\n').length > 5) && (
-                  <p className="text-xs text-slate-500 mt-2 italic">...</p>
-                )}
-              </div>
+              {/* R Code */}
+              {selectedImpl.rCode && (
+                <div>
+                  <h4 className="text-sm font-mono uppercase tracking-tight-mono text-ink mb-2 border-b border-ink pb-2">R Implementation</h4>
+                  <pre className="bg-canvas border border-ink p-4 text-xs font-mono text-ink overflow-x-auto">
+                    {selectedImpl.rCode}
+                  </pre>
+                </div>
+              )}
 
-              {implementation.considerations.length > 0 && (
-                <div className="mb-4">
-                  <h4 className="text-xs font-semibold text-slate-700 uppercase mb-1">Considerations</h4>
-                  <ul className="list-disc list-inside text-sm text-slate-600 space-y-1">
-                    {implementation.considerations.slice(0, 3).map((c, i) => (
+              {/* Considerations */}
+              {selectedImpl.considerations.length > 0 && (
+                <div>
+                  <h4 className="text-sm font-mono uppercase tracking-tight-mono text-ink mb-2 border-b border-ink pb-2">Key Considerations</h4>
+                  <ul className="list-disc list-inside text-sm text-ink space-y-1 font-sans">
+                    {selectedImpl.considerations.map((c, i) => (
                       <li key={i}>{c}</li>
                     ))}
-                    {implementation.considerations.length > 3 && (
-                      <li className="text-slate-500 italic">+ {implementation.considerations.length - 3} more...</li>
-                    )}
                   </ul>
                 </div>
               )}
 
-              <div className="flex items-center justify-end space-x-3 pt-4 border-t border-slate-100">
-                <button
-                  onClick={() => handleReject(implementation.uuid)}
-                  disabled={processingUuid === implementation.uuid}
-                  className="bg-red-600 hover:bg-red-700 text-white px-6 py-2 rounded-lg text-sm font-medium transition-colors shadow-sm disabled:opacity-50 disabled:cursor-not-allowed flex items-center"
-                >
-                  {processingUuid === implementation.uuid ? (
-                    <>
-                      <i className="fas fa-spinner fa-spin mr-2"></i>
-                      Processing...
-                    </>
-                  ) : (
-                    <>
-                      <i className="fas fa-times-circle mr-2"></i>
-                      Reject
-                    </>
-                  )}
-                </button>
-                <button
-                  onClick={() => handleApprove(implementation.uuid)}
-                  disabled={processingUuid === implementation.uuid}
-                  className="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-lg text-sm font-medium transition-colors shadow-sm disabled:opacity-50 disabled:cursor-not-allowed flex items-center"
-                >
-                  {processingUuid === implementation.uuid ? (
-                    <>
-                      <i className="fas fa-spinner fa-spin mr-2"></i>
-                      Processing...
-                    </>
-                  ) : (
-                    <>
-                      <i className="fas fa-check-circle mr-2"></i>
-                      Approve
-                    </>
-                  )}
-                </button>
-              </div>
+              {/* Variations */}
+              {selectedImpl.variations.length > 0 && (
+                <div>
+                  <h4 className="text-sm font-mono uppercase tracking-tight-mono text-ink mb-2 border-b border-ink pb-2">Common Variations</h4>
+                  <ul className="list-disc list-inside text-sm text-ink space-y-1 font-sans">
+                    {selectedImpl.variations.map((v, i) => (
+                      <li key={i}>{v}</li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+            </div>
+
+            {/* Modal Footer */}
+            <div className="border-t-2 border-ink bg-canvas px-6 py-4 flex justify-end gap-3 sticky bottom-0">
+              <button
+                onClick={() => {
+                  handleReject(selectedImpl.uuid);
+                  setShowCodeModal(false);
+                }}
+                disabled={processingUuid === selectedImpl.uuid}
+                className="bg-terminal-red hover:bg-terminal-red/80 text-white px-6 py-3 text-sm font-medium font-mono uppercase transition-colors duration-brutal border border-ink disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {processingUuid === selectedImpl.uuid ? (
+                  <>
+                    <i className="fas fa-spinner fa-spin mr-2"></i>
+                    Processing...
+                  </>
+                ) : (
+                  <>
+                    <i className="fas fa-times-circle mr-2"></i>
+                    Reject
+                  </>
+                )}
+              </button>
+              <button
+                onClick={() => {
+                  handleApprove(selectedImpl.uuid);
+                  setShowCodeModal(false);
+                }}
+                disabled={processingUuid === selectedImpl.uuid}
+                className="bg-terminal-green hover:bg-terminal-green/80 text-white px-6 py-3 text-sm font-medium font-mono uppercase transition-colors duration-brutal border border-ink disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {processingUuid === selectedImpl.uuid ? (
+                  <>
+                    <i className="fas fa-spinner fa-spin mr-2"></i>
+                    Processing...
+                  </>
+                ) : (
+                  <>
+                    <i className="fas fa-check-circle mr-2"></i>
+                    Approve
+                  </>
+                )}
+              </button>
             </div>
           </div>
-        ))}
-      </div>
+        </div>
+      )}
     </div>
   );
 };
@@ -2384,22 +2734,23 @@ const AdminPatternManager = ({
   if (userRole !== 'admin') {
     return (
       <div className="max-w-7xl mx-auto px-4 py-8">
-        <div className="bg-red-100 border border-red-400 text-red-700 px-6 py-4 rounded-lg">
-          <p className="font-semibold">Access Denied</p>
-          <p>Admin role required to access this feature.</p>
+        <div className="bg-white border-2 border-terminal-red p-8 text-center shadow-brutal">
+          <i className="fas fa-exclamation-triangle text-terminal-red text-4xl mb-4"></i>
+          <h3 className="text-xl font-semibold font-mono uppercase text-ink mb-2 tracking-tight-mono">Access Denied</h3>
+          <p className="text-ink font-sans">Admin role required to access this feature.</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="max-w-7xl mx-auto px-4 py-8">
+    <div className="max-w-7xl mx-auto">
       {/* Header */}
-      <div className="flex items-center justify-between mb-6">
-        <h1 className="text-3xl font-bold text-slate-900">Admin Pattern Management</h1>
+      <div className="flex items-center justify-between mb-8">
+        <h1 className="text-4xl font-bold font-mono uppercase text-ink tracking-wide-head">Admin Pattern Management</h1>
         <button
           onClick={onBack}
-          className="bg-slate-600 hover:bg-slate-700 text-white px-6 py-2 rounded-lg text-sm transition-colors flex items-center"
+          className="bg-ink hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-brutal text-white px-6 py-3 text-sm font-medium font-mono uppercase transition-all duration-brutal border border-ink flex items-center"
         >
           <i className="fas fa-arrow-left mr-2"></i>
           Back
@@ -2407,23 +2758,23 @@ const AdminPatternManager = ({
       </div>
 
       {/* Tabs */}
-      <div className="flex space-x-4 mb-6 border-b border-slate-200">
+      <div className="flex gap-0 border-b-2 border-ink mb-8">
         <button
           onClick={() => setActiveTab("definitions")}
-          className={`pb-3 px-1 border-b-2 font-semibold transition-colors ${
+          className={`px-8 py-4 font-mono uppercase text-sm tracking-tight-mono transition-colors duration-brutal ${
             activeTab === "definitions"
-              ? "border-indigo-600 text-indigo-600"
-              : "border-transparent text-slate-500 hover:text-slate-700"
+              ? "bg-ink text-white border-t-2 border-x-2 border-ink -mb-[2px]"
+              : "text-ink hover:bg-canvas"
           }`}
         >
           Pattern Definitions
         </button>
         <button
           onClick={() => setActiveTab("implementations")}
-          className={`pb-3 px-1 border-b-2 font-semibold transition-colors ${
+          className={`px-8 py-4 font-mono uppercase text-sm tracking-tight-mono transition-colors duration-brutal ${
             activeTab === "implementations"
-              ? "border-indigo-600 text-indigo-600"
-              : "border-transparent text-slate-500 hover:text-slate-700"
+              ? "bg-ink text-white border-t-2 border-x-2 border-ink -mb-[2px]"
+              : "text-ink hover:bg-canvas"
           }`}
         >
           Implementations
@@ -2432,38 +2783,53 @@ const AdminPatternManager = ({
 
       {/* Filters & Controls */}
       {activeTab === "definitions" ? (
-        <div className="bg-white rounded-lg shadow-sm border border-slate-200 p-4 mb-6">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-            {/* Search */}
+        <div className="mb-8">
+          {/* Category Filters */}
+          <div className="flex gap-2 overflow-x-auto pb-4 mb-4">
+            <button
+              onClick={() => setCategoryFilter("all")}
+              className={`px-4 py-2 font-mono uppercase text-xs tracking-tight-mono transition-all duration-brutal whitespace-nowrap ${
+                categoryFilter === "all"
+                  ? 'bg-ink text-white shadow-brutal'
+                  : 'bg-white border border-ink text-ink hover:-translate-y-0.5 hover:shadow-brutal'
+              }`}
+            >
+              All Categories
+            </button>
+            {CATEGORIES.map(cat => (
+              <button
+                key={cat.code}
+                onClick={() => setCategoryFilter(cat.code)}
+                className={`px-4 py-2 font-mono uppercase text-xs tracking-tight-mono transition-all duration-brutal whitespace-nowrap ${
+                  categoryFilter === cat.code
+                    ? 'bg-ink text-white shadow-brutal'
+                    : 'bg-white border border-ink text-ink hover:-translate-y-0.5 hover:shadow-brutal'
+                }`}
+              >
+                {cat.code}
+              </button>
+            ))}
+          </div>
+
+          {/* Search & Create Row */}
+          <div className="flex gap-4">
             <input
               type="text"
               placeholder="Search by ID or title..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full p-2 border border-slate-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              className="flex-1 px-4 py-3 border-2 border-ink font-mono text-sm focus:border-link-blue focus:outline-none transition-colors duration-brutal"
             />
 
-            {/* Category Filter */}
-            <select
-              value={categoryFilter}
-              onChange={(e) => setCategoryFilter(e.target.value)}
-              className="w-full p-2 border border-slate-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
-            >
-              <option value="all">All Categories</option>
-              {CATEGORIES.map(cat => (
-                <option key={cat.code} value={cat.code}>{cat.code} - {cat.name}</option>
-              ))}
-            </select>
-
             {/* Show Deleted Checkbox */}
-            <label className="flex items-center space-x-2 px-2">
+            <label className="flex items-center space-x-2 px-4 py-3 bg-white border border-ink">
               <input
                 type="checkbox"
                 checked={showDeleted}
                 onChange={(e) => setShowDeleted(e.target.checked)}
-                className="w-4 h-4 text-indigo-600 rounded focus:ring-indigo-500"
+                className="w-4 h-4 accent-ink"
               />
-              <span className="text-sm text-slate-700">Show Deleted</span>
+              <span className="text-sm font-mono uppercase text-ink tracking-tight-mono">Show Deleted</span>
             </label>
 
             {/* Create New Button */}
@@ -2472,7 +2838,7 @@ const AdminPatternManager = ({
                 setEditingPattern(null);
                 setShowModal(true);
               }}
-              className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg text-sm font-semibold transition-colors flex items-center justify-center"
+              className="bg-ink hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-brutal text-white px-6 py-3 text-sm font-medium font-mono uppercase transition-all duration-brutal border border-ink flex items-center whitespace-nowrap"
             >
               <i className="fas fa-plus mr-2"></i>
               Create New
@@ -2480,26 +2846,26 @@ const AdminPatternManager = ({
           </div>
         </div>
       ) : (
-        <div className="bg-white rounded-lg shadow-sm border border-slate-200 p-4 mb-6">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="mb-8">
+          <div className="flex gap-4">
             {/* Search */}
             <input
               type="text"
               placeholder="Search by Pattern ID, author, or title..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full p-2 border border-slate-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 md:col-span-2"
+              className="flex-1 px-4 py-3 border-2 border-ink font-mono text-sm focus:border-link-blue focus:outline-none transition-colors duration-brutal"
             />
 
             {/* Show Deleted Checkbox */}
-            <label className="flex items-center space-x-2 px-2">
+            <label className="flex items-center space-x-2 px-4 py-3 bg-white border border-ink">
               <input
                 type="checkbox"
                 checked={showDeleted}
                 onChange={(e) => setShowDeleted(e.target.checked)}
-                className="w-4 h-4 text-indigo-600 rounded focus:ring-indigo-500"
+                className="w-4 h-4 accent-ink"
               />
-              <span className="text-sm text-slate-700">Show Deleted</span>
+              <span className="text-sm font-mono uppercase text-ink tracking-tight-mono">Show Deleted</span>
             </label>
           </div>
         </div>
@@ -2507,42 +2873,92 @@ const AdminPatternManager = ({
 
       {/* Error State */}
       {error && (
-        <div className="bg-red-100 border border-red-400 text-red-700 px-6 py-4 rounded-lg mb-6">
-          <p className="font-semibold">Error</p>
-          <p>{error}</p>
+        <div className="bg-white border-2 border-terminal-red p-8 text-center shadow-brutal mb-8">
+          <i className="fas fa-exclamation-triangle text-terminal-red text-4xl mb-4"></i>
+          <h3 className="text-xl font-semibold font-mono uppercase text-ink mb-2 tracking-tight-mono">Error</h3>
+          <p className="text-ink font-sans">{error}</p>
         </div>
       )}
 
       {/* Loading State */}
       {loading && (
-        <div className="bg-white rounded-xl p-12 text-center">
-          <i className="fas fa-spinner fa-spin text-4xl text-indigo-600 mb-4"></i>
-          <p className="text-slate-500">Loading patterns...</p>
+        <div className="bg-white border-2 border-ink p-16 text-center shadow-brutal">
+          <div className="inline-block animate-spin w-12 h-12 border-2 border-ink border-t-transparent mb-4"></div>
+          <p className="text-ink font-mono uppercase tracking-tight-mono">Loading patterns...</p>
         </div>
       )}
 
-      {/* Pattern Table */}
+      {/* Pattern Definitions Grid */}
       {!loading && activeTab === "definitions" && (
-        <PatternDefinitionsTable
-          patterns={filteredPatterns}
-          onEdit={handleEditPattern}
-          onDelete={handleDelete}
-        />
+        filteredPatterns.length === 0 ? (
+          <div className="bg-white border-2 border-ink p-16 text-center shadow-brutal">
+            <i className="fas fa-folder-open text-ink/40 text-5xl mb-6"></i>
+            <h3 className="text-2xl font-bold font-mono uppercase text-ink mb-3 tracking-tight-mono">No Patterns Found</h3>
+            <p className="text-ink font-sans max-w-md mx-auto">
+              {searchTerm || categoryFilter !== 'all'
+                ? 'Try adjusting your search or filter criteria.'
+                : 'No patterns available. Create your first pattern to get started.'}
+            </p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {filteredPatterns.map(pattern => {
+              const implCount = implementations.filter(
+                impl => impl.patternId === pattern.id
+              ).length;
+
+              return (
+                <PatternCardAdmin
+                  key={pattern.id}
+                  def={pattern}
+                  implCount={implCount}
+                  onView={() => {
+                    // View pattern detail in catalog (optional navigation)
+                    handleEditPattern(pattern);
+                  }}
+                  onEdit={() => handleEditPattern(pattern)}
+                  onDelete={() => {
+                    if (window.confirm(`Are you sure you want to delete pattern ${pattern.id}?`)) {
+                      handleDelete(pattern.id);
+                    }
+                  }}
+                />
+              );
+            })}
+          </div>
+        )
       )}
 
       {/* Implementations Tab */}
       {activeTab === "implementations" && (
         implementationsLoading ? (
-          <div className="bg-white rounded-xl p-12 text-center">
-            <i className="fas fa-spinner fa-spin text-4xl text-indigo-600 mb-4"></i>
-            <p className="text-slate-500">Loading implementations...</p>
+          <div className="bg-white border-2 border-ink p-16 text-center shadow-brutal">
+            <div className="inline-block animate-spin w-12 h-12 border-2 border-ink border-t-transparent mb-4"></div>
+            <p className="text-ink font-mono uppercase tracking-tight-mono">Loading implementations...</p>
+          </div>
+        ) : filteredImplementations.length === 0 ? (
+          <div className="bg-white border-2 border-ink p-16 text-center shadow-brutal">
+            <i className="fas fa-folder-open text-ink/40 text-5xl mb-6"></i>
+            <h3 className="text-2xl font-bold font-mono uppercase text-ink mb-3 tracking-tight-mono">No Implementations Found</h3>
+            <p className="text-ink font-sans max-w-md mx-auto">
+              {searchTerm ? 'Try adjusting your search criteria.' : 'No implementations available.'}
+            </p>
           </div>
         ) : (
-          <ImplementationsTable
-            implementations={filteredImplementations}
-            onEdit={handleEditImplementation}
-            onDelete={handleDeleteImplementation}
-          />
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {filteredImplementations.map(impl => (
+              <ImplementationCardAdmin
+                key={impl.uuid}
+                impl={impl}
+                onEdit={() => handleEditImplementation(impl)}
+                onDelete={() => {
+                  if (window.confirm('Are you sure you want to delete this implementation?')) {
+                    handleDeleteImplementation(impl.uuid);
+                  }
+                }}
+              />
+            ))}
+          </div>
         )
       )}
 
@@ -2921,54 +3337,54 @@ const BasketView = ({
   return (
     <div className="max-w-6xl mx-auto h-[calc(100vh-140px)] flex flex-col">
         {/* Dashboard Header */}
-        <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6 mb-6 flex justify-between items-center shrink-0">
+        <div className="bg-white border border-ink p-8 mb-6 flex justify-between items-center shrink-0">
             <div>
-               <h2 className="text-2xl font-bold text-slate-900 mb-1">Skill Basket Review</h2>
-               <div className="flex space-x-6 text-sm text-slate-600">
-                  <span>Total Patterns: <strong className="text-slate-900">{stats.total}</strong></span>
-                  <span>System Default: <strong className="text-slate-500">{stats.system}</strong></span>
-                  <span>Custom Overrides: <strong className="text-indigo-600">{stats.custom}</strong></span>
+               <h2 className="text-2xl font-bold text-ink mb-2 font-mono uppercase tracking-tight-mono">Skill Basket Review</h2>
+               <div className="flex space-x-6 text-sm text-ink">
+                  <span className="font-mono">Total Patterns: <strong className="text-ink">{stats.total}</strong></span>
+                  <span className="font-mono">System Default: <strong className="text-ink">{stats.system}</strong></span>
+                  <span className="font-mono">Custom Overrides: <strong className="text-link-blue">{stats.custom}</strong></span>
                </div>
             </div>
             <div className="flex space-x-3">
-                 <button onClick={onClear} className="text-red-500 hover:text-red-700 px-4 py-2 text-sm font-medium">Clear All</button>
-                 <button onClick={exportData} className="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-2 rounded-lg shadow-sm font-semibold transition-colors">
+                 <button onClick={onClear} className="text-terminal-red hover:text-terminal-red px-4 py-2 text-sm font-medium font-mono uppercase border border-terminal-red hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-brutal transition-all duration-brutal">Clear All</button>
+                 <button onClick={exportData} className="bg-ink hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-brutal text-white px-6 py-2 font-semibold font-mono uppercase transition-all duration-brutal border border-ink">
                     <i className="fas fa-download mr-2"></i> Export for Agent
                  </button>
             </div>
         </div>
 
         {/* Split Pane */}
-        <div className="flex flex-grow overflow-hidden bg-white rounded-xl shadow-sm border border-slate-200">
+        <div className="flex flex-grow overflow-hidden bg-white border border-ink">
             
             {/* Left Sidebar: Categories */}
-            <div className="w-64 border-r border-slate-200 bg-slate-50 overflow-y-auto flex flex-col">
-               <div className="p-4 border-b border-slate-200 sticky top-0 bg-slate-50 z-10">
-                  <h3 className="text-xs font-bold text-slate-500 uppercase tracking-wider">Categories</h3>
+            <div className="w-64 border-r border-ink bg-canvas overflow-y-auto flex flex-col">
+               <div className="p-4 border-b border-ink sticky top-0 bg-canvas z-10">
+                  <h3 className="text-xs font-bold text-ink uppercase tracking-wider font-mono">Categories</h3>
                </div>
                <nav className="p-2 space-y-1">
                   <button
                      onClick={() => setActiveCategory("ALL")}
-                     className={`w-full text-left px-3 py-2 rounded-md text-sm font-medium flex justify-between items-center ${
-                        activeCategory === "ALL" ? "bg-white shadow text-indigo-600" : "text-slate-600 hover:bg-slate-100"
+                     className={`w-full text-left px-3 py-2 text-sm font-medium flex justify-between items-center font-mono uppercase transition-all duration-brutal ${
+                        activeCategory === "ALL" ? "bg-white border-2 border-ink text-link-blue" : "text-ink hover:bg-white/50"
                      }`}
                   >
                      <span>All Categories</span>
-                     <span className="bg-slate-200 text-slate-600 text-xs px-2 py-0.5 rounded-full">{enrichedItems.length}</span>
+                     <span className="bg-ink text-white text-xs px-2 py-1 border border-ink">{enrichedItems.length}</span>
                   </button>
                   {categoryStats.map(cat => (
                      <button
                         key={cat.code}
                         onClick={() => setActiveCategory(cat.code)}
-                        className={`w-full text-left px-3 py-2 rounded-md text-sm font-medium flex justify-between items-center ${
-                           activeCategory === cat.code ? "bg-white shadow text-indigo-600" : "text-slate-600 hover:bg-slate-100"
+                        className={`w-full text-left px-3 py-2 text-sm font-medium flex justify-between items-center font-mono uppercase transition-all duration-brutal ${
+                           activeCategory === cat.code ? "bg-white border-2 border-ink text-link-blue" : "text-ink hover:bg-white/50"
                         }`}
                      >
                         <div className="flex items-center">
-                           {cat.hasCustom && <span className="w-2 h-2 rounded-full bg-indigo-500 mr-2"></span>}
+                           {cat.hasCustom && <span className="w-2 h-2 rounded-full bg-link-blue mr-2"></span>}
                            <span>{cat.name}</span>
                         </div>
-                        <span className={`${cat.count > 0 ? "bg-slate-200 text-slate-600" : "bg-slate-100 text-slate-300"} text-xs px-2 py-0.5 rounded-full`}>
+                        <span className={`${cat.count > 0 ? "bg-ink text-white" : "bg-white text-ink border border-ink"} text-xs px-2 py-1`}>
                            {cat.count}
                         </span>
                      </button>
@@ -2979,67 +3395,67 @@ const BasketView = ({
             {/* Right Pane: List */}
             <div className="flex-grow overflow-y-auto p-6">
                <div className="mb-4 flex justify-between items-end">
-                   <h3 className="text-lg font-bold text-slate-800">
+                   <h3 className="text-lg font-bold text-ink font-mono uppercase">
                       {activeCategory === "ALL" ? "All Patterns" : CATEGORIES.find(c => c.code === activeCategory)?.name}
                    </h3>
-                   <span className="text-xs text-slate-500">{displayedItems.length} items shown</span>
+                   <span className="text-xs text-ink font-mono">{displayedItems.length} items shown</span>
                </div>
 
                {displayedItems.length === 0 ? (
-                  <div className="text-center py-20 text-slate-400">
-                     <p>No patterns in this category.</p>
+                  <div className="text-center py-20 text-ink">
+                     <p className="font-mono">No patterns in this category.</p>
                   </div>
                ) : (
                   <div className="space-y-3">
                      {displayedItems.map(({def, impl}) => {
                         const isCustom = impl.author !== SYSTEM_AUTHOR;
                         return (
-                           <div 
-                              key={def.id} 
-                              className={`p-4 rounded-lg border flex justify-between items-center transition-all ${
-                                 isCustom 
-                                 ? "bg-indigo-50 border-indigo-200 shadow-sm" 
-                                 : "bg-white border-slate-200 hover:border-slate-300"
+                           <div
+                              key={def.id}
+                              className={`p-4 border flex justify-between items-center transition-all duration-brutal ${
+                                 isCustom
+                                 ? "bg-white border-2 border-link-blue shadow-brutal-lg"
+                                 : "bg-white border border-ink"
                               }`}
                            >
                               <div className="flex-grow">
                                  <div className="flex items-center space-x-3 mb-1">
-                                    <span className={`text-xs font-mono font-bold px-1.5 py-0.5 rounded ${
-                                       isCustom ? "bg-indigo-200 text-indigo-800" : "bg-slate-100 text-slate-500"
+                                    <span className={`text-xs font-mono font-bold px-2 py-1 border border-ink ${
+                                       isCustom ? "bg-link-blue text-white" : "bg-white text-ink"
                                     }`}>
                                        {def.id}
                                     </span>
-                                    <h4 className={`font-semibold ${isCustom ? "text-indigo-900" : "text-slate-800"}`}>{def.title}</h4>
+                                    <h4 className={`font-semibold ${isCustom ? "text-link-blue" : "text-ink"}`}>{def.title}</h4>
                                  </div>
                                  <div className="flex items-center text-sm">
-                                    <span className="text-slate-500 mr-2">Implementation:</span>
+                                    <span className="text-ink mr-2 font-mono">Implementation:</span>
                                     {isCustom ? (
-                                       <span className="flex items-center text-indigo-700 font-bold bg-white px-2 py-0.5 rounded border border-indigo-100 shadow-sm">
+                                       <span className="flex items-center text-link-blue font-bold font-mono uppercase px-2 py-1 border border-ink bg-white">
                                           <i className="fas fa-user-circle mr-1.5"></i>
                                           {impl.author}
                                        </span>
                                     ) : (
-                                       <span className="text-slate-400 flex items-center">
+                                       <span className="text-ink flex items-center font-mono uppercase">
                                           <i className="fas fa-shield-alt mr-1.5 text-xs"></i>
                                           System Default
                                        </span>
                                     )}
                                  </div>
                               </div>
-                              
+
                               <div className="flex items-center space-x-2">
                                  {isCustom && (
-                                    <button 
+                                    <button
                                        onClick={() => onReset(def.id)}
-                                       className="text-xs text-indigo-600 hover:text-indigo-800 hover:underline px-3 py-1 font-medium"
+                                       className="text-xs text-ink hover:text-link-blue px-3 py-1 font-medium font-mono uppercase border border-ink hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-brutal transition-all duration-brutal"
                                        title="Revert to System Default"
                                     >
                                        Reset to System
                                     </button>
                                  )}
-                                 <button 
-                                    onClick={() => onRemove(def.id)} 
-                                    className="text-slate-400 hover:text-red-500 w-8 h-8 flex items-center justify-center rounded-full hover:bg-red-50 transition-colors"
+                                 <button
+                                    onClick={() => onRemove(def.id)}
+                                    className="text-ink hover:text-terminal-red w-8 h-8 flex items-center justify-center border border-ink hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-brutal transition-all duration-brutal"
                                     title="Remove from Basket"
                                  >
                                     <i className="fas fa-times"></i>
@@ -3087,8 +3503,8 @@ const Catalog = ({
         <div className="flex items-center space-x-2 overflow-x-auto pb-2 md:pb-0 w-full md:w-auto">
           <button
             onClick={() => setFilter("ALL")}
-            className={`px-3 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition-colors ${
-              filter === "ALL" ? "bg-indigo-600 text-white" : "bg-white text-slate-600 hover:bg-indigo-50"
+            className={`px-4 py-2 text-xs font-semibold whitespace-nowrap transition-all duration-brutal font-mono uppercase border border-ink ${
+              filter === "ALL" ? "bg-ink text-white shadow-brutal" : "bg-white text-ink hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-brutal"
             }`}
           >
             All Categories
@@ -3097,8 +3513,8 @@ const Catalog = ({
             <button
               key={cat.code}
               onClick={() => setFilter(cat.code)}
-              className={`px-3 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition-colors ${
-                filter === cat.code ? "bg-indigo-600 text-white" : "bg-white text-slate-600 hover:bg-indigo-50"
+              className={`px-4 py-2 text-xs font-semibold whitespace-nowrap transition-all duration-brutal font-mono uppercase border border-ink ${
+                filter === cat.code ? "bg-ink text-white shadow-brutal" : "bg-white text-ink hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-brutal"
               }`}
             >
               {cat.name}
@@ -3107,19 +3523,19 @@ const Catalog = ({
         </div>
         <div className="flex items-center gap-2 w-full md:w-auto">
           <div className="relative flex-1 md:w-64">
-            <i className="fas fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 text-xs"></i>
+            <i className="fas fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-ink text-xs"></i>
             <input
               type="text"
               placeholder="Search patterns..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="w-full pl-8 pr-4 py-2 border border-slate-300 rounded-full text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              className="w-full pl-8 pr-4 py-2 border border-ink text-sm focus:outline-none focus:border-2 focus:border-link-blue transition-all duration-brutal"
             />
           </div>
           {onRefresh && (
             <button
               onClick={onRefresh}
-              className="px-4 py-2 bg-white border border-slate-300 rounded-full text-sm font-medium text-slate-600 hover:bg-indigo-50 hover:text-indigo-600 hover:border-indigo-300 transition-colors flex items-center gap-2"
+              className="px-4 py-2 bg-white border border-ink text-sm font-medium font-mono uppercase text-ink hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-brutal hover:text-link-blue transition-all duration-brutal flex items-center gap-2"
               title="Refresh catalog data"
             >
               <i className="fas fa-sync-alt"></i>
@@ -3139,11 +3555,11 @@ const Catalog = ({
           />
         ))}
       </div>
-      
+
       {filteredDefs.length === 0 && (
-          <div className="text-center py-10 text-slate-400">
+          <div className="text-center py-10 text-ink">
               <i className="fas fa-folder-open text-4xl mb-2"></i>
-              <p>No patterns found in this category.</p>
+              <p className="font-mono">No patterns found in this category.</p>
           </div>
       )}
     </div>
