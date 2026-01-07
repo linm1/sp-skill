@@ -382,10 +382,10 @@ const Layout = ({
                 }
                 setView("catalog");
               }}
-              className={`font-mono uppercase text-xs md:text-sm font-medium tracking-tight-mono hover:text-link-blue transition-colors duration-brutal ${currentView === "catalog" ? "text-link-blue" : "text-ink"}`}
+              className={`font-mono uppercase text-xs md:text-sm font-medium tracking-tight-mono hover:text-link-blue transition-colors duration-brutal flex items-center ${currentView === "catalog" ? "text-link-blue" : "text-ink"}`}
             >
+              <i className="fas fa-th sm:mr-2"></i>
               <span className="hidden sm:inline">Catalog</span>
-              <i className="fas fa-th sm:hidden"></i>
             </button>
             {isLoaded && isSignedIn && userRole !== 'guest' && (
               <button
