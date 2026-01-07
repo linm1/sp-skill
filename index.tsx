@@ -3471,7 +3471,7 @@ const BasketView = ({
         </div>
 
         {/* Mobile Category Tabs - Only visible on small screens */}
-        <div className="md:hidden mb-4 overflow-x-auto">
+        <div className="md:hidden mb-4 overflow-x-auto bg-canvas sticky top-[60px] z-40 pb-2 -mx-4 px-4 pt-2 border-b border-ink">
           <div className="flex gap-2 pb-2">
             <button
               onClick={() => setActiveCategory("ALL")}
