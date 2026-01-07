@@ -12,9 +12,44 @@ The system functions as a **Data Warehouse for code logic** - ingesting unstruct
 - **Build Tool**: Vite 6
 - **Backend**: Vercel Serverless Functions (Node.js)
 - **AI Integration**: Google Gemini API (`@google/genai`) - server-side only
-- **Styling**: Tailwind CSS v4 (PostCSS plugin, compiled at build time)
+- **Styling**: Tailwind CSS v4 (CSS-based configuration via `@theme` directive)
 - **Icons**: Font Awesome (CDN)
 - **Deployment**: Vercel (https://sp-skill.vercel.app/)
+
+## Tailwind CSS v4 Configuration
+
+This project uses **Tailwind CSS v4**, which has a different configuration system than v3:
+
+### Key Differences from v3
+- **v4 uses CSS-based configuration** via the `@theme` directive in `index.css`
+- **v3-style `tailwind.config.js` is ignored** (kept for compatibility but not used)
+- All design tokens (colors, shadows, fonts) are defined in CSS using CSS variables
+
+### Configuration Location
+All Tailwind customization is in **`index.css`** using the `@theme` block:
+
+```css
+@theme {
+  --color-canvas: #F4EFEA;
+  --color-ink: #383838;
+  --color-duck-yellow: #FFD700;
+  /* ... more custom tokens */
+}
+```
+
+### Design System
+The complete design system is documented in `style.md` (Neo-Brutalist aesthetic):
+- High contrast borders (1px solid black)
+- Sharp edges (0px border-radius)
+- Hard drop shadows (offset without blur)
+- Custom color palette: canvas, ink, duck-yellow, link-blue, terminal-red, terminal-green
+- Typography: Aeonik Mono (headers) + Inter (body text)
+
+### Important Notes
+- **Do not add configuration to `tailwind.config.js`** - it will be ignored
+- All custom classes like `text-ink`, `bg-canvas`, `shadow-brutal` are generated from the `@theme` block
+- If custom colors/styles aren't applying, check `index.css` `@theme` section
+- The Vite plugin (`@tailwindcss/vite`) automatically processes the CSS configuration
 
 ## Quick Start
 
@@ -78,13 +113,13 @@ sp-skill/
 ├── DEPLOYMENT.md           # Production deployment guide
 ├── index.html              # Entry HTML
 ├── index.tsx               # Main React application (single-file architecture)
-├── index.css               # Tailwind CSS entry point
+├── index.css               # Tailwind CSS v4 configuration (@theme directive)
 ├── package.json            # Dependencies and scripts
 ├── tsconfig.json           # TypeScript configuration
 ├── vite.config.ts          # Vite build configuration
 ├── vercel.json             # Vercel deployment configuration
-├── tailwind.config.js      # Tailwind CSS configuration
-├── postcss.config.js       # PostCSS configuration
+├── tailwind.config.js      # Empty (v4 uses CSS config, not JS)
+├── style.md                # Complete design system documentation
 ├── metadata.json           # App metadata
 ├── api/                    # Serverless functions
 │   ├── analyze.ts          # Gemini API integration
@@ -313,7 +348,37 @@ Add entries to `PRELOADED_CONTENT` object with pattern ID as key.
 ### Modifying Pattern Template
 Update `generateMarkdown()` function to change output format.
 
+## Troubleshooting
+
+### Custom Tailwind Colors Not Applying
+
+**Symptom**: Classes like `text-ink`, `bg-canvas`, `shadow-brutal` render with default colors instead of custom values. UI elements may have invisible text or wrong colors.
+
+**Cause**: Tailwind CSS v4 uses CSS-based configuration, not JavaScript config files.
+
+**Solution**:
+1. Ensure all custom tokens are defined in `index.css` within the `@theme` block:
+   ```css
+   @theme {
+     --color-ink: #383838;
+     --color-canvas: #F4EFEA;
+     /* ... more tokens */
+   }
+   ```
+2. Do NOT add configuration to `tailwind.config.js` - it's ignored in v4
+3. Restart the dev server after modifying `index.css`
+4. Verify in browser console:
+   ```js
+   const test = document.createElement('div');
+   test.className = 'text-ink';
+   document.body.appendChild(test);
+   getComputedStyle(test).color; // Should be "rgb(56, 56, 56)"
+   ```
+
+**Reference**: See the "Tailwind CSS v4 Configuration" section above for complete details.
+
 ## External Resources
 
 - [SKILL_MANIFEST.md](./docs/SKILL_MANIFEST.md) - Full folder structure reference
+- [style.md](./style.md) - Complete design system & style guide
 - Google AI Studio: https://ai.studio/apps/drive/1Z1tYsu-VI85piqEJB8VTMMsFHCKgyng3
