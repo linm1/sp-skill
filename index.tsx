@@ -347,14 +347,14 @@ const Layout = ({
   return (
     <div className="min-h-screen flex flex-col font-sans text-ink">
       <nav className="bg-white text-ink border-b border-ink sticky top-0 z-50">
-        <div className="container mx-auto px-6 py-4 flex justify-between items-center" style={{ height: '70px' }}>
-          <div className="flex items-center space-x-4 cursor-pointer" onClick={() => {
+        <div className="container mx-auto px-3 md:px-6 py-3 md:py-4 flex justify-between items-center" style={{ minHeight: '60px' }}>
+          <div className="flex items-center space-x-2 md:space-x-4 cursor-pointer" onClick={() => {
             if (currentView === "admin-patterns" || currentView === "admin-review") {
               onRefresh?.();
             }
             setView("catalog");
           }}>
-            <div className="w-12 h-12 flex-shrink-0">
+            <div className="w-8 h-8 md:w-12 md:h-12 flex-shrink-0">
               <svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-full">
                 {/* Background Grid */}
                 <rect x="12" y="12" width="40" height="40" fill="white" stroke="#383838" strokeWidth="2"/>
@@ -370,11 +370,11 @@ const Layout = ({
               </svg>
             </div>
             <div className="flex flex-col justify-left">
-              <h1 className="text-xl font-bold font-mono tracking-tight-mono leading-tight">StatPatternHub</h1>
-              <p className="text-xs text-ink leading-tight">Clinical Programming Warehouse</p>
+              <h1 className="text-base md:text-xl font-bold font-mono tracking-tight-mono leading-tight">StatPatternHub</h1>
+              <p className="text-[10px] md:text-xs text-ink leading-tight hidden sm:block">Clinical Programming Warehouse</p>
             </div>
           </div>
-          <div className="flex items-center space-x-6">
+          <div className="flex items-center space-x-2 md:space-x-6">
             <button
               onClick={() => {
                 if (currentView === "admin-patterns" || currentView === "admin-review") {
@@ -382,9 +382,10 @@ const Layout = ({
                 }
                 setView("catalog");
               }}
-              className={`font-mono uppercase text-sm font-medium tracking-tight-mono hover:text-link-blue transition-colors duration-brutal ${currentView === "catalog" ? "text-link-blue" : "text-ink"}`}
+              className={`font-mono uppercase text-xs md:text-sm font-medium tracking-tight-mono hover:text-link-blue transition-colors duration-brutal flex items-center ${currentView === "catalog" ? "text-link-blue" : "text-ink"}`}
             >
-              Catalog
+              <i className="fas fa-th sm:mr-2"></i>
+              <span className="hidden sm:inline">Catalog</span>
             </button>
             {isLoaded && isSignedIn && userRole !== 'guest' && (
               <button
@@ -395,16 +396,16 @@ const Layout = ({
                     setView("contribute");
                   }
                 }}
-                className={`font-mono uppercase text-sm font-medium tracking-tight-mono hover:text-link-blue transition-colors duration-brutal flex items-center ${currentView === "contribute" ? "text-link-blue" : "text-ink"}`}
+                className={`font-mono uppercase text-xs md:text-sm font-medium tracking-tight-mono hover:text-link-blue transition-colors duration-brutal flex items-center ${currentView === "contribute" ? "text-link-blue" : "text-ink"}`}
               >
-                <i className="fas fa-plus-circle mr-2"></i>
-                Contribute
+                <i className="fas fa-plus-circle sm:mr-2"></i>
+                <span className="hidden sm:inline ml-0 sm:ml-0">Contribute</span>
               </button>
             )}
             {isLoaded && isSignedIn && userRole !== 'guest' && (
               <button
                 onClick={() => setView("my-contributions")}
-                className={`font-mono uppercase text-sm font-medium tracking-tight-mono hover:text-link-blue transition-colors duration-brutal flex items-center ${currentView === "my-contributions" ? "text-link-blue" : "text-ink"}`}
+                className={`font-mono uppercase text-xs md:text-sm font-medium tracking-tight-mono hover:text-link-blue transition-colors duration-brutal flex items-center hidden sm:flex ${currentView === "my-contributions" ? "text-link-blue" : "text-ink"}`}
               >
                 <i className="fas fa-folder-open mr-2"></i>
                 My Contributions
@@ -414,14 +415,14 @@ const Layout = ({
               <>
                 <button
                   onClick={() => setView("admin-review")}
-                  className={`font-mono uppercase text-sm font-medium tracking-tight-mono hover:text-link-blue transition-colors duration-brutal flex items-center ${currentView === "admin-review" ? "text-link-blue" : "text-ink"}`}
+                  className={`font-mono uppercase text-xs md:text-sm font-medium tracking-tight-mono hover:text-link-blue transition-colors duration-brutal flex items-center hidden sm:flex ${currentView === "admin-review" ? "text-link-blue" : "text-ink"}`}
                 >
                   <i className="fas fa-clipboard-check mr-2"></i>
                   Admin Review
                 </button>
                 <button
                   onClick={() => setView("admin-patterns")}
-                  className={`font-mono uppercase text-sm font-medium tracking-tight-mono hover:text-link-blue transition-colors duration-brutal flex items-center ${currentView === "admin-patterns" ? "text-link-blue" : "text-ink"}`}
+                  className={`font-mono uppercase text-xs md:text-sm font-medium tracking-tight-mono hover:text-link-blue transition-colors duration-brutal flex items-center hidden sm:flex ${currentView === "admin-patterns" ? "text-link-blue" : "text-ink"}`}
                 >
                   <i className="fas fa-cog mr-2"></i>
                   Admin Panel
@@ -430,31 +431,31 @@ const Layout = ({
             )}
             <button
               onClick={() => setView("basket")}
-              className={`font-mono uppercase text-sm font-medium tracking-tight-mono hover:text-link-blue transition-colors duration-brutal flex items-center ${currentView === "basket" ? "text-link-blue" : "text-ink"}`}
+              className={`font-mono uppercase text-xs md:text-sm font-medium tracking-tight-mono hover:text-link-blue transition-colors duration-brutal flex items-center ${currentView === "basket" ? "text-link-blue" : "text-ink"}`}
             >
-              <i className="fas fa-suitcase mr-2"></i>
-              Skill Basket
+              <i className="fas fa-suitcase sm:mr-2"></i>
+              <span className="hidden sm:inline">Skill Basket</span>
               <span className="ml-2 bg-ink text-white text-xs font-bold px-2 py-1 border border-ink">{basketCount}</span>
             </button>
-            <div className="border-l border-ink pl-6 flex items-center space-x-4">
+            <div className="border-l border-ink pl-2 md:pl-6 flex items-center space-x-2 md:space-x-4">
               {isLoaded && isSignedIn ? (
                 <>
-                  <div className="flex items-center space-x-2">
-                    <span className="text-sm text-ink">
+                  <div className="hidden sm:flex items-center space-x-2">
+                    <span className="text-xs md:text-sm text-ink">
                       {user?.firstName || user?.username || "User"}
                     </span>
-                    <UserButton
-                      afterSignOutUrl="/"
-                      appearance={{
-                        elements: {
-                          avatarBox: "w-8 h-8"
-                        }
-                      }}
-                    />
                   </div>
-                  <div className="flex flex-col items-end">
-                    <span className="text-xs text-ink uppercase font-mono">Role</span>
-                    <span className={`text-sm font-semibold font-mono uppercase ${
+                  <UserButton
+                    afterSignOutUrl="/"
+                    appearance={{
+                      elements: {
+                        avatarBox: "w-8 h-8"
+                      }
+                    }}
+                  />
+                  <div className="flex flex-col items-end hidden sm:flex">
+                    <span className="text-[10px] md:text-xs text-ink uppercase font-mono">Role</span>
+                    <span className={`text-xs md:text-sm font-semibold font-mono uppercase ${
                       userRole === 'admin' ? 'text-terminal-red' :
                       userRole === 'premier' ? 'text-link-blue' :
                       userRole === 'contributor' ? 'text-terminal-green' :
@@ -465,14 +466,14 @@ const Layout = ({
                   </div>
                 </>
               ) : (
-                <div className="flex items-center space-x-3">
+                <div className="flex items-center space-x-2 md:space-x-3">
                   <SignInButton mode="modal">
-                    <button className="bg-ink hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-brutal text-white px-4 py-2 text-sm font-medium font-mono uppercase transition-all duration-brutal border border-ink">
+                    <button className="bg-ink hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-brutal text-white px-2 md:px-4 py-1.5 md:py-2 text-xs md:text-sm font-medium font-mono uppercase transition-all duration-brutal border border-ink">
                       Sign In
                     </button>
                   </SignInButton>
                   <SignUpButton mode="modal">
-                    <button className="bg-white hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-brutal text-ink px-4 py-2 text-sm font-medium font-mono uppercase transition-all duration-brutal border border-ink">
+                    <button className="bg-white hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-brutal text-ink px-2 md:px-4 py-1.5 md:py-2 text-xs md:text-sm font-medium font-mono uppercase transition-all duration-brutal border border-ink">
                       Sign Up
                     </button>
                   </SignUpButton>
@@ -482,9 +483,9 @@ const Layout = ({
           </div>
         </div>
       </nav>
-      <main className="flex-grow container mx-auto px-6 py-8">{children}</main>
+      <main className="flex-grow container mx-auto px-4 md:px-6 py-4 md:py-8">{children}</main>
       <footer className="bg-canvas border-t border-ink mt-auto">
-        <div className="container mx-auto px-6 py-6 text-center text-sm text-ink font-mono">
+        <div className="container mx-auto px-4 md:px-6 py-4 md:py-6 text-center text-xs md:text-sm text-ink font-mono">
           StatPatternHub v1.0.0 | Adheres to SKILL_MANIFEST.md Schema
         </div>
       </footer>
@@ -508,7 +509,7 @@ const PatternCard: React.FC<PatternCardProps> = ({
       onClick={onClick}
       className="bg-white border border-black overflow-hidden hover:-translate-y-1 hover:shadow-brutal-lg transition-transform duration-brutal flex flex-col h-full cursor-pointer group"
     >
-      <div className="p-8 flex-grow">
+      <div className="p-4 md:p-8 flex-grow">
         <div className="flex justify-between items-start mb-3">
           <span className="inline-block px-2 py-1 text-xs font-semibold bg-ink text-white font-mono uppercase border border-ink">
             {def.id}
@@ -519,12 +520,13 @@ const PatternCard: React.FC<PatternCardProps> = ({
              </span>
           )}
         </div>
-        <h3 className="text-lg font-bold text-ink mb-3 leading-tight group-hover:text-link-blue transition-colors duration-brutal">{def.title}</h3>
+        <h3 className="text-base md:text-lg font-bold text-ink mb-3 leading-tight group-hover:text-link-blue transition-colors duration-brutal">{def.title}</h3>
         <p className="text-sm text-ink line-clamp-2 mb-4">{def.problem}</p>
       </div>
-      <div className="px-8 py-3 bg-canvas border-t border-ink flex justify-between items-center text-xs text-ink font-mono uppercase">
+      <div className="px-4 md:px-8 py-3 bg-canvas border-t border-ink flex justify-between items-center text-xs text-ink font-mono uppercase">
           <span>{def.category}</span>
-          <span>View Container &rarr;</span>
+          <span className="hidden sm:inline">View Container &rarr;</span>
+          <span className="sm:hidden">&rarr;</span>
       </div>
     </div>
   );
@@ -3447,28 +3449,66 @@ const BasketView = ({
   return (
     <div className="max-w-6xl mx-auto h-[calc(100vh-140px)] flex flex-col">
         {/* Dashboard Header */}
-        <div className="bg-white border border-ink p-8 mb-6 flex justify-between items-center shrink-0">
-            <div>
-               <h2 className="text-2xl font-bold text-ink mb-2 font-mono uppercase tracking-tight-mono">Skill Basket Review</h2>
-               <div className="flex space-x-6 text-sm text-ink">
-                  <span className="font-mono">Total Patterns: <strong className="text-ink">{stats.total}</strong></span>
-                  <span className="font-mono">System Default: <strong className="text-ink">{stats.system}</strong></span>
-                  <span className="font-mono">Custom Overrides: <strong className="text-link-blue">{stats.custom}</strong></span>
+        <div className="bg-white border border-ink p-4 md:p-8 mb-4 md:mb-6 shrink-0">
+            {/* Title Row */}
+            <h2 className="text-lg md:text-2xl font-bold text-ink mb-3 font-mono uppercase tracking-tight-mono">Skill Basket Review</h2>
+
+            {/* Stats and Actions Row */}
+            <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-3">
+               {/* Stats */}
+               <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs md:text-sm text-ink">
+                  <span className="font-mono">Total: <strong className="text-ink">{stats.total}</strong></span>
+                  <span className="font-mono">System: <strong className="text-ink">{stats.system}</strong></span>
+                  <span className="font-mono">Custom: <strong className="text-link-blue">{stats.custom}</strong></span>
+               </div>
+
+               {/* Action Buttons */}
+               <div className="flex space-x-2 md:space-x-3">
+                    <button onClick={onClear} className="text-terminal-red hover:text-terminal-red px-2 md:px-4 py-1.5 md:py-2 text-xs md:text-sm font-medium font-mono uppercase border border-terminal-red hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-brutal transition-all duration-brutal flex items-center">
+                       <i className="fas fa-trash md:mr-2"></i>
+                       <span className="hidden md:inline">Clear All</span>
+                    </button>
+                    <button onClick={exportData} className="bg-ink hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-brutal text-white px-2 md:px-6 py-1.5 md:py-2 text-xs md:text-sm font-semibold font-mono uppercase transition-all duration-brutal border border-ink flex items-center">
+                       <i className="fas fa-download md:mr-2"></i>
+                       <span className="hidden md:inline">Export for Agent</span>
+                    </button>
                </div>
             </div>
-            <div className="flex space-x-3">
-                 <button onClick={onClear} className="text-terminal-red hover:text-terminal-red px-4 py-2 text-sm font-medium font-mono uppercase border border-terminal-red hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-brutal transition-all duration-brutal">Clear All</button>
-                 <button onClick={exportData} className="bg-ink hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-brutal text-white px-6 py-2 font-semibold font-mono uppercase transition-all duration-brutal border border-ink">
-                    <i className="fas fa-download mr-2"></i> Export for Agent
-                 </button>
-            </div>
+        </div>
+
+        {/* Mobile Category Tabs - Only visible on small screens */}
+        <div className="md:hidden mb-4 overflow-x-auto bg-canvas pb-2 -mx-4 px-4 pt-2 border-b border-ink shrink-0">
+          <div className="flex gap-2 pb-2">
+            <button
+              onClick={() => setActiveCategory("ALL")}
+              className={`px-3 py-2 text-xs font-semibold whitespace-nowrap transition-all duration-brutal font-mono uppercase border border-ink flex items-center gap-2 ${
+                activeCategory === "ALL" ? "bg-ink text-white shadow-brutal" : "bg-white text-ink"
+              }`}
+            >
+              ALL
+              <span className="bg-white text-ink text-xs px-1.5 py-0.5 border border-ink">{enrichedItems.length}</span>
+            </button>
+            {categoryStats.filter(cat => cat.count > 0).map((cat) => (
+              <button
+                key={cat.code}
+                onClick={() => setActiveCategory(cat.code)}
+                className={`px-3 py-2 text-xs font-semibold whitespace-nowrap transition-all duration-brutal font-mono uppercase border border-ink flex items-center gap-2 ${
+                  activeCategory === cat.code ? "bg-ink text-white shadow-brutal" : "bg-white text-ink"
+                }`}
+              >
+                {cat.hasCustom && <span className="w-1.5 h-1.5 rounded-full bg-link-blue"></span>}
+                {cat.code}
+                <span className={`${activeCategory === cat.code ? "bg-white text-ink" : "bg-ink text-white"} text-xs px-1.5 py-0.5 border border-ink`}>{cat.count}</span>
+              </button>
+            ))}
+          </div>
         </div>
 
         {/* Split Pane */}
         <div className="flex flex-grow overflow-hidden bg-white border border-ink">
-            
-            {/* Left Sidebar: Categories */}
-            <div className="w-64 border-r border-ink bg-canvas overflow-y-auto flex flex-col">
+
+            {/* Left Sidebar: Categories - Hidden on mobile */}
+            <div className="hidden md:flex w-64 border-r border-ink bg-canvas overflow-y-auto flex-col">
                <div className="p-4 border-b border-ink sticky top-0 bg-canvas z-10">
                   <h3 className="text-xs font-bold text-ink uppercase tracking-wider font-mono">Categories</h3>
                </div>
@@ -3503,12 +3543,12 @@ const BasketView = ({
             </div>
 
             {/* Right Pane: List */}
-            <div className="flex-grow overflow-y-auto p-6">
-               <div className="mb-4 flex justify-between items-end">
-                   <h3 className="text-lg font-bold text-ink font-mono uppercase">
+            <div className="flex-grow overflow-y-auto p-3 md:p-6">
+               <div className="mb-3 md:mb-4 flex flex-col sm:flex-row justify-between sm:items-end gap-2">
+                   <h3 className="text-base md:text-lg font-bold text-ink font-mono uppercase">
                       {activeCategory === "ALL" ? "All Patterns" : CATEGORIES.find(c => c.code === activeCategory)?.name}
                    </h3>
-                   <span className="text-xs text-ink font-mono">{displayedItems.length} items shown</span>
+                   <span className="text-xs text-ink font-mono">{displayedItems.length} items</span>
                </div>
 
                {displayedItems.length === 0 ? (
@@ -3516,51 +3556,52 @@ const BasketView = ({
                      <p className="font-mono">No patterns in this category.</p>
                   </div>
                ) : (
-                  <div className="space-y-3">
+                  <div className="space-y-2 md:space-y-3">
                      {displayedItems.map(({def, impl}) => {
                         const isCustom = impl.author !== SYSTEM_AUTHOR;
                         return (
                            <div
                               key={def.id}
-                              className={`p-4 border flex justify-between items-center transition-all duration-brutal ${
+                              className={`p-3 md:p-4 border flex flex-col md:flex-row md:justify-between md:items-center gap-3 transition-all duration-brutal ${
                                  isCustom
                                  ? "bg-white border-2 border-link-blue shadow-brutal-lg"
                                  : "bg-white border border-ink"
                               }`}
                            >
                               <div className="flex-grow">
-                                 <div className="flex items-center space-x-3 mb-1">
+                                 <div className="flex items-center flex-wrap gap-2 md:space-x-3 mb-2">
                                     <span className={`text-xs font-mono font-bold px-2 py-1 border border-ink ${
                                        isCustom ? "bg-link-blue text-white" : "bg-white text-ink"
                                     }`}>
                                        {def.id}
                                     </span>
-                                    <h4 className={`font-semibold ${isCustom ? "text-link-blue" : "text-ink"}`}>{def.title}</h4>
+                                    <h4 className={`text-sm md:text-base font-semibold ${isCustom ? "text-link-blue" : "text-ink"}`}>{def.title}</h4>
                                  </div>
-                                 <div className="flex items-center text-sm">
-                                    <span className="text-ink mr-2 font-mono">Implementation:</span>
+                                 <div className="flex items-center text-xs md:text-sm flex-wrap gap-2">
+                                    <span className="text-ink font-mono hidden sm:inline">Implementation:</span>
                                     {isCustom ? (
-                                       <span className="flex items-center text-link-blue font-bold font-mono uppercase px-2 py-1 border border-ink bg-white">
+                                       <span className="flex items-center text-link-blue font-bold font-mono uppercase px-2 py-1 border border-ink bg-white text-xs">
                                           <i className="fas fa-user-circle mr-1.5"></i>
                                           {impl.author}
                                        </span>
                                     ) : (
-                                       <span className="text-ink flex items-center font-mono uppercase">
+                                       <span className="text-ink flex items-center font-mono uppercase text-xs">
                                           <i className="fas fa-shield-alt mr-1.5 text-xs"></i>
-                                          System Default
+                                          System
                                        </span>
                                     )}
                                  </div>
                               </div>
 
-                              <div className="flex items-center space-x-2">
+                              <div className="flex items-center space-x-2 self-end md:self-center">
                                  {isCustom && (
                                     <button
                                        onClick={() => onReset(def.id)}
-                                       className="text-xs text-ink hover:text-link-blue px-3 py-1 font-medium font-mono uppercase border border-ink hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-brutal transition-all duration-brutal"
+                                       className="text-xs text-ink hover:text-link-blue px-2 md:px-3 py-1 font-medium font-mono uppercase border border-ink hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-brutal transition-all duration-brutal flex items-center"
                                        title="Revert to System Default"
                                     >
-                                       Reset to System
+                                       <i className="fas fa-undo md:mr-1.5"></i>
+                                       <span className="hidden sm:inline">Reset</span>
                                     </button>
                                  )}
                                  <button
