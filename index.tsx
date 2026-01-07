@@ -354,12 +354,24 @@ const Layout = ({
             }
             setView("catalog");
           }}>
-            <div className="w-10 h-10 bg-duck-yellow rounded-full flex items-center justify-center font-bold text-xl border border-ink">
-              SPH
+            <div className="w-12 h-12 flex-shrink-0">
+              <svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-full">
+                {/* Background Grid */}
+                <rect x="12" y="12" width="40" height="40" fill="white" stroke="#383838" strokeWidth="2"/>
+                {/* Grid Lines */}
+                <line x1="25" y1="12" x2="25" y2="52" stroke="#383838" strokeWidth="2"/>
+                <line x1="39" y1="12" x2="39" y2="52" stroke="#383838" strokeWidth="2"/>
+                <line x1="12" y1="25" x2="52" y2="25" stroke="#383838" strokeWidth="2"/>
+                <line x1="12" y1="39" x2="52" y2="39" stroke="#383838" strokeWidth="2"/>
+                {/* Highlighted Cells */}
+                <rect x="12" y="12" width="13" height="13" fill="#383838"/>
+                <rect x="25" y="25" width="14" height="14" fill="#FFD700"/>
+                <rect x="39" y="39" width="13" height="13" fill="#FFD700"/>
+              </svg>
             </div>
-            <div>
-              <h1 className="text-xl font-bold font-mono uppercase tracking-tight-mono">StatPatternHub</h1>
-              <p className="text-xs text-ink">Clinical Knowledge Warehouse</p>
+            <div className="flex flex-col justify-left">
+              <h1 className="text-xl font-bold font-mono tracking-tight-mono leading-tight">StatPatternHub</h1>
+              <p className="text-xs text-ink leading-tight">Clinical Programming Warehouse</p>
             </div>
           </div>
           <div className="flex items-center space-x-6">
@@ -1571,7 +1583,21 @@ const AdminReviewQueue = () => {
     return (
       <div className="max-w-7xl mx-auto">
         <div className="text-center py-20">
-          <div className="inline-block animate-spin w-12 h-12 border-2 border-ink border-t-transparent mb-4"></div>
+          <div className="inline-block animate-spin mb-4">
+            <svg width="48" height="48" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+              {/* Background Grid */}
+              <rect x="12" y="12" width="40" height="40" fill="white" stroke="#383838" strokeWidth="2"/>
+              {/* Grid Lines */}
+              <line x1="25" y1="12" x2="25" y2="52" stroke="#383838" strokeWidth="2"/>
+              <line x1="39" y1="12" x2="39" y2="52" stroke="#383838" strokeWidth="2"/>
+              <line x1="12" y1="25" x2="52" y2="25" stroke="#383838" strokeWidth="2"/>
+              <line x1="12" y1="39" x2="52" y2="39" stroke="#383838" strokeWidth="2"/>
+              {/* Highlighted Cells */}
+              <rect x="12" y="12" width="13" height="13" fill="#383838"/>
+              <rect x="25" y="25" width="14" height="14" fill="#FFD700"/>
+              <rect x="39" y="39" width="13" height="13" fill="#FFD700"/>
+            </svg>
+          </div>
           <div className="text-ink text-lg font-mono uppercase tracking-tight-mono">Loading pending submissions...</div>
         </div>
       </div>
@@ -2884,7 +2910,21 @@ const AdminPatternManager = ({
       {/* Loading State */}
       {loading && (
         <div className="bg-white border-2 border-ink p-16 text-center shadow-brutal">
-          <div className="inline-block animate-spin w-12 h-12 border-2 border-ink border-t-transparent mb-4"></div>
+          <div className="inline-block animate-spin mb-4">
+            <svg width="48" height="48" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+              {/* Background Grid */}
+              <rect x="12" y="12" width="40" height="40" fill="white" stroke="#383838" strokeWidth="2"/>
+              {/* Grid Lines */}
+              <line x1="25" y1="12" x2="25" y2="52" stroke="#383838" strokeWidth="2"/>
+              <line x1="39" y1="12" x2="39" y2="52" stroke="#383838" strokeWidth="2"/>
+              <line x1="12" y1="25" x2="52" y2="25" stroke="#383838" strokeWidth="2"/>
+              <line x1="12" y1="39" x2="52" y2="39" stroke="#383838" strokeWidth="2"/>
+              {/* Highlighted Cells */}
+              <rect x="12" y="12" width="13" height="13" fill="#383838"/>
+              <rect x="25" y="25" width="14" height="14" fill="#FFD700"/>
+              <rect x="39" y="39" width="13" height="13" fill="#FFD700"/>
+            </svg>
+          </div>
           <p className="text-ink font-mono uppercase tracking-tight-mono">Loading patterns...</p>
         </div>
       )}
@@ -2934,7 +2974,21 @@ const AdminPatternManager = ({
       {activeTab === "implementations" && (
         implementationsLoading ? (
           <div className="bg-white border-2 border-ink p-16 text-center shadow-brutal">
-            <div className="inline-block animate-spin w-12 h-12 border-2 border-ink border-t-transparent mb-4"></div>
+            <div className="inline-block animate-spin mb-4">
+              <svg width="48" height="48" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+                {/* Background Grid */}
+                <rect x="12" y="12" width="40" height="40" fill="white" stroke="#383838" strokeWidth="2"/>
+                {/* Grid Lines */}
+                <line x1="25" y1="12" x2="25" y2="52" stroke="#383838" strokeWidth="2"/>
+                <line x1="39" y1="12" x2="39" y2="52" stroke="#383838" strokeWidth="2"/>
+                <line x1="12" y1="25" x2="52" y2="25" stroke="#383838" strokeWidth="2"/>
+                <line x1="12" y1="39" x2="52" y2="39" stroke="#383838" strokeWidth="2"/>
+                {/* Highlighted Cells */}
+                <rect x="12" y="12" width="13" height="13" fill="#383838"/>
+                <rect x="25" y="25" width="14" height="14" fill="#FFD700"/>
+                <rect x="39" y="39" width="13" height="13" fill="#FFD700"/>
+              </svg>
+            </div>
             <p className="text-ink font-mono uppercase tracking-tight-mono">Loading implementations...</p>
           </div>
         ) : filteredImplementations.length === 0 ? (
@@ -3003,6 +3057,11 @@ const MyContributions = ({
     updatedAt: string;
   }>>([]);
 
+  // Filter state - must be declared before useEffect
+  const [searchTerm, setSearchTerm] = useState("");
+  const [categoryFilter, setCategoryFilter] = useState("all");
+  const [statusFilter, setStatusFilter] = useState("all");
+
   useEffect(() => {
     const fetchContributions = async () => {
       try {
@@ -3042,6 +3101,20 @@ const MyContributions = ({
     fetchContributions();
   }, [getToken]);
 
+  // Filter contributions - must be before any returns
+  const filteredContributions = useMemo(() => {
+    return contributions.filter(contribution => {
+      const matchesSearch = searchTerm === "" ||
+        contribution.patternId.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        contribution.patternTitle.toLowerCase().includes(searchTerm.toLowerCase());
+
+      const matchesCategory = categoryFilter === "all" || contribution.patternCategory === categoryFilter;
+      const matchesStatus = statusFilter === "all" || contribution.status === statusFilter;
+
+      return matchesSearch && matchesCategory && matchesStatus;
+    });
+  }, [contributions, searchTerm, categoryFilter, statusFilter]);
+
   const getStatusBadgeClass = (status: string) => {
     switch (status) {
       case 'pending':
@@ -3065,7 +3138,21 @@ const MyContributions = ({
     return (
       <div className="max-w-6xl mx-auto">
         <div className="text-center py-20">
-          <div className="inline-block animate-spin h-12 w-12 border-b-2 border-ink mb-4"></div>
+          <div className="inline-block animate-spin mb-4">
+            <svg width="48" height="48" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+              {/* Background Grid */}
+              <rect x="12" y="12" width="40" height="40" fill="white" stroke="#383838" strokeWidth="2"/>
+              {/* Grid Lines */}
+              <line x1="25" y1="12" x2="25" y2="52" stroke="#383838" strokeWidth="2"/>
+              <line x1="39" y1="12" x2="39" y2="52" stroke="#383838" strokeWidth="2"/>
+              <line x1="12" y1="25" x2="52" y2="25" stroke="#383838" strokeWidth="2"/>
+              <line x1="12" y1="39" x2="52" y2="39" stroke="#383838" strokeWidth="2"/>
+              {/* Highlighted Cells */}
+              <rect x="12" y="12" width="13" height="13" fill="#383838"/>
+              <rect x="25" y="25" width="14" height="14" fill="#FFD700"/>
+              <rect x="39" y="39" width="13" height="13" fill="#FFD700"/>
+            </svg>
+          </div>
           <div className="text-ink text-lg font-sans">Loading your contributions...</div>
         </div>
       </div>
@@ -3108,16 +3195,93 @@ const MyContributions = ({
   }
 
   return (
-    <div className="max-w-6xl mx-auto">
-      <div className="mb-6">
+    <div className="container mx-auto px-6 py-8">
+      {/* Header */}
+      <div className="mb-8">
         <h2 className="text-3xl font-mono uppercase tracking-wide-head text-ink mb-2">My Contributions</h2>
         <p className="text-ink font-sans">
           You have submitted {contributions.length} pattern implementation{contributions.length !== 1 ? 's' : ''}
         </p>
       </div>
 
-      <div className="space-y-4">
-        {contributions.map((contribution) => {
+      {/* Category Filters */}
+      <div className="mb-6">
+        <div className="flex flex-wrap items-center gap-2 w-full">
+          <button
+            onClick={() => setCategoryFilter("all")}
+            className={`px-4 py-2 text-xs font-semibold whitespace-nowrap transition-all duration-brutal font-mono uppercase border border-ink ${
+              categoryFilter === "all" ? "bg-ink text-white shadow-brutal" : "bg-white text-ink hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-brutal"
+            }`}
+          >
+            All Categories
+          </button>
+          {CATEGORIES.map((cat) => (
+            <button
+              key={cat.code}
+              onClick={() => setCategoryFilter(cat.code)}
+              className={`px-4 py-2 text-xs font-semibold whitespace-nowrap transition-all duration-brutal font-mono uppercase border border-ink ${
+                categoryFilter === cat.code ? "bg-ink text-white shadow-brutal" : "bg-white text-ink hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-brutal"
+              }`}
+            >
+              {cat.name}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Search and Status Filter */}
+      <div className="mb-8">
+        <div className="flex gap-4">
+          <input
+            type="text"
+            placeholder="Search by Pattern ID or title..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="flex-1 px-4 py-3 border-2 border-ink font-mono text-sm focus:border-link-blue focus:outline-none transition-colors duration-brutal"
+          />
+          <select
+            value={statusFilter}
+            onChange={(e) => setStatusFilter(e.target.value)}
+            className="px-4 py-3 border-2 border-ink font-mono text-sm focus:border-link-blue focus:outline-none transition-colors duration-brutal bg-white"
+          >
+            <option value="all">All Status</option>
+            <option value="pending">Pending</option>
+            <option value="active">Active</option>
+            <option value="rejected">Rejected</option>
+          </select>
+          <button
+            onClick={onContribute}
+            className="bg-ink hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-brutal text-white px-6 py-3 text-sm font-medium font-mono uppercase transition-all duration-brutal border border-ink flex items-center whitespace-nowrap"
+          >
+            <i className="fas fa-plus mr-2"></i>
+            New Contribution
+          </button>
+        </div>
+      </div>
+
+      {/* Contributions Grid */}
+      {filteredContributions.length === 0 ? (
+        <div className="bg-white border-2 border-ink p-16 text-center shadow-brutal">
+          <i className="fas fa-folder-open text-ink/40 text-5xl mb-6"></i>
+          <h3 className="text-2xl font-bold font-mono uppercase text-ink mb-3 tracking-tight-mono">No Contributions Found</h3>
+          <p className="text-ink font-sans max-w-md mx-auto mb-6">
+            {searchTerm || categoryFilter !== 'all' || statusFilter !== 'all'
+              ? 'Try adjusting your search or filter criteria.'
+              : 'You haven\'t submitted any pattern implementations yet. Share your expertise with the community!'}
+          </p>
+          {contributions.length === 0 && (
+            <button
+              onClick={onContribute}
+              className="bg-ink text-white border border-ink px-6 py-3 font-mono uppercase font-semibold hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-brutal transition-all duration-brutal inline-flex items-center"
+            >
+              <i className="fas fa-plus-circle mr-2"></i>
+              Contribute Now
+            </button>
+          )}
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {filteredContributions.map((contribution) => {
           const isPending = contribution.status === 'pending';
           const isActive = contribution.status === 'active';
           const isRejected = contribution.status === 'rejected';
@@ -3127,111 +3291,81 @@ const MyContributions = ({
               key={contribution.uuid}
               className="bg-white border border-ink overflow-hidden hover:-translate-y-1 hover:shadow-brutal-lg transition-transform duration-brutal"
             >
-              <div className="p-6">
-                <div className="flex items-start justify-between mb-4">
-                  <div className="flex-grow">
-                    <div className="flex items-center space-x-3 mb-2">
-                      <span className="px-2 py-1 bg-ink text-white text-xs font-mono font-semibold uppercase">
-                        {contribution.patternId}
-                      </span>
-                      <h3 className="text-lg font-bold text-ink font-sans">
-                        {contribution.patternTitle}
-                      </h3>
-                      <span className={`px-3 py-1 text-xs font-mono font-semibold uppercase border ${getStatusBadgeClass(contribution.status)}`}>
-                        {contribution.status.charAt(0).toUpperCase() + contribution.status.slice(1)}
-                      </span>
-                    </div>
-                    <p className="text-sm text-ink font-sans">
-                      Category: {contribution.patternCategory} | Submitted: {formatRelativeTime(contribution.createdAt)}
-                      {contribution.updatedAt !== contribution.createdAt && (
-                        <> | Updated: {formatRelativeTime(contribution.updatedAt)}</>
-                      )}
-                    </p>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    {isPending && (
-                      <button
-                        onClick={() => {
-                          const impl: PatternImplementation = {
-                            uuid: contribution.uuid,
-                            patternId: contribution.patternId,
-                            author: CURRENT_USER,
-                            sasCode: contribution.sasCode,
-                            rCode: contribution.rCode,
-                            considerations: contribution.considerations,
-                            variations: contribution.variations,
-                            status: contribution.status,
-                            isPremium: false,
-                            timestamp: new Date(contribution.updatedAt).getTime()
-                          };
-                          onEdit(impl);
-                        }}
-                        className="bg-ink text-white border border-ink px-4 py-2 text-sm font-mono uppercase font-semibold hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-brutal transition-all duration-brutal"
-                      >
-                        <i className="fas fa-edit mr-2"></i>
-                        Edit
-                      </button>
-                    )}
-                    {(isActive || isRejected) && (
-                      <span className="text-sm text-ink font-sans italic">
-                        {isActive ? 'Published' : 'View Only'}
-                      </span>
-                    )}
-                  </div>
+              {/* Header */}
+              <div className="p-4 border-b border-ink">
+                <div className="flex items-start justify-between mb-2">
+                  <span className="px-2 py-1 bg-ink text-white text-xs font-mono font-semibold uppercase">
+                    {contribution.patternId}
+                  </span>
+                  <span className={`px-2 py-1 text-xs font-mono font-semibold uppercase ${getStatusBadgeClass(contribution.status)}`}>
+                    {contribution.status}
+                  </span>
                 </div>
+                <h3 className="text-base font-bold text-ink font-sans mb-1 line-clamp-2">
+                  {contribution.patternTitle}
+                </h3>
+                <p className="text-xs text-ink font-sans opacity-60">
+                  {contribution.patternCategory}
+                </p>
+              </div>
 
-                {/* SAS Code Preview */}
-                <div className="bg-white border border-ink p-4 shadow-terminal">
-                  <h4 className="text-xs font-mono uppercase tracking-tight-mono text-ink font-semibold mb-2">SAS Code Preview</h4>
+              {/* Code Preview */}
+              <div className="p-4 flex-grow">
+                <div className="text-xs font-mono text-ink">
                   {contribution.sasCode ? (
-                    <>
-                      <pre className="text-xs font-mono text-ink whitespace-pre-wrap overflow-hidden">
+                    <div>
+                      <span className="font-semibold opacity-60">SAS:</span>
+                      <pre className="mt-1 whitespace-pre-wrap line-clamp-3">
                         {contribution.sasCode.split('\n').filter(l => l.trim()).slice(0, 3).join('\n')}
                       </pre>
-                      {contribution.sasCode.split('\n').length > 3 && (
-                        <p className="text-xs text-ink mt-2 italic font-sans">...</p>
-                      )}
-                    </>
-                  ) : (
-                    <p className="text-xs text-ink italic font-sans">(Not provided)</p>
-                  )}
-                </div>
-
-                {/* R Code Preview */}
-                <div className="bg-white border border-ink p-4 shadow-terminal mt-4">
-                  <h4 className="text-xs font-mono uppercase tracking-tight-mono text-ink font-semibold mb-2">R Code Preview</h4>
-                  {contribution.rCode ? (
-                    <>
-                      <pre className="text-xs font-mono text-ink whitespace-pre-wrap overflow-hidden">
+                    </div>
+                  ) : contribution.rCode ? (
+                    <div>
+                      <span className="font-semibold opacity-60">R:</span>
+                      <pre className="mt-1 whitespace-pre-wrap line-clamp-3">
                         {contribution.rCode.split('\n').filter(l => l.trim()).slice(0, 3).join('\n')}
                       </pre>
-                      {contribution.rCode.split('\n').length > 3 && (
-                        <p className="text-xs text-ink mt-2 italic font-sans">...</p>
-                      )}
-                    </>
+                    </div>
                   ) : (
-                    <p className="text-xs text-ink italic font-sans">(Not provided)</p>
+                    <p className="italic opacity-60">No code preview</p>
                   )}
                 </div>
+              </div>
 
-                {contribution.considerations.length > 0 && (
-                  <div className="mt-4">
-                    <h4 className="text-xs font-mono uppercase tracking-tight-mono text-ink font-semibold mb-1">Considerations</h4>
-                    <ul className="list-disc list-inside text-sm text-ink font-sans space-y-1">
-                      {contribution.considerations.slice(0, 2).map((c, i) => (
-                        <li key={i}>{c}</li>
-                      ))}
-                      {contribution.considerations.length > 2 && (
-                        <li className="text-ink italic">+ {contribution.considerations.length - 2} more...</li>
-                      )}
-                    </ul>
-                  </div>
+              {/* Footer */}
+              <div className="p-4 border-t border-ink flex items-center justify-between">
+                <div className="text-xs text-ink font-sans opacity-60">
+                  {formatRelativeTime(contribution.createdAt)}
+                </div>
+                {isPending && (
+                  <button
+                    onClick={() => {
+                      const impl: PatternImplementation = {
+                        uuid: contribution.uuid,
+                        patternId: contribution.patternId,
+                        author: CURRENT_USER,
+                        sasCode: contribution.sasCode,
+                        rCode: contribution.rCode,
+                        considerations: contribution.considerations,
+                        variations: contribution.variations,
+                        status: contribution.status,
+                        isPremium: false,
+                        timestamp: new Date(contribution.updatedAt).getTime()
+                      };
+                      onEdit(impl);
+                    }}
+                    className="bg-ink text-white border border-ink px-3 py-1 text-xs font-mono uppercase font-semibold hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-brutal transition-all duration-brutal"
+                  >
+                    <i className="fas fa-edit mr-1"></i>
+                    Edit
+                  </button>
                 )}
               </div>
             </div>
           );
         })}
-      </div>
+        </div>
+      )}
     </div>
   );
 };
@@ -3854,11 +3988,28 @@ const App = () => {
   // Show loading state
   if (loading) {
     return (
-      <div className="min-h-screen bg-slate-900 flex items-center justify-center">
-        <div className="text-center">
-          <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-white mb-4"></div>
-          <div className="text-white text-xl">Loading patterns...</div>
-          <div className="text-slate-400 text-sm mt-2">Fetching data from database</div>
+      <div className="min-h-screen bg-canvas flex items-center justify-center">
+        <div className="bg-white border border-ink p-16 shadow-brutal">
+          <div className="text-center">
+            {/* Grid Pattern Spinner */}
+            <div className="inline-block animate-spin mb-6">
+              <svg width="48" height="48" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+                {/* Background Grid */}
+                <rect x="12" y="12" width="40" height="40" fill="white" stroke="#383838" strokeWidth="2"/>
+                {/* Grid Lines */}
+                <line x1="25" y1="12" x2="25" y2="52" stroke="#383838" strokeWidth="2"/>
+                <line x1="39" y1="12" x2="39" y2="52" stroke="#383838" strokeWidth="2"/>
+                <line x1="12" y1="25" x2="52" y2="25" stroke="#383838" strokeWidth="2"/>
+                <line x1="12" y1="39" x2="52" y2="39" stroke="#383838" strokeWidth="2"/>
+                {/* Highlighted Cells */}
+                <rect x="12" y="12" width="13" height="13" fill="#383838"/>
+                <rect x="25" y="25" width="14" height="14" fill="#FFD700"/>
+                <rect x="39" y="39" width="13" height="13" fill="#FFD700"/>
+              </svg>
+            </div>
+            <div className="text-ink font-mono text-xl uppercase tracking-tight-mono font-medium">Loading patterns...</div>
+            <div className="text-ink font-sans text-sm mt-3 opacity-60">Fetching data from database</div>
+          </div>
         </div>
       </div>
     );
@@ -3867,18 +4018,19 @@ const App = () => {
   // Show error state
   if (error) {
     return (
-      <div className="min-h-screen bg-slate-900 flex items-center justify-center">
-        <div className="bg-red-900 text-white p-6 rounded-lg max-w-md">
-          <div className="flex items-center mb-3">
-            <i className="fas fa-exclamation-triangle text-2xl mr-3"></i>
-            <h2 className="text-xl font-bold">Error Loading Patterns</h2>
+      <div className="min-h-screen bg-canvas flex items-center justify-center p-6">
+        <div className="bg-white border-2 border-terminal-red p-8 shadow-brutal max-w-md">
+          <div className="flex items-center mb-4">
+            <i className="fas fa-exclamation-triangle text-2xl mr-3 text-terminal-red"></i>
+            <h2 className="text-xl font-mono uppercase tracking-tight-mono font-semibold text-ink">Error Loading Patterns</h2>
           </div>
-          <p className="mb-4">{error}</p>
+          <p className="mb-6 font-sans text-ink">{error}</p>
           <button
             onClick={() => window.location.reload()}
-            className="mt-4 px-4 py-2 bg-red-700 rounded hover:bg-red-600 transition-colors w-full"
+            className="w-full px-6 py-3 bg-ink text-white font-mono uppercase font-semibold border border-ink hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-brutal transition-all duration-brutal flex items-center justify-center gap-2"
           >
-            <i className="fas fa-sync mr-2"></i> Retry
+            <i className="fas fa-sync"></i>
+            <span>Retry</span>
           </button>
         </div>
       </div>
