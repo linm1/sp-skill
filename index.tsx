@@ -347,14 +347,14 @@ const Layout = ({
   return (
     <div className="min-h-screen flex flex-col font-sans text-ink">
       <nav className="bg-white text-ink border-b border-ink sticky top-0 z-50">
-        <div className="container mx-auto px-6 py-4 flex justify-between items-center" style={{ height: '70px' }}>
-          <div className="flex items-center space-x-4 cursor-pointer" onClick={() => {
+        <div className="container mx-auto px-3 md:px-6 py-3 md:py-4 flex justify-between items-center" style={{ minHeight: '60px' }}>
+          <div className="flex items-center space-x-2 md:space-x-4 cursor-pointer" onClick={() => {
             if (currentView === "admin-patterns" || currentView === "admin-review") {
               onRefresh?.();
             }
             setView("catalog");
           }}>
-            <div className="w-12 h-12 flex-shrink-0">
+            <div className="w-8 h-8 md:w-12 md:h-12 flex-shrink-0">
               <svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-full">
                 {/* Background Grid */}
                 <rect x="12" y="12" width="40" height="40" fill="white" stroke="#383838" strokeWidth="2"/>
@@ -370,11 +370,11 @@ const Layout = ({
               </svg>
             </div>
             <div className="flex flex-col justify-left">
-              <h1 className="text-xl font-bold font-mono tracking-tight-mono leading-tight">StatPatternHub</h1>
-              <p className="text-xs text-ink leading-tight">Clinical Programming Warehouse</p>
+              <h1 className="text-base md:text-xl font-bold font-mono tracking-tight-mono leading-tight">StatPatternHub</h1>
+              <p className="text-[10px] md:text-xs text-ink leading-tight hidden sm:block">Clinical Programming Warehouse</p>
             </div>
           </div>
-          <div className="flex items-center space-x-6">
+          <div className="flex items-center space-x-2 md:space-x-6">
             <button
               onClick={() => {
                 if (currentView === "admin-patterns" || currentView === "admin-review") {
@@ -382,9 +382,10 @@ const Layout = ({
                 }
                 setView("catalog");
               }}
-              className={`font-mono uppercase text-sm font-medium tracking-tight-mono hover:text-link-blue transition-colors duration-brutal ${currentView === "catalog" ? "text-link-blue" : "text-ink"}`}
+              className={`font-mono uppercase text-xs md:text-sm font-medium tracking-tight-mono hover:text-link-blue transition-colors duration-brutal ${currentView === "catalog" ? "text-link-blue" : "text-ink"}`}
             >
-              Catalog
+              <span className="hidden sm:inline">Catalog</span>
+              <i className="fas fa-th sm:hidden"></i>
             </button>
             {isLoaded && isSignedIn && userRole !== 'guest' && (
               <button
@@ -395,16 +396,16 @@ const Layout = ({
                     setView("contribute");
                   }
                 }}
-                className={`font-mono uppercase text-sm font-medium tracking-tight-mono hover:text-link-blue transition-colors duration-brutal flex items-center ${currentView === "contribute" ? "text-link-blue" : "text-ink"}`}
+                className={`font-mono uppercase text-xs md:text-sm font-medium tracking-tight-mono hover:text-link-blue transition-colors duration-brutal flex items-center ${currentView === "contribute" ? "text-link-blue" : "text-ink"}`}
               >
-                <i className="fas fa-plus-circle mr-2"></i>
-                Contribute
+                <i className="fas fa-plus-circle sm:mr-2"></i>
+                <span className="hidden sm:inline ml-0 sm:ml-0">Contribute</span>
               </button>
             )}
             {isLoaded && isSignedIn && userRole !== 'guest' && (
               <button
                 onClick={() => setView("my-contributions")}
-                className={`font-mono uppercase text-sm font-medium tracking-tight-mono hover:text-link-blue transition-colors duration-brutal flex items-center ${currentView === "my-contributions" ? "text-link-blue" : "text-ink"}`}
+                className={`font-mono uppercase text-xs md:text-sm font-medium tracking-tight-mono hover:text-link-blue transition-colors duration-brutal flex items-center hidden sm:flex ${currentView === "my-contributions" ? "text-link-blue" : "text-ink"}`}
               >
                 <i className="fas fa-folder-open mr-2"></i>
                 My Contributions
@@ -414,14 +415,14 @@ const Layout = ({
               <>
                 <button
                   onClick={() => setView("admin-review")}
-                  className={`font-mono uppercase text-sm font-medium tracking-tight-mono hover:text-link-blue transition-colors duration-brutal flex items-center ${currentView === "admin-review" ? "text-link-blue" : "text-ink"}`}
+                  className={`font-mono uppercase text-xs md:text-sm font-medium tracking-tight-mono hover:text-link-blue transition-colors duration-brutal flex items-center hidden sm:flex ${currentView === "admin-review" ? "text-link-blue" : "text-ink"}`}
                 >
                   <i className="fas fa-clipboard-check mr-2"></i>
                   Admin Review
                 </button>
                 <button
                   onClick={() => setView("admin-patterns")}
-                  className={`font-mono uppercase text-sm font-medium tracking-tight-mono hover:text-link-blue transition-colors duration-brutal flex items-center ${currentView === "admin-patterns" ? "text-link-blue" : "text-ink"}`}
+                  className={`font-mono uppercase text-xs md:text-sm font-medium tracking-tight-mono hover:text-link-blue transition-colors duration-brutal flex items-center hidden sm:flex ${currentView === "admin-patterns" ? "text-link-blue" : "text-ink"}`}
                 >
                   <i className="fas fa-cog mr-2"></i>
                   Admin Panel
@@ -430,31 +431,31 @@ const Layout = ({
             )}
             <button
               onClick={() => setView("basket")}
-              className={`font-mono uppercase text-sm font-medium tracking-tight-mono hover:text-link-blue transition-colors duration-brutal flex items-center ${currentView === "basket" ? "text-link-blue" : "text-ink"}`}
+              className={`font-mono uppercase text-xs md:text-sm font-medium tracking-tight-mono hover:text-link-blue transition-colors duration-brutal flex items-center ${currentView === "basket" ? "text-link-blue" : "text-ink"}`}
             >
-              <i className="fas fa-suitcase mr-2"></i>
-              Skill Basket
+              <i className="fas fa-suitcase sm:mr-2"></i>
+              <span className="hidden sm:inline">Skill Basket</span>
               <span className="ml-2 bg-ink text-white text-xs font-bold px-2 py-1 border border-ink">{basketCount}</span>
             </button>
-            <div className="border-l border-ink pl-6 flex items-center space-x-4">
+            <div className="border-l border-ink pl-2 md:pl-6 flex items-center space-x-2 md:space-x-4">
               {isLoaded && isSignedIn ? (
                 <>
-                  <div className="flex items-center space-x-2">
-                    <span className="text-sm text-ink">
+                  <div className="hidden sm:flex items-center space-x-2">
+                    <span className="text-xs md:text-sm text-ink">
                       {user?.firstName || user?.username || "User"}
                     </span>
-                    <UserButton
-                      afterSignOutUrl="/"
-                      appearance={{
-                        elements: {
-                          avatarBox: "w-8 h-8"
-                        }
-                      }}
-                    />
                   </div>
-                  <div className="flex flex-col items-end">
-                    <span className="text-xs text-ink uppercase font-mono">Role</span>
-                    <span className={`text-sm font-semibold font-mono uppercase ${
+                  <UserButton
+                    afterSignOutUrl="/"
+                    appearance={{
+                      elements: {
+                        avatarBox: "w-8 h-8"
+                      }
+                    }}
+                  />
+                  <div className="flex flex-col items-end hidden sm:flex">
+                    <span className="text-[10px] md:text-xs text-ink uppercase font-mono">Role</span>
+                    <span className={`text-xs md:text-sm font-semibold font-mono uppercase ${
                       userRole === 'admin' ? 'text-terminal-red' :
                       userRole === 'premier' ? 'text-link-blue' :
                       userRole === 'contributor' ? 'text-terminal-green' :
@@ -465,14 +466,14 @@ const Layout = ({
                   </div>
                 </>
               ) : (
-                <div className="flex items-center space-x-3">
+                <div className="flex items-center space-x-2 md:space-x-3">
                   <SignInButton mode="modal">
-                    <button className="bg-ink hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-brutal text-white px-4 py-2 text-sm font-medium font-mono uppercase transition-all duration-brutal border border-ink">
+                    <button className="bg-ink hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-brutal text-white px-2 md:px-4 py-1.5 md:py-2 text-xs md:text-sm font-medium font-mono uppercase transition-all duration-brutal border border-ink">
                       Sign In
                     </button>
                   </SignInButton>
                   <SignUpButton mode="modal">
-                    <button className="bg-white hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-brutal text-ink px-4 py-2 text-sm font-medium font-mono uppercase transition-all duration-brutal border border-ink">
+                    <button className="bg-white hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-brutal text-ink px-2 md:px-4 py-1.5 md:py-2 text-xs md:text-sm font-medium font-mono uppercase transition-all duration-brutal border border-ink">
                       Sign Up
                     </button>
                   </SignUpButton>
@@ -482,9 +483,9 @@ const Layout = ({
           </div>
         </div>
       </nav>
-      <main className="flex-grow container mx-auto px-6 py-8">{children}</main>
+      <main className="flex-grow container mx-auto px-4 md:px-6 py-4 md:py-8">{children}</main>
       <footer className="bg-canvas border-t border-ink mt-auto">
-        <div className="container mx-auto px-6 py-6 text-center text-sm text-ink font-mono">
+        <div className="container mx-auto px-4 md:px-6 py-4 md:py-6 text-center text-xs md:text-sm text-ink font-mono">
           StatPatternHub v1.0.0 | Adheres to SKILL_MANIFEST.md Schema
         </div>
       </footer>
@@ -508,7 +509,7 @@ const PatternCard: React.FC<PatternCardProps> = ({
       onClick={onClick}
       className="bg-white border border-black overflow-hidden hover:-translate-y-1 hover:shadow-brutal-lg transition-transform duration-brutal flex flex-col h-full cursor-pointer group"
     >
-      <div className="p-8 flex-grow">
+      <div className="p-4 md:p-8 flex-grow">
         <div className="flex justify-between items-start mb-3">
           <span className="inline-block px-2 py-1 text-xs font-semibold bg-ink text-white font-mono uppercase border border-ink">
             {def.id}
@@ -519,12 +520,13 @@ const PatternCard: React.FC<PatternCardProps> = ({
              </span>
           )}
         </div>
-        <h3 className="text-lg font-bold text-ink mb-3 leading-tight group-hover:text-link-blue transition-colors duration-brutal">{def.title}</h3>
+        <h3 className="text-base md:text-lg font-bold text-ink mb-3 leading-tight group-hover:text-link-blue transition-colors duration-brutal">{def.title}</h3>
         <p className="text-sm text-ink line-clamp-2 mb-4">{def.problem}</p>
       </div>
-      <div className="px-8 py-3 bg-canvas border-t border-ink flex justify-between items-center text-xs text-ink font-mono uppercase">
+      <div className="px-4 md:px-8 py-3 bg-canvas border-t border-ink flex justify-between items-center text-xs text-ink font-mono uppercase">
           <span>{def.category}</span>
-          <span>View Container &rarr;</span>
+          <span className="hidden sm:inline">View Container &rarr;</span>
+          <span className="sm:hidden">&rarr;</span>
       </div>
     </div>
   );
