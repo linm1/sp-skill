@@ -1057,10 +1057,10 @@ const MultiEntryField = ({
         type="button"
         onClick={handleAdd}
         disabled={!canAdd}
-        className={`w-full p-2 border-2 border-dashed rounded-md text-sm transition-colors ${
+        className={`w-full p-2 border border-ink text-sm font-mono uppercase tracking-tight-mono transition-all duration-brutal ${
           canAdd
-            ? "border-indigo-300 text-indigo-600 hover:border-indigo-400 hover:bg-indigo-50"
-            : "border-slate-200 text-slate-400 cursor-not-allowed"
+            ? "bg-white text-ink hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-brutal"
+            : "bg-canvas text-slate-400 cursor-not-allowed opacity-50"
         }`}
       >
         <i className="fas fa-plus mr-1"></i>
@@ -3500,50 +3500,51 @@ const Catalog = ({
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col md:flex-row justify-between items-center gap-4">
-        <div className="flex items-center space-x-2 overflow-x-auto pb-2 md:pb-0 w-full md:w-auto">
+      {/* Categories Section - Single Line with Horizontal Scroll */}
+      <div className="flex items-center gap-2 w-full overflow-x-auto pb-2">
+        <button
+          onClick={() => setFilter("ALL")}
+          className={`px-4 py-2 text-xs font-semibold whitespace-nowrap transition-all duration-brutal font-mono uppercase border border-ink ${
+            filter === "ALL" ? "bg-ink text-white shadow-brutal" : "bg-white text-ink hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-brutal"
+          }`}
+        >
+          All Categories
+        </button>
+        {CATEGORIES.map((cat) => (
           <button
-            onClick={() => setFilter("ALL")}
+            key={cat.code}
+            onClick={() => setFilter(cat.code)}
             className={`px-4 py-2 text-xs font-semibold whitespace-nowrap transition-all duration-brutal font-mono uppercase border border-ink ${
-              filter === "ALL" ? "bg-ink text-white shadow-brutal" : "bg-white text-ink hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-brutal"
+              filter === cat.code ? "bg-ink text-white shadow-brutal" : "bg-white text-ink hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-brutal"
             }`}
           >
-            All Categories
+            {cat.name}
           </button>
-          {CATEGORIES.map((cat) => (
-            <button
-              key={cat.code}
-              onClick={() => setFilter(cat.code)}
-              className={`px-4 py-2 text-xs font-semibold whitespace-nowrap transition-all duration-brutal font-mono uppercase border border-ink ${
-                filter === cat.code ? "bg-ink text-white shadow-brutal" : "bg-white text-ink hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-brutal"
-              }`}
-            >
-              {cat.name}
-            </button>
-          ))}
+        ))}
+      </div>
+
+      {/* Search and Refresh Controls */}
+      <div className="flex items-center gap-2 w-full md:w-auto">
+        <div className="relative flex-1 md:w-64">
+          <i className="fas fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-ink text-xs"></i>
+          <input
+            type="text"
+            placeholder="Search patterns..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="w-full pl-8 pr-4 py-2 border border-ink text-sm focus:outline-none focus:border-2 focus:border-link-blue transition-all duration-brutal"
+          />
         </div>
-        <div className="flex items-center gap-2 w-full md:w-auto">
-          <div className="relative flex-1 md:w-64">
-            <i className="fas fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-ink text-xs"></i>
-            <input
-              type="text"
-              placeholder="Search patterns..."
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              className="w-full pl-8 pr-4 py-2 border border-ink text-sm focus:outline-none focus:border-2 focus:border-link-blue transition-all duration-brutal"
-            />
-          </div>
-          {onRefresh && (
-            <button
-              onClick={onRefresh}
-              className="px-4 py-2 bg-white border border-ink text-sm font-medium font-mono uppercase text-ink hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-brutal hover:text-link-blue transition-all duration-brutal flex items-center gap-2"
-              title="Refresh catalog data"
-            >
-              <i className="fas fa-sync-alt"></i>
-              <span className="hidden md:inline">Refresh</span>
-            </button>
-          )}
-        </div>
+        {onRefresh && (
+          <button
+            onClick={onRefresh}
+            className="px-4 py-2 bg-white border border-ink text-sm font-medium font-mono uppercase text-ink hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-brutal hover:text-link-blue transition-all duration-brutal flex items-center gap-2"
+            title="Refresh catalog data"
+          >
+            <i className="fas fa-sync-alt"></i>
+            <span className="hidden md:inline">Refresh</span>
+          </button>
+        )}
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
