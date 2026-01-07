@@ -3449,24 +3449,30 @@ const BasketView = ({
   return (
     <div className="max-w-6xl mx-auto h-[calc(100vh-140px)] flex flex-col">
         {/* Dashboard Header */}
-        <div className="bg-white border border-ink p-4 md:p-8 mb-4 md:mb-6 flex flex-col md:flex-row justify-between md:items-center gap-4 shrink-0">
-            <div>
-               <h2 className="text-lg md:text-2xl font-bold text-ink mb-2 font-mono uppercase tracking-tight-mono">Skill Basket Review</h2>
-               <div className="flex flex-col sm:flex-row sm:space-x-6 space-y-1 sm:space-y-0 text-xs md:text-sm text-ink">
+        <div className="bg-white border border-ink p-4 md:p-8 mb-4 md:mb-6 shrink-0">
+            {/* Title Row */}
+            <h2 className="text-lg md:text-2xl font-bold text-ink mb-3 font-mono uppercase tracking-tight-mono">Skill Basket Review</h2>
+
+            {/* Stats and Actions Row */}
+            <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-3">
+               {/* Stats */}
+               <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs md:text-sm text-ink">
                   <span className="font-mono">Total: <strong className="text-ink">{stats.total}</strong></span>
                   <span className="font-mono">System: <strong className="text-ink">{stats.system}</strong></span>
                   <span className="font-mono">Custom: <strong className="text-link-blue">{stats.custom}</strong></span>
                </div>
-            </div>
-            <div className="flex space-x-2 md:space-x-3">
-                 <button onClick={onClear} className="text-terminal-red hover:text-terminal-red px-3 md:px-4 py-2 text-xs md:text-sm font-medium font-mono uppercase border border-terminal-red hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-brutal transition-all duration-brutal flex items-center">
-                    <i className="fas fa-trash md:mr-2"></i>
-                    <span className="hidden md:inline">Clear All</span>
-                 </button>
-                 <button onClick={exportData} className="bg-ink hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-brutal text-white px-3 md:px-6 py-2 text-xs md:text-sm font-semibold font-mono uppercase transition-all duration-brutal border border-ink flex items-center">
-                    <i className="fas fa-download md:mr-2"></i>
-                    <span className="hidden md:inline">Export for Agent</span>
-                 </button>
+
+               {/* Action Buttons */}
+               <div className="flex space-x-2 md:space-x-3">
+                    <button onClick={onClear} className="text-terminal-red hover:text-terminal-red px-2 md:px-4 py-1.5 md:py-2 text-xs md:text-sm font-medium font-mono uppercase border border-terminal-red hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-brutal transition-all duration-brutal flex items-center">
+                       <i className="fas fa-trash md:mr-2"></i>
+                       <span className="hidden md:inline">Clear All</span>
+                    </button>
+                    <button onClick={exportData} className="bg-ink hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-brutal text-white px-2 md:px-6 py-1.5 md:py-2 text-xs md:text-sm font-semibold font-mono uppercase transition-all duration-brutal border border-ink flex items-center">
+                       <i className="fas fa-download md:mr-2"></i>
+                       <span className="hidden md:inline">Export for Agent</span>
+                    </button>
+               </div>
             </div>
         </div>
 
