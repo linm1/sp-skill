@@ -3,6 +3,7 @@ import { db } from '../../db/index.js';
 import { patternImplementations } from '../../db/schema.js';
 import { eq } from 'drizzle-orm';
 import { getAuthenticatedUser } from '../../lib/auth.js';
+import { cache } from '../../lib/cache.js';
 
 /**
  * Pattern Implementation Update Endpoint
@@ -169,6 +170,14 @@ async function handlePatch(req: VercelRequest, res: VercelResponse) {
       .where(eq(patternImplementations.uuid, uuid))
       .returning();
 
+    // Invalidate caches
+    const patternId = updated[0].patternId;
+    const authorId = updated[0].authorId;
+    await cache.invalidatePattern('impl:pending:*');
+    await cache.invalidatePattern(`impl:user:${authorId}:*`);
+    await cache.del(`pattern:detail:${patternId}`);
+    await cache.invalidatePattern('pattern:catalog:*');
+
     return res.status(200).json({
       success: true,
       message: `Implementation ${status === 'active' ? 'approved' : 'rejected'} successfully`,
@@ -283,7 +292,15 @@ async function handlePut(req: VercelRequest, res: VercelResponse) {
       .where(eq(patternImplementations.uuid, uuid))
       .returning();
 
-    // 7. Return success response
+    // 7. Invalidate caches
+    const patternId = updated[0].patternId;
+    const authorId = updated[0].authorId;
+    await cache.invalidatePattern(`impl:user:${authorId}:*`);
+    await cache.del(`pattern:detail:${patternId}`);
+    await cache.invalidatePattern('pattern:catalog:*');
+    await cache.invalidatePattern(`impl:pattern:${patternId}:*`);
+
+    // 8. Return success response
     return res.status(200).json({
       success: true,
       message: newStatus !== implementation.status
@@ -378,7 +395,15 @@ async function handleDelete(req: VercelRequest, res: VercelResponse) {
       .where(eq(patternImplementations.uuid, uuid))
       .returning();
 
-    // 6. Return success response
+    // 6. Invalidate caches
+    const patternId = deletedImplementation[0].patternId;
+    const authorId = existingImplementation[0].authorId;
+    await cache.invalidatePattern(`impl:user:${authorId}:*`);
+    await cache.del(`pattern:detail:${patternId}`);
+    await cache.invalidatePattern('pattern:catalog:*');
+    await cache.invalidatePattern(`impl:pattern:${patternId}:*`);
+
+    // 7. Return success response
     return res.status(200).json({
       success: true,
       message: 'Implementation soft-deleted successfully',

@@ -4,6 +4,7 @@ import { db } from '../../db/index.js';
 import { patternDefinitions, patternImplementations } from '../../db/schema.js';
 import { eq, and } from 'drizzle-orm';
 import { getAuthenticatedUser } from '../../lib/auth.js';
+import { cache } from '../../lib/cache.js';
 
 /**
  * Pattern Detail API - Single Pattern Endpoint
@@ -96,6 +97,13 @@ async function handleGet(req: VercelRequest, res: VercelResponse) {
       });
     }
 
+    // Check cache before DB query
+    const cacheKey = `pattern:detail:${id}`;
+    const cachedData = await cache.get<any>(cacheKey);
+    if (cachedData) {
+      return res.status(200).json(cachedData);
+    }
+
     // Fetch pattern definition
     const patterns = await db
       .select()
@@ -134,7 +142,8 @@ async function handleGet(req: VercelRequest, res: VercelResponse) {
       return dateB.getTime() - dateA.getTime();
     });
 
-    return res.status(200).json({
+    // Prepare response
+    const response = {
       success: true,
       pattern: {
         id: pattern.id,
@@ -157,7 +166,12 @@ async function handleGet(req: VercelRequest, res: VercelResponse) {
           updatedAt: impl.updatedAt
         }))
       }
-    });
+    };
+
+    // Store in cache (TTL: 1800s = 30 minutes)
+    await cache.set(cacheKey, response, 1800);
+
+    return res.status(200).json(response);
 
   } catch (error) {
     console.error('Error fetching pattern detail:', error);
@@ -270,7 +284,11 @@ async function handlePut(req: VercelRequest, res: VercelResponse) {
       .where(eq(patternDefinitions.id, id))
       .returning();
 
-    // 6. Return success response
+    // 6. Invalidate caches
+    await cache.del(`pattern:detail:${id}`);
+    await cache.invalidatePattern('pattern:catalog:*');
+
+    // 7. Return success response
     return res.status(200).json({
       success: true,
       message: 'Pattern updated successfully',
@@ -373,7 +391,11 @@ async function handleDelete(req: VercelRequest, res: VercelResponse) {
       .where(eq(patternDefinitions.id, id))
       .returning();
 
-    // 5. Return success response
+    // 5. Invalidate caches
+    await cache.del(`pattern:detail:${id}`);
+    await cache.invalidatePattern('pattern:catalog:*');
+
+    // 6. Return success response
     return res.status(200).json({
       success: true,
       message: 'Pattern soft-deleted successfully',

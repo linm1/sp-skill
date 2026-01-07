@@ -2,6 +2,7 @@ import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { db } from '../db/index.js';
 import { users } from '../db/schema.js';
 import { eq } from 'drizzle-orm';
+import { cache } from '../lib/cache.js';
 
 /**
  * Manual User Sync Endpoint
@@ -58,6 +59,11 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         .where(eq(users.clerkId, clerkId))
         .returning();
 
+      // Invalidate user caches
+      await cache.del(`user:clerk:${clerkId}`);
+      await cache.del(`user:profile:${clerkId}`);
+      console.log('[CACHE INVALIDATE] Manual sync cleared cache for:', clerkId);
+
       return res.status(200).json({
         success: true,
         action: 'updated',
@@ -74,6 +80,11 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         role
       })
       .returning();
+
+    // Invalidate user caches (defensive, in case of JIT provisioning race condition)
+    await cache.del(`user:clerk:${clerkId}`);
+    await cache.del(`user:profile:${clerkId}`);
+    console.log('[CACHE INVALIDATE] Manual sync cleared cache for new user:', clerkId);
 
     return res.status(201).json({
       success: true,

@@ -4,6 +4,7 @@ import { db } from '../db/index.js';
 import { patternDefinitions, patternImplementations } from '../db/schema.js';
 import { eq, and } from 'drizzle-orm';
 import { getAuthenticatedUser } from '../lib/auth.js';
+import { cache } from '../lib/cache.js';
 
 /**
  * Pattern Catalog API
@@ -69,6 +70,7 @@ async function handleGet(req: VercelRequest, res: VercelResponse) {
     const { category, includeDeleted } = req.query;
 
     // Check if includeDeleted is requested (admin-only)
+    let userRole = 'guest'; // Default role for non-authenticated users
     if (includeDeleted === 'true') {
       const user = await getAuthenticatedUser(req);
       if (!user || user.role !== 'admin') {
@@ -77,11 +79,32 @@ async function handleGet(req: VercelRequest, res: VercelResponse) {
           message: 'Admin role required to view deleted patterns'
         });
       }
+      userRole = user.role;
+    } else {
+      // Try to get user role for cache key (non-blocking)
+      try {
+        const user = await getAuthenticatedUser(req);
+        if (user) {
+          userRole = user.role;
+        }
+      } catch {
+        // Ignore auth errors for public queries
+      }
+    }
+
+    // Check cache before DB query
+    const categoryParam = category && typeof category === 'string' ? category.toUpperCase() : 'ALL';
+    const shouldIncludeDeleted = includeDeleted === 'true';
+    const cacheKey = `pattern:catalog:${categoryParam}:${shouldIncludeDeleted}:${userRole}`;
+    const cacheTTL = shouldIncludeDeleted ? 300 : 3600; // 5 min for admin, 1 hour for normal
+
+    const cachedData = await cache.get<any>(cacheKey);
+    if (cachedData) {
+      return res.status(200).json(cachedData);
     }
 
     // Base query - get all pattern definitions
     let patterns;
-    const shouldIncludeDeleted = includeDeleted === 'true';
 
     try {
       // Try to query with soft-delete filter first
@@ -269,12 +292,18 @@ async function handleGet(req: VercelRequest, res: VercelResponse) {
       return a.id.localeCompare(b.id);
     });
 
-    return res.status(200).json({
+    // Prepare response
+    const response = {
       success: true,
       count: enrichedPatterns.length,
       category: category ? (Array.isArray(category) ? category[0].toUpperCase() : category.toUpperCase()) : 'ALL',
       patterns: enrichedPatterns
-    });
+    };
+
+    // Store in cache (non-blocking)
+    await cache.set(cacheKey, response, cacheTTL);
+
+    return res.status(200).json(response);
 
   } catch (error) {
     console.error('Error fetching patterns:', error);
@@ -355,7 +384,10 @@ async function handlePost(req: VercelRequest, res: VercelResponse) {
       })
       .returning();
 
-    // 6. Return success response
+    // 6. Invalidate pattern catalog cache
+    await cache.invalidatePattern('pattern:catalog:*');
+
+    // 7. Return success response
     return res.status(201).json({
       success: true,
       message: 'Pattern definition created successfully',

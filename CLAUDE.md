@@ -48,6 +48,10 @@ VITE_CLERK_PUBLISHABLE_KEY=your_clerk_publishable_key_here
 # Email Service (required for admin notifications)
 RESEND_API_KEY=your_resend_api_key_here
 ADMIN_EMAIL=admin@example.com
+
+# Redis Cache (automatically attached by Vercel KV)
+KV_REST_API_URL=your_vercel_kv_url
+KV_REST_API_TOKEN=your_vercel_kv_token
 ```
 
 **Getting Environment Variables:**

@@ -3,6 +3,7 @@ import { Webhook } from 'svix';
 import { db } from '../../db/index.js';
 import { users } from '../../db/schema.js';
 import { eq } from 'drizzle-orm';
+import { cache } from '../../lib/cache.js';
 
 /**
  * Clerk Webhook Endpoint
@@ -189,6 +190,11 @@ async function handleUserUpdated(data: any) {
       .returning();
 
     console.log('User updated successfully:', updated[0]);
+
+    // Invalidate user caches
+    await cache.del(`user:clerk:${clerkId}`);
+    await cache.del(`user:profile:${clerkId}`);
+    console.log('[CACHE INVALIDATE] User cache cleared for:', clerkId);
   } catch (error) {
     console.error('Error updating user:', error);
     throw error;
@@ -222,4 +228,9 @@ async function handleUserDeleted(data: any) {
 
   // Option 3: Do nothing (keep user data even after Clerk deletion)
   console.log('User deletion event logged, no database action taken');
+
+  // Invalidate user caches (regardless of deletion strategy)
+  await cache.del(`user:clerk:${clerkId}`);
+  await cache.del(`user:profile:${clerkId}`);
+  console.log('[CACHE INVALIDATE] User cache cleared for deleted user:', clerkId);
 }

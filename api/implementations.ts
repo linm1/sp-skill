@@ -5,6 +5,7 @@ import { patternDefinitions, patternImplementations } from '../db/schema.js';
 import { eq, and } from 'drizzle-orm';
 import { getAuthenticatedUser } from '../lib/auth.js';
 import { sendAdminNotification } from '../lib/email.js';
+import { cache } from '../lib/cache.js';
 
 /**
  * Pattern Implementations API
@@ -164,7 +165,12 @@ async function handlePost(req: VercelRequest, res: VercelResponse) {
       // Continue with successful response - email is not critical
     }
 
-    // 6. Return success response with created implementation
+    // 6. Invalidate caches
+    await cache.invalidatePattern('impl:pending:*');
+    await cache.del(`pattern:detail:${implementation.patternId}`);
+    await cache.invalidatePattern('pattern:catalog:*');
+
+    // 7. Return success response with created implementation
     return res.status(201).json({
       success: true,
       message: 'Implementation submitted successfully and is pending review',
@@ -224,6 +230,13 @@ async function handleGet(req: VercelRequest, res: VercelResponse) {
 
     // Route 1: Get user's own implementations (author_id=me)
     if (author_id === 'me') {
+      // Check cache before DB query
+      const cacheKey = `impl:user:${user.id}:${shouldIncludeDeleted}`;
+      const cachedData = await cache.get<any>(cacheKey);
+      if (cachedData) {
+        return res.status(200).json(cachedData);
+      }
+
       let userImplementations;
 
       try {
@@ -298,11 +311,17 @@ async function handleGet(req: VercelRequest, res: VercelResponse) {
         }
       }
 
-      return res.status(200).json({
+      // Prepare response
+      const response = {
         success: true,
         count: userImplementations.length,
         implementations: userImplementations
-      });
+      };
+
+      // Store in cache (TTL: 600s = 10 minutes)
+      await cache.set(cacheKey, response, 600);
+
+      return res.status(200).json(response);
     }
 
     // Route 2: Get pending implementations for admin review (status=pending)
@@ -313,6 +332,13 @@ async function handleGet(req: VercelRequest, res: VercelResponse) {
           error: 'Forbidden',
           message: 'Admin role required to view pending implementations'
         });
+      }
+
+      // Check cache before DB query
+      const cacheKey = `impl:pending:${shouldIncludeDeleted}`;
+      const cachedData = await cache.get<any>(cacheKey);
+      if (cachedData) {
+        return res.status(200).json(cachedData);
       }
 
       let pendingImplementations;
@@ -391,11 +417,17 @@ async function handleGet(req: VercelRequest, res: VercelResponse) {
         }
       }
 
-      return res.status(200).json({
+      // Prepare response
+      const response = {
         success: true,
         count: pendingImplementations.length,
         implementations: pendingImplementations
-      });
+      };
+
+      // Store in cache (TTL: 120s = 2 minutes for pending items)
+      await cache.set(cacheKey, response, 120);
+
+      return res.status(200).json(response);
     }
 
     // Route 3: Get implementations by pattern ID (admin only)
@@ -406,6 +438,13 @@ async function handleGet(req: VercelRequest, res: VercelResponse) {
           error: 'Forbidden',
           message: 'Admin role required to query implementations by pattern ID'
         });
+      }
+
+      // Check cache before DB query
+      const cacheKey = `impl:pattern:${patternId}:${shouldIncludeDeleted}`;
+      const cachedData = await cache.get<any>(cacheKey);
+      if (cachedData) {
+        return res.status(200).json(cachedData);
       }
 
       let patternImplementationsList;
@@ -472,11 +511,17 @@ async function handleGet(req: VercelRequest, res: VercelResponse) {
         }
       }
 
-      return res.status(200).json({
+      // Prepare response
+      const response = {
         success: true,
         count: patternImplementationsList.length,
         implementations: patternImplementationsList
-      });
+      };
+
+      // Store in cache (TTL: 600s = 10 minutes)
+      await cache.set(cacheKey, response, 600);
+
+      return res.status(200).json(response);
     }
 
     // Invalid query parameters
