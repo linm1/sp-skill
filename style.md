@@ -187,7 +187,201 @@ module.exports = {
 
 ---
 
-## 10. Reference Component Code
+## 10. Responsive Design & Mobile Patterns
+
+The design system adapts to mobile devices while maintaining the Neo-Brutalist aesthetic. All mobile patterns preserve sharp edges, hard shadows, and the monospace/sans-serif typography hierarchy.
+
+### Breakpoints
+
+The project uses Tailwind's default breakpoint system:
+
+| Breakpoint | Min Width | Usage |
+| :--- | :--- | :--- |
+| `sm:` | 640px | Small tablets, large phones (landscape) |
+| `md:` | 768px | Tablets, small laptops |
+| `lg:` | 1024px | Desktops |
+| `xl:` | 1280px | Large desktops |
+
+**Philosophy**: Mobile-first approach. Base styles target mobile, then enhance for larger screens using `md:` and `lg:` prefixes.
+
+### Responsive Spacing Scale
+
+Consistent spacing patterns across breakpoints:
+
+| Element | Mobile | Desktop (md:) |
+| :--- | :--- | :--- |
+| **Container Padding** | `px-3` / `px-4` (12px-16px) | `px-6` (24px) |
+| **Section Padding** | `py-4` (16px) | `py-8` (32px) |
+| **Card Padding** | `p-4` (16px) | `p-8` (32px) |
+| **Button Padding** | `px-2 py-1.5` (8px/6px) | `px-4 py-2` (16px/8px) |
+| **Element Spacing** | `space-x-2` (8px) | `space-x-4` / `space-x-6` (16px/24px) |
+
+### Responsive Typography Scale
+
+| Element | Mobile | Desktop (md:) |
+| :--- | :--- | :--- |
+| **Page Title** | `text-lg` (18px) | `text-2xl` (24px) |
+| **Section Title** | `text-base` (16px) | `text-lg` (18px) |
+| **Body Text** | `text-sm` (14px) | `text-base` (16px) |
+| **UI Labels** | `text-xs` (12px) | `text-sm` (14px) |
+| **Fine Print** | `text-[10px]` (10px) | `text-xs` (12px) |
+
+### Mobile Navigation Patterns
+
+#### Icon-First Layout
+
+On mobile, navigation items show icons only. On desktop, icon + text.
+
+```tsx
+// Pattern: Icon visible on all screens, text hidden on mobile
+<button className="flex items-center">
+  <i className="fas fa-icon sm:mr-2"></i>
+  <span className="hidden sm:inline">Button Text</span>
+</button>
+```
+
+**Key principles:**
+- Icons come FIRST in markup (consistent visual order)
+- Use `sm:mr-2` to add margin between icon and text on desktop
+- Use `hidden sm:inline` to hide text on mobile
+- Always include `flex items-center` on button for proper alignment
+
+#### Navigation Bar Responsive Pattern
+
+```tsx
+<nav className="px-3 md:px-6 py-3 md:py-4" style={{ minHeight: '60px' }}>
+  <div className="flex justify-between items-center space-x-2 md:space-x-6">
+    {/* Logo scales down on mobile */}
+    <div className="w-8 h-8 md:w-12 md:h-12">...</div>
+
+    {/* Navigation items */}
+    <button className="text-xs md:text-sm">...</button>
+  </div>
+</nav>
+```
+
+### Mobile Layout Strategies
+
+#### Horizontal Scrolling Categories (Mobile Alternative to Sidebar)
+
+When a desktop sidebar would consume too much vertical space on mobile, replace with horizontal scrolling tabs:
+
+```tsx
+{/* Desktop: Vertical sidebar */}
+<div className="hidden md:flex w-64 border-r border-ink">
+  {/* Sidebar content */}
+</div>
+
+{/* Mobile: Horizontal scrolling tabs */}
+<div className="md:hidden overflow-x-auto bg-canvas border-b border-ink shrink-0">
+  <div className="flex gap-2">
+    <button className="px-3 py-2 whitespace-nowrap">Tab 1</button>
+    <button className="px-3 py-2 whitespace-nowrap">Tab 2</button>
+  </div>
+</div>
+```
+
+**Key principles:**
+- Use `shrink-0` to prevent flex compression
+- Add `overflow-x-auto` for horizontal scrolling
+- Use `whitespace-nowrap` to prevent text wrapping
+- Include `bg-canvas` for visual separation
+
+#### Flexbox Space Allocation
+
+For layouts with fixed headers and scrolling content:
+
+```tsx
+<div className="h-[calc(100vh-140px)] flex flex-col">
+  {/* Fixed header - won't shrink */}
+  <header className="shrink-0">...</header>
+
+  {/* Fixed tabs (mobile) - won't shrink */}
+  <div className="md:hidden shrink-0">...</div>
+
+  {/* Scrolling content - grows to fill space */}
+  <div className="flex-grow overflow-hidden">
+    <div className="overflow-y-auto h-full">
+      {/* Content scrolls here */}
+    </div>
+  </div>
+</div>
+```
+
+### Responsive Component Examples
+
+#### Responsive Button
+
+```tsx
+<button className="
+  bg-ink text-white
+  px-2 md:px-4
+  py-1.5 md:py-2
+  text-xs md:text-sm
+  font-mono uppercase font-semibold
+  border border-ink
+  hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-brutal
+  transition-all duration-brutal
+  flex items-center
+">
+  <i className="fas fa-download md:mr-2"></i>
+  <span className="hidden md:inline">Export</span>
+</button>
+```
+
+#### Responsive Card Grid
+
+```tsx
+<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
+  <div className="bg-white border border-ink p-4 md:p-8">
+    {/* Card content */}
+  </div>
+</div>
+```
+
+#### Responsive Header with Inline Actions
+
+```tsx
+<div className="bg-white border border-ink p-4 md:p-8">
+  {/* Title */}
+  <h2 className="text-lg md:text-2xl font-bold mb-3">Title</h2>
+
+  {/* Stats and actions on same row to save space */}
+  <div className="flex flex-col md:flex-row md:justify-between gap-3">
+    <div className="flex flex-wrap gap-x-4 text-xs md:text-sm">
+      <span>Stat 1</span>
+      <span>Stat 2</span>
+    </div>
+    <div className="flex space-x-2">
+      {/* Action buttons */}
+    </div>
+  </div>
+</div>
+```
+
+### Mobile-Specific Utilities
+
+| Utility | Purpose |
+| :--- | :--- |
+| `hidden sm:block` | Hide on mobile, show on desktop |
+| `sm:hidden` | Show on mobile, hide on desktop |
+| `shrink-0` | Prevent flex item from shrinking |
+| `overflow-x-auto` | Enable horizontal scrolling |
+| `whitespace-nowrap` | Prevent text wrapping in scrolling containers |
+| `-mx-4 px-4` | Extend background to edges (negative margin + padding) |
+
+### Testing Guidelines
+
+When implementing responsive features:
+1. **Test at 375px width** (iPhone SE, smallest common mobile)
+2. **Test at 768px width** (Tablet breakpoint)
+3. **Ensure tap targets are at least 44x44px** (iOS guideline)
+4. **Verify horizontal scrolling** works smoothly without bounce
+5. **Check z-index stacking** doesn't cause overlap issues
+
+---
+
+## 11. Reference Component Code
 
 Here is a reference snippet for a **"Feature Card"** that encapsulates the core logic of the system:
 
