@@ -3205,28 +3205,26 @@ const MyContributions = ({
       </div>
 
       {/* Category Filters */}
-      <div className="mb-6">
-        <div className="flex flex-wrap items-center gap-2 w-full">
+      <div className="flex items-center gap-2 w-full overflow-x-auto pb-2 mb-6">
+        <button
+          onClick={() => setCategoryFilter("all")}
+          className={`px-4 py-2 text-xs font-semibold whitespace-nowrap transition-all duration-brutal font-mono uppercase border border-ink ${
+            categoryFilter === "all" ? "bg-ink text-white shadow-brutal" : "bg-white text-ink hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-brutal"
+          }`}
+        >
+          All Categories
+        </button>
+        {CATEGORIES.map((cat) => (
           <button
-            onClick={() => setCategoryFilter("all")}
+            key={cat.code}
+            onClick={() => setCategoryFilter(cat.code)}
             className={`px-4 py-2 text-xs font-semibold whitespace-nowrap transition-all duration-brutal font-mono uppercase border border-ink ${
-              categoryFilter === "all" ? "bg-ink text-white shadow-brutal" : "bg-white text-ink hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-brutal"
+              categoryFilter === cat.code ? "bg-ink text-white shadow-brutal" : "bg-white text-ink hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-brutal"
             }`}
           >
-            All Categories
+            {cat.name}
           </button>
-          {CATEGORIES.map((cat) => (
-            <button
-              key={cat.code}
-              onClick={() => setCategoryFilter(cat.code)}
-              className={`px-4 py-2 text-xs font-semibold whitespace-nowrap transition-all duration-brutal font-mono uppercase border border-ink ${
-                categoryFilter === cat.code ? "bg-ink text-white shadow-brutal" : "bg-white text-ink hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-brutal"
-              }`}
-            >
-              {cat.name}
-            </button>
-          ))}
-        </div>
+        ))}
       </div>
 
       {/* Search and Status Filter */}
