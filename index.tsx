@@ -1579,10 +1579,70 @@ const AdminReviewQueue = () => {
     return lines.length > 0 ? lines.join('\n') : "No code preview available";
   };
 
-  if (loading) {
-    return (
-      <div className="max-w-7xl mx-auto">
-        <div className="text-center py-20">
+  return (
+    <div className="max-w-7xl mx-auto">
+      {/* Header */}
+      <div className="mb-8">
+        <h2 className="text-4xl font-bold font-mono uppercase text-ink mb-2 tracking-wide-head">Admin Review Queue</h2>
+        <p className="text-ink font-sans">
+          {filteredPending.length} pending submission{filteredPending.length !== 1 ? 's' : ''} {searchQuery || selectedCategory ? 'matching filters' : 'awaiting review'}
+        </p>
+      </div>
+
+      {/* Filter Bar */}
+      <div className="mb-8">
+        {/* Category Filters */}
+        <div className="flex items-center gap-2 w-full overflow-x-auto pb-2 mb-4">
+          <button
+            onClick={() => setSelectedCategory(null)}
+            className={`px-4 py-2 text-xs font-semibold whitespace-nowrap transition-all duration-brutal font-mono uppercase border border-ink ${
+              selectedCategory === null
+                ? 'bg-ink text-white shadow-brutal'
+                : 'bg-white text-ink hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-brutal'
+            }`}
+          >
+            All Categories
+          </button>
+          {CATEGORIES.map(cat => (
+            <button
+              key={cat.code}
+              onClick={() => setSelectedCategory(cat.code)}
+              className={`px-4 py-2 text-xs font-semibold whitespace-nowrap transition-all duration-brutal font-mono uppercase border border-ink ${
+                selectedCategory === cat.code
+                  ? 'bg-ink text-white shadow-brutal'
+                  : 'bg-white text-ink hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-brutal'
+              }`}
+            >
+              {cat.name}
+            </button>
+          ))}
+        </div>
+
+        {/* Search Input */}
+        <div className="relative w-full">
+          <i className="fas fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-ink text-xs"></i>
+          <input
+            type="text"
+            placeholder="Search pending patterns..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="w-full pl-8 pr-4 py-3 border-2 border-ink font-mono text-sm focus:border-link-blue focus:outline-none transition-colors duration-brutal"
+          />
+        </div>
+      </div>
+
+      {/* Error State */}
+      {error && (
+        <div className="bg-white border-2 border-terminal-red p-8 text-center shadow-brutal mb-8">
+          <i className="fas fa-exclamation-triangle text-terminal-red text-4xl mb-4"></i>
+          <h3 className="text-xl font-semibold font-mono uppercase text-ink mb-2 tracking-tight-mono">Access Denied</h3>
+          <p className="text-ink font-sans">{error}</p>
+        </div>
+      )}
+
+      {/* Loading State */}
+      {loading && (
+        <div className="bg-white border-2 border-ink p-16 text-center shadow-brutal">
           <div className="inline-block animate-spin mb-4">
             <svg width="48" height="48" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
               {/* Background Grid */}
@@ -1598,75 +1658,12 @@ const AdminReviewQueue = () => {
               <rect x="39" y="39" width="13" height="13" fill="#FFD700"/>
             </svg>
           </div>
-          <div className="text-ink text-lg font-mono uppercase tracking-tight-mono">Loading pending submissions...</div>
+          <p className="text-ink font-mono uppercase tracking-tight-mono">Loading pending submissions...</p>
         </div>
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="max-w-7xl mx-auto">
-        <div className="bg-white border-2 border-terminal-red p-8 text-center shadow-brutal">
-          <i className="fas fa-exclamation-triangle text-terminal-red text-4xl mb-4"></i>
-          <h3 className="text-xl font-semibold font-mono uppercase text-ink mb-2 tracking-tight-mono">Access Denied</h3>
-          <p className="text-ink">{error}</p>
-        </div>
-      </div>
-    );
-  }
-
-  return (
-    <div className="max-w-7xl mx-auto">
-      {/* Header */}
-      <div className="mb-8">
-        <h2 className="text-4xl font-bold font-mono uppercase text-ink mb-2 tracking-wide-head">Admin Review Queue</h2>
-        <p className="text-ink font-sans">
-          {filteredPending.length} pending submission{filteredPending.length !== 1 ? 's' : ''} {searchQuery || selectedCategory ? 'matching filters' : 'awaiting review'}
-        </p>
-      </div>
-
-      {/* Filter Bar */}
-      <div className="mb-8">
-        {/* Category Filters */}
-        <div className="flex gap-2 overflow-x-auto pb-4 mb-4">
-          <button
-            onClick={() => setSelectedCategory(null)}
-            className={`px-4 py-2 font-mono uppercase text-xs tracking-tight-mono transition-all duration-brutal whitespace-nowrap ${
-              selectedCategory === null
-                ? 'bg-ink text-white shadow-brutal'
-                : 'bg-white border border-ink text-ink hover:-translate-y-0.5 hover:shadow-brutal'
-            }`}
-          >
-            All Categories
-          </button>
-          {CATEGORIES.map(cat => (
-            <button
-              key={cat.code}
-              onClick={() => setSelectedCategory(cat.code)}
-              className={`px-4 py-2 font-mono uppercase text-xs tracking-tight-mono transition-all duration-brutal whitespace-nowrap ${
-                selectedCategory === cat.code
-                  ? 'bg-ink text-white shadow-brutal'
-                  : 'bg-white border border-ink text-ink hover:-translate-y-0.5 hover:shadow-brutal'
-              }`}
-            >
-              {cat.code}
-            </button>
-          ))}
-        </div>
-
-        {/* Search Input */}
-        <input
-          type="text"
-          placeholder="Search pending patterns..."
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-          className="w-full px-4 py-3 border-2 border-ink font-mono text-sm focus:border-link-blue focus:outline-none transition-colors duration-brutal"
-        />
-      </div>
+      )}
 
       {/* Grid Layout or Empty State */}
-      {filteredPending.length === 0 ? (
+      {!loading && !error && filteredPending.length === 0 ? (
         <div className="bg-white border-2 border-ink p-16 text-center shadow-brutal">
           <i className="fas fa-check-circle text-terminal-green text-5xl mb-6"></i>
           <h3 className="text-2xl font-bold font-mono uppercase text-ink mb-3 tracking-tight-mono">
@@ -1678,7 +1675,7 @@ const AdminReviewQueue = () => {
               : 'Try adjusting your search or filter criteria.'}
           </p>
         </div>
-      ) : (
+      ) : !loading && !error && (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {filteredPending.map(impl => (
             <PendingImplementationCard
@@ -2812,13 +2809,13 @@ const AdminPatternManager = ({
       {activeTab === "definitions" ? (
         <div className="mb-8">
           {/* Category Filters */}
-          <div className="flex gap-2 overflow-x-auto pb-4 mb-4">
+          <div className="flex items-center gap-2 w-full overflow-x-auto pb-2 mb-4">
             <button
               onClick={() => setCategoryFilter("all")}
-              className={`px-4 py-2 font-mono uppercase text-xs tracking-tight-mono transition-all duration-brutal whitespace-nowrap ${
+              className={`px-4 py-2 text-xs font-semibold whitespace-nowrap transition-all duration-brutal font-mono uppercase border border-ink ${
                 categoryFilter === "all"
                   ? 'bg-ink text-white shadow-brutal'
-                  : 'bg-white border border-ink text-ink hover:-translate-y-0.5 hover:shadow-brutal'
+                  : 'bg-white text-ink hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-brutal'
               }`}
             >
               All Categories
@@ -2827,26 +2824,29 @@ const AdminPatternManager = ({
               <button
                 key={cat.code}
                 onClick={() => setCategoryFilter(cat.code)}
-                className={`px-4 py-2 font-mono uppercase text-xs tracking-tight-mono transition-all duration-brutal whitespace-nowrap ${
+                className={`px-4 py-2 text-xs font-semibold whitespace-nowrap transition-all duration-brutal font-mono uppercase border border-ink ${
                   categoryFilter === cat.code
                     ? 'bg-ink text-white shadow-brutal'
-                    : 'bg-white border border-ink text-ink hover:-translate-y-0.5 hover:shadow-brutal'
+                    : 'bg-white text-ink hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-brutal'
                 }`}
               >
-                {cat.code}
+                {cat.name}
               </button>
             ))}
           </div>
 
           {/* Search & Create Row */}
           <div className="flex gap-4">
-            <input
-              type="text"
-              placeholder="Search by ID or title..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="flex-1 px-4 py-3 border-2 border-ink font-mono text-sm focus:border-link-blue focus:outline-none transition-colors duration-brutal"
-            />
+            <div className="relative flex-1">
+              <i className="fas fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-ink text-xs"></i>
+              <input
+                type="text"
+                placeholder="Search by ID or title..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="w-full pl-8 pr-4 py-3 border-2 border-ink font-mono text-sm focus:border-link-blue focus:outline-none transition-colors duration-brutal"
+              />
+            </div>
 
             {/* Show Deleted Checkbox */}
             <label className="flex items-center space-x-2 px-4 py-3 bg-white border border-ink">
@@ -2876,13 +2876,16 @@ const AdminPatternManager = ({
         <div className="mb-8">
           <div className="flex gap-4">
             {/* Search */}
-            <input
-              type="text"
-              placeholder="Search by Pattern ID, author, or title..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="flex-1 px-4 py-3 border-2 border-ink font-mono text-sm focus:border-link-blue focus:outline-none transition-colors duration-brutal"
-            />
+            <div className="relative flex-1">
+              <i className="fas fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-ink text-xs"></i>
+              <input
+                type="text"
+                placeholder="Search by Pattern ID, author, or title..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="w-full pl-8 pr-4 py-3 border-2 border-ink font-mono text-sm focus:border-link-blue focus:outline-none transition-colors duration-brutal"
+              />
+            </div>
 
             {/* Show Deleted Checkbox */}
             <label className="flex items-center space-x-2 px-4 py-3 bg-white border border-ink">
@@ -3134,66 +3137,6 @@ const MyContributions = ({
     return lines.length > 0 ? lines.join('\n') : "No code preview available";
   };
 
-  if (loading) {
-    return (
-      <div className="max-w-6xl mx-auto">
-        <div className="text-center py-20">
-          <div className="inline-block animate-spin mb-4">
-            <svg width="48" height="48" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
-              {/* Background Grid */}
-              <rect x="12" y="12" width="40" height="40" fill="white" stroke="#383838" strokeWidth="2"/>
-              {/* Grid Lines */}
-              <line x1="25" y1="12" x2="25" y2="52" stroke="#383838" strokeWidth="2"/>
-              <line x1="39" y1="12" x2="39" y2="52" stroke="#383838" strokeWidth="2"/>
-              <line x1="12" y1="25" x2="52" y2="25" stroke="#383838" strokeWidth="2"/>
-              <line x1="12" y1="39" x2="52" y2="39" stroke="#383838" strokeWidth="2"/>
-              {/* Highlighted Cells */}
-              <rect x="12" y="12" width="13" height="13" fill="#383838"/>
-              <rect x="25" y="25" width="14" height="14" fill="#FFD700"/>
-              <rect x="39" y="39" width="13" height="13" fill="#FFD700"/>
-            </svg>
-          </div>
-          <div className="text-ink text-lg font-sans">Loading your contributions...</div>
-        </div>
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="max-w-6xl mx-auto">
-        <div className="bg-white border-2 border-terminal-red shadow-brutal-lg p-6 text-center">
-          <i className="fas fa-exclamation-triangle text-terminal-red text-3xl mb-3"></i>
-          <h3 className="text-lg font-mono uppercase text-ink mb-2">Error Loading Contributions</h3>
-          <p className="text-ink font-sans">{error}</p>
-        </div>
-      </div>
-    );
-  }
-
-  if (contributions.length === 0) {
-    return (
-      <div className="max-w-6xl mx-auto">
-        <div className="bg-white border border-ink p-12 text-center">
-          <div className="w-20 h-20 bg-canvas border border-ink flex items-center justify-center mx-auto mb-6">
-            <i className="fas fa-folder-open text-ink text-3xl"></i>
-          </div>
-          <h3 className="text-2xl font-mono uppercase text-ink mb-3">No Contributions Yet</h3>
-          <p className="text-ink font-sans mb-6 max-w-md mx-auto">
-            You haven't submitted any pattern implementations yet. Share your expertise with the community!
-          </p>
-          <button
-            onClick={onContribute}
-            className="bg-ink text-white border border-ink px-6 py-3 font-mono uppercase font-semibold hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-brutal transition-all duration-brutal inline-flex items-center"
-          >
-            <i className="fas fa-plus-circle mr-2"></i>
-            Contribute Now
-          </button>
-        </div>
-      </div>
-    );
-  }
-
   return (
     <div className="container mx-auto px-6 py-8">
       {/* Header */}
@@ -3230,13 +3173,16 @@ const MyContributions = ({
       {/* Search and Status Filter */}
       <div className="mb-8">
         <div className="flex gap-4">
-          <input
-            type="text"
-            placeholder="Search by Pattern ID or title..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="flex-1 px-4 py-3 border-2 border-ink font-mono text-sm focus:border-link-blue focus:outline-none transition-colors duration-brutal"
-          />
+          <div className="relative flex-1">
+            <i className="fas fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-ink text-xs"></i>
+            <input
+              type="text"
+              placeholder="Search by Pattern ID or title..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-full pl-8 pr-4 py-3 border-2 border-ink font-mono text-sm focus:border-link-blue focus:outline-none transition-colors duration-brutal"
+            />
+          </div>
           <select
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value)}
@@ -3257,8 +3203,39 @@ const MyContributions = ({
         </div>
       </div>
 
+      {/* Error State */}
+      {error && (
+        <div className="bg-white border-2 border-terminal-red p-8 text-center shadow-brutal mb-8">
+          <i className="fas fa-exclamation-triangle text-terminal-red text-4xl mb-4"></i>
+          <h3 className="text-xl font-semibold font-mono uppercase text-ink mb-2 tracking-tight-mono">Error Loading Contributions</h3>
+          <p className="text-ink font-sans">{error}</p>
+        </div>
+      )}
+
+      {/* Loading State */}
+      {loading && (
+        <div className="bg-white border-2 border-ink p-16 text-center shadow-brutal">
+          <div className="inline-block animate-spin mb-4">
+            <svg width="48" height="48" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+              {/* Background Grid */}
+              <rect x="12" y="12" width="40" height="40" fill="white" stroke="#383838" strokeWidth="2"/>
+              {/* Grid Lines */}
+              <line x1="25" y1="12" x2="25" y2="52" stroke="#383838" strokeWidth="2"/>
+              <line x1="39" y1="12" x2="39" y2="52" stroke="#383838" strokeWidth="2"/>
+              <line x1="12" y1="25" x2="52" y2="25" stroke="#383838" strokeWidth="2"/>
+              <line x1="12" y1="39" x2="52" y2="39" stroke="#383838" strokeWidth="2"/>
+              {/* Highlighted Cells */}
+              <rect x="12" y="12" width="13" height="13" fill="#383838"/>
+              <rect x="25" y="25" width="14" height="14" fill="#FFD700"/>
+              <rect x="39" y="39" width="13" height="13" fill="#FFD700"/>
+            </svg>
+          </div>
+          <p className="text-ink font-mono uppercase tracking-tight-mono">Loading your contributions...</p>
+        </div>
+      )}
+
       {/* Contributions Grid */}
-      {filteredContributions.length === 0 ? (
+      {!loading && !error && filteredContributions.length === 0 ? (
         <div className="bg-white border-2 border-ink p-16 text-center shadow-brutal">
           <i className="fas fa-folder-open text-ink/40 text-5xl mb-6"></i>
           <h3 className="text-2xl font-bold font-mono uppercase text-ink mb-3 tracking-tight-mono">No Contributions Found</h3>
@@ -3277,7 +3254,7 @@ const MyContributions = ({
             </button>
           )}
         </div>
-      ) : (
+      ) : !loading && !error && (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {filteredContributions.map((contribution) => {
           const isPending = contribution.status === 'pending';
