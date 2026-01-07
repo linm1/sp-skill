@@ -1,6 +1,38 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
 @import "tailwindcss";
 
+@theme {
+  /* Custom Colors */
+  --color-canvas: #F4EFEA;
+  --color-ink: #383838;
+  --color-duck-yellow: #FFD700;
+  --color-link-blue: #007AFF;
+  --color-terminal-red: #FF5F56;
+  --color-terminal-green: #27C93F;
+
+  /* Font Families */
+  --font-family-mono: 'Aeonik Mono', ui-monospace, Menlo, Consolas, monospace;
+  --font-family-sans: Inter, sans-serif;
+
+  /* Box Shadows */
+  --shadow-brutal: 2px 2px 0px #383838;
+  --shadow-brutal-lg: 4px 4px 0px rgba(0,0,0,0.1);
+  --shadow-terminal: 6px 6px 0px rgba(0,0,0,0.1);
+
+  /* Letter Spacing */
+  --letter-spacing-tight-mono: 0.32px;
+  --letter-spacing-wide-head: 1.44px;
+
+  /* Font Sizes with Line Heights */
+  --font-size-mega: 72px;
+  --font-size-card: 20px;
+  --line-height-mega: 86.4px;
+  --line-height-card: 28px;
+
+  /* Transition Duration */
+  --duration-brutal: 200ms;
+}
+
 body {
     background-color: #F4EFEA; /* Paper Canvas */
     font-family: 'Inter', sans-serif;
