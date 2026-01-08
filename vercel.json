@@ -3,6 +3,12 @@
   "buildCommand": "vite build",
   "outputDirectory": "dist",
   "framework": "vite",
+  "build": {
+    "env": {
+      "TS_NODE_SKIP_IGNORE": "true",
+      "TS_NODE_TRANSPILE_ONLY": "true"
+    }
+  },
   "rewrites": [
     {
       "source": "/api/:path*",
