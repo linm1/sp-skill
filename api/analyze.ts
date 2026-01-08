@@ -1,5 +1,6 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { GoogleGenAI, Type } from '@google/genai';
+import { getAuthenticatedUser } from '../lib/auth.js';
 
 // Response schema for structured output
 const responseSchema = {
@@ -16,6 +17,15 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   // Only allow POST requests
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
+  }
+
+  // Authenticate user
+  const user = await getAuthenticatedUser(req);
+  if (!user) {
+    return res.status(401).json({
+      error: 'Unauthorized',
+      message: 'Please log in to use AI analysis features'
+    });
   }
 
   // Check for API key on server side

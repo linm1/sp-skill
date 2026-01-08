@@ -1,4 +1,5 @@
 import { ai, AxAIGoogleGeminiModel, AxGen } from '@ax-llm/ax';
+import { getAuthenticatedUser } from '../lib/auth.js';
 
 // SAS syntax validation helpers
 function validateSASCode(code) {
@@ -105,6 +106,15 @@ export default async function handler(req, res) {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
+  // Authenticate user
+  const user = await getAuthenticatedUser(req);
+  if (!user) {
+    return res.status(401).json({
+      error: 'Unauthorized',
+      message: 'Please log in to use code extraction'
+    });
+  }
+
   // Check for API key
   console.log('Raw env GEMINI_API_KEY:', process.env.GEMINI_API_KEY?.substring(0, 10));
   console.log('All GEMINI env vars:', Object.keys(process.env).filter(k => k.includes('GEMINI')));
@@ -161,7 +171,10 @@ export default async function handler(req, res) {
 
     // Simplify signature - just extract code, make confidence optional
     const generator = new AxGen(
-      `"You are an expert clinical statistical programmer. Your task is to extract clean, executable ${languageUpper} code from raw input that contains comments and documentation. Extract ONLY the ${languageUpper} code relevant to the specified clinical programming pattern. Remove all comment lines, documentation headers, and explanatory text. Keep the code properly indented and syntactically correct. The code field must contain the actual ${languageUpper} code, not be empty." rawCode:string, patternTitle:string, problemStatement:string, whenToUse:string -> code:string "The extracted ${languageUpper} code without comments", confidence?:number "Quality score 0-1"`
+      `"You are an expert clinical statistical programmer. Your task is to extract clean, executable ${languageUpper} code from raw input that contains comments and documentation. 
+      Extract ONLY the ${languageUpper} code relevant to the specified clinical programming pattern. Remove all comment lines, documentation headers, and explanatory text. 
+      Keep the code properly indented and syntactically correct. The code field must contain the actual ${languageUpper} code, not be empty." 
+      rawCode:string, patternTitle:string, problemStatement:string, whenToUse:string -> code:string "The extracted ${languageUpper} code without comments", confidence?:number "Quality score 0-1"`
     );
 
     // Don't add assertions yet - let's see raw output first
