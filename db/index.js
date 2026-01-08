@@ -1,0 +1,13 @@
+import { drizzle } from 'drizzle-orm/vercel-postgres';
+import { sql } from '@vercel/postgres';
+import * as schema from './schema.js';
+
+/**
+ * Drizzle ORM instance with Vercel Postgres
+ * Use this in your serverless functions for type-safe queries
+ *
+ * Example usage:
+ * import { db } from '../db/index.js';
+ * const patterns = await db.select().from(schema.patternDefinitions);
+ */
+export const db = drizzle(sql, { schema });

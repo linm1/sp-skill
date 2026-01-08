@@ -1099,6 +1099,7 @@ const SmartEtlForm = ({
   isSaving?: boolean;
   allPatterns?: PatternDefinition[];
 }) => {
+  const { getToken } = useAuth(); // Get authentication token function from Clerk
   const isEditMode = !!initialImpl;
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [rawInput, setRawInput] = useState("");
@@ -1139,6 +1140,12 @@ const SmartEtlForm = ({
 
     setIsAnalyzing(true);
     try {
+      // Get authentication token
+      const token = await getToken();
+      if (!token) {
+        throw new Error("Please sign in to use code extraction");
+      }
+
       const languagesToExtract = extractLanguage === 'both' ? ['sas', 'r'] : [extractLanguage];
       const results: { sasCode?: string; rCode?: string; warnings?: string[] } = {};
 
@@ -1147,6 +1154,7 @@ const SmartEtlForm = ({
         const response = await fetch('/api/extract-code', {
           method: 'POST',
           headers: {
+            'Authorization': `Bearer ${token}`,
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({
