@@ -2,6 +2,7 @@ import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { ai, AxAIGoogleGeminiModel, AxGen } from '@ax-llm/ax';
 import { getAuthenticatedUser } from '../lib/auth.js';
 import { validateSASCode, validateRCode } from '../lib/validators.js';
+import { sanitizePatternTitle, sanitizePromptInput, sanitizeCodeInput } from '../lib/sanitize.js';
 
 // Request body interface
 interface ExtractCodeRequest {
@@ -63,6 +64,21 @@ export default async function handler(
     return res.status(400).json({ error: 'Input too large (max 100KB)' });
   }
 
+  // Sanitize all user inputs before using in AI prompts (prevents prompt injection)
+  const safePatternTitle = sanitizePatternTitle(patternTitle);
+  const safeProblemStatement = sanitizePromptInput(problemStatement || '', 1000);
+  const safeWhenToUse = sanitizePromptInput(whenToUse || '', 1000);
+  const safeRawCode = sanitizeCodeInput(rawCode);
+
+  // Validate sanitized inputs are not empty
+  if (!safePatternTitle) {
+    return res.status(400).json({ error: 'Invalid pattern title after sanitization' });
+  }
+
+  if (!safeRawCode) {
+    return res.status(400).json({ error: 'Invalid code after sanitization' });
+  }
+
   try {
     // Initialize Gemini with Ax
     console.log('Initializing Gemini AI with Ax...');
@@ -93,19 +109,19 @@ export default async function handler(
     // Don't add assertions yet - let's see raw output first
     // We'll add validation after getting the code
 
-    // Execute extraction
-    console.log('Executing generator.forward with inputs:', {
-      rawCode: rawCode.substring(0, 50) + '...',
-      patternTitle,
-      problemStatement: problemStatement || '',
-      whenToUse: whenToUse || ''
+    // Execute extraction using sanitized inputs
+    console.log('Executing generator.forward with sanitized inputs:', {
+      rawCode: safeRawCode.substring(0, 50) + '...',
+      patternTitle: safePatternTitle,
+      problemStatement: safeProblemStatement,
+      whenToUse: safeWhenToUse
     });
 
     const result = await generator.forward(llm, {
-      rawCode,
-      patternTitle,
-      problemStatement: problemStatement || '',
-      whenToUse: whenToUse || ''
+      rawCode: safeRawCode,
+      patternTitle: safePatternTitle,
+      problemStatement: safeProblemStatement,
+      whenToUse: safeWhenToUse
     });
 
     console.log('Generation result:', result);
