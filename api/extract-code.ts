@@ -1,8 +1,9 @@
+import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { ai, AxAIGoogleGeminiModel, AxGen } from '@ax-llm/ax';
 import { getAuthenticatedUser } from '../lib/auth.js';
 
 // SAS syntax validation helpers
-function validateSASCode(code) {
+function validateSASCode(code: string): true | string {
   const trimmed = code.trim();
 
   if (!trimmed) {
@@ -43,7 +44,7 @@ function validateSASCode(code) {
 }
 
 // R syntax validation helpers
-function validateRCode(code) {
+function validateRCode(code: string): true | string {
   const trimmed = code.trim();
 
   if (!trimmed) {
@@ -99,8 +100,20 @@ function validateRCode(code) {
   return true;
 }
 
+// Request body interface
+interface ExtractCodeRequest {
+  rawCode: string;
+  language: 'sas' | 'r';
+  patternTitle: string;
+  problemStatement?: string;
+  whenToUse?: string;
+}
+
 // Main handler
-export default async function handler(req, res) {
+export default async function handler(
+  req: VercelRequest,
+  res: VercelResponse
+): Promise<VercelResponse> {
   // Only allow POST requests
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
@@ -131,7 +144,7 @@ export default async function handler(req, res) {
   console.log('API Key format check:', apiKey.substring(0, 4) + '...' + apiKey.substring(apiKey.length - 4));
 
   // Validate request body
-  const { rawCode, language, patternTitle, problemStatement, whenToUse } = req.body;
+  const { rawCode, language, patternTitle, problemStatement, whenToUse } = req.body as ExtractCodeRequest;
 
   if (!rawCode || typeof rawCode !== 'string') {
     return res.status(400).json({ error: 'Missing or invalid rawCode' });
@@ -247,7 +260,7 @@ export default async function handler(req, res) {
       language
     });
 
-  } catch (error) {
+  } catch (error: any) {
     console.error('Code extraction error:', error);
     console.error('Error stack:', error.stack);
     console.error('Error cause:', error.cause);

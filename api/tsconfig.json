@@ -1,9 +1,10 @@
 {
   "compilerOptions": {
-    "target": "ES2020",
+    "target": "ES2022",
     "module": "ESNext",
-    "lib": ["ES2020"],
-    "moduleResolution": "node",
+    "lib": ["ES2022"],
+    "moduleResolution": "bundler",
+    "useDefineForClassFields": false,
     "esModuleInterop": true,
     "skipLibCheck": true,
     "skipDefaultLibCheck": true,
@@ -19,8 +20,9 @@
   "ts-node": {
     "transpileOnly": true,
     "compilerOptions": {
-      "module": "commonjs",
-      "skipLibCheck": true
+      "module": "ESNext",
+      "skipLibCheck": true,
+      "useDefineForClassFields": false
     }
   },
   "include": [
