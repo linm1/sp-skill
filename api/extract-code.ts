@@ -3,6 +3,7 @@ import { ai, AxAIGoogleGeminiModel, AxGen } from '@ax-llm/ax';
 import { getAuthenticatedUser } from '../lib/auth.js';
 import { validateSASCode, validateRCode } from '../lib/validators.js';
 import { sanitizePatternTitle, sanitizePromptInput, sanitizeCodeInput } from '../lib/sanitize.js';
+import { checkRateLimit } from '../lib/rate-limit.js';
 
 // Request body interface
 interface ExtractCodeRequest {
@@ -11,6 +12,47 @@ interface ExtractCodeRequest {
   patternTitle: string;
   problemStatement?: string;
   whenToUse?: string;
+}
+
+/**
+ * Retry a function with exponential backoff
+ *
+ * @param fn - Async function to retry
+ * @param maxRetries - Maximum number of retries (default: 3)
+ * @param initialDelay - Initial delay in ms (default: 1000)
+ * @returns Result of function or throws error
+ */
+async function retryWithBackoff<T>(
+  fn: () => Promise<T>,
+  maxRetries = 3,
+  initialDelay = 1000
+): Promise<T> {
+  let lastError: Error;
+
+  for (let attempt = 0; attempt <= maxRetries; attempt++) {
+    try {
+      return await fn();
+    } catch (error: any) {
+      lastError = error;
+
+      // Don't retry on client errors (4xx) or final attempt
+      if (attempt === maxRetries || (error.status && error.status < 500)) {
+        break;
+      }
+
+      // Calculate delay: 1s, 2s, 4s
+      const delay = initialDelay * Math.pow(2, attempt);
+
+      if (process.env.NODE_ENV === 'development') {
+        console.log(`Retry attempt ${attempt + 1}/${maxRetries} after ${delay}ms...`);
+      }
+
+      // Wait before retry
+      await new Promise(resolve => setTimeout(resolve, delay));
+    }
+  }
+
+  throw lastError!;
 }
 
 // Main handler
@@ -30,6 +72,34 @@ export default async function handler(
       error: 'Unauthorized',
       message: 'Please log in to use code extraction'
     });
+  }
+
+  // Check rate limit
+  try {
+    // Use clerkId for rate limiting (fallback to email if clerkId is null)
+    const rateLimitKey = user.clerkId || user.email;
+    const rateLimit = await checkRateLimit(rateLimitKey, user.role as 'contributor' | 'premier' | 'admin');
+
+    if (!rateLimit.success) {
+      return res.status(429)
+        .setHeader('X-RateLimit-Limit', rateLimit.limit.toString())
+        .setHeader('X-RateLimit-Remaining', '0')
+        .setHeader('X-RateLimit-Reset', rateLimit.reset.toString())
+        .json({
+          error: 'Rate limit exceeded',
+          message: `You have reached your daily limit of ${rateLimit.limit} code extractions. Limit resets in ${Math.ceil((rateLimit.reset - Date.now()) / 1000 / 60)} minutes.`,
+          limit: rateLimit.limit,
+          reset: rateLimit.reset,
+        });
+    }
+
+    // Add rate limit headers to successful responses
+    res.setHeader('X-RateLimit-Limit', rateLimit.limit.toString());
+    res.setHeader('X-RateLimit-Remaining', rateLimit.remaining.toString());
+    res.setHeader('X-RateLimit-Reset', rateLimit.reset.toString());
+  } catch (error) {
+    // Graceful degradation: Allow request if rate limiter fails
+    console.error('Rate limit check failed, allowing request:', error);
   }
 
   // Check for API key
@@ -117,12 +187,17 @@ export default async function handler(
       whenToUse: safeWhenToUse
     });
 
-    const result = await generator.forward(llm, {
-      rawCode: safeRawCode,
-      patternTitle: safePatternTitle,
-      problemStatement: safeProblemStatement,
-      whenToUse: safeWhenToUse
-    });
+    // Wrap Gemini API call with retry logic (3 retries max, 1s initial delay)
+    const result = await retryWithBackoff(
+      () => generator.forward(llm, {
+        rawCode: safeRawCode,
+        patternTitle: safePatternTitle,
+        problemStatement: safeProblemStatement,
+        whenToUse: safeWhenToUse
+      }),
+      3,  // 3 retries max
+      1000 // 1 second initial delay
+    );
 
     console.log('Generation result:', result);
 
