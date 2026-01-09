@@ -48,18 +48,32 @@ body {
     white-space: pre-wrap;
 }
 
-/* Cell-by-Cell Fill Animation */
-@keyframes fillCell {
-  0%, 100% { fill: white; }
-  20%, 80% { fill: #FFD700; }
+/* Diagonal Flow Animation - Dark square moves 1→5→9→5→1 */
+@keyframes darkSquareCell1 {
+  0%, 12.5% { fill: #383838; }
+  12.6%, 87.4% { fill: #FFD700; }
+  87.5%, 100% { fill: #383838; }
 }
 
-.animate-fill-cell-1 { animation: fillCell 1.5s ease-in-out infinite; animation-delay: 0s; }
-.animate-fill-cell-2 { animation: fillCell 1.5s ease-in-out infinite; animation-delay: 0.15s; }
-.animate-fill-cell-3 { animation: fillCell 1.5s ease-in-out infinite; animation-delay: 0.3s; }
-.animate-fill-cell-4 { animation: fillCell 1.5s ease-in-out infinite; animation-delay: 0.45s; }
-.animate-fill-cell-5 { animation: fillCell 1.5s ease-in-out infinite; animation-delay: 0.6s; }
-.animate-fill-cell-6 { animation: fillCell 1.5s ease-in-out infinite; animation-delay: 0.75s; }
-.animate-fill-cell-7 { animation: fillCell 1.5s ease-in-out infinite; animation-delay: 0.9s; }
-.animate-fill-cell-8 { animation: fillCell 1.5s ease-in-out infinite; animation-delay: 1.05s; }
-.animate-fill-cell-9 { animation: fillCell 1.5s ease-in-out infinite; animation-delay: 1.2s; }
+@keyframes darkSquareCell5 {
+  0%, 12.5% { fill: white; }
+  12.6%, 37.5% { fill: #383838; }
+  37.6%, 62.4% { fill: #FFD700; }
+  62.5%, 87.5% { fill: #383838; }
+  87.6%, 100% { fill: white; }
+}
+
+@keyframes darkSquareCell9 {
+  0%, 37.5% { fill: white; }
+  37.6%, 62.5% { fill: #383838; }
+  62.6%, 100% { fill: #FFD700; }
+}
+
+@keyframes yellowTrailOther {
+  0%, 100% { fill: white; }
+}
+
+.animate-flow-cell-1 { animation: darkSquareCell1 2s ease-in-out infinite; }
+.animate-flow-cell-5 { animation: darkSquareCell5 2s ease-in-out infinite; }
+.animate-flow-cell-9 { animation: darkSquareCell9 2s ease-in-out infinite; }
+.animate-flow-cell-other { animation: yellowTrailOther 2s ease-in-out infinite; }

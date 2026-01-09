@@ -172,18 +172,16 @@ const LoadingSpinner = ({ message }: { message: string }) => (
         <line x1="39" y1="12" x2="39" y2="52" stroke="#383838" strokeWidth="2"/>
         <line x1="12" y1="25" x2="52" y2="25" stroke="#383838" strokeWidth="2"/>
         <line x1="12" y1="39" x2="52" y2="39" stroke="#383838" strokeWidth="2"/>
-        {/* Animated Cells - Row 1 */}
-        <rect x="12" y="12" width="13" height="13" className="animate-fill-cell-1" fill="white"/>
-        <rect x="25" y="12" width="14" height="13" className="animate-fill-cell-2" fill="white"/>
-        <rect x="39" y="12" width="13" height="13" className="animate-fill-cell-3" fill="white"/>
-        {/* Animated Cells - Row 2 */}
-        <rect x="12" y="25" width="13" height="14" className="animate-fill-cell-4" fill="white"/>
-        <rect x="25" y="25" width="14" height="14" className="animate-fill-cell-5" fill="white"/>
-        <rect x="39" y="25" width="13" height="14" className="animate-fill-cell-6" fill="white"/>
-        {/* Animated Cells - Row 3 */}
-        <rect x="12" y="39" width="13" height="13" className="animate-fill-cell-7" fill="white"/>
-        <rect x="25" y="39" width="14" height="13" className="animate-fill-cell-8" fill="white"/>
-        <rect x="39" y="39" width="13" height="13" className="animate-fill-cell-9" fill="white"/>
+        {/* Animated Cells - Diagonal Flow (1→5→9→5→1) */}
+        <rect x="12" y="12" width="13" height="13" className="animate-flow-cell-1" fill="#383838"/>
+        <rect x="25" y="12" width="14" height="13" className="animate-flow-cell-other" fill="white"/>
+        <rect x="39" y="12" width="13" height="13" className="animate-flow-cell-other" fill="white"/>
+        <rect x="12" y="25" width="13" height="14" className="animate-flow-cell-other" fill="white"/>
+        <rect x="25" y="25" width="14" height="14" className="animate-flow-cell-5" fill="white"/>
+        <rect x="39" y="25" width="13" height="14" className="animate-flow-cell-other" fill="white"/>
+        <rect x="12" y="39" width="13" height="13" className="animate-flow-cell-other" fill="white"/>
+        <rect x="25" y="39" width="14" height="13" className="animate-flow-cell-other" fill="white"/>
+        <rect x="39" y="39" width="13" height="13" className="animate-flow-cell-9" fill="white"/>
       </svg>
     </div>
     <p className="text-ink font-mono uppercase tracking-tight-mono">{message}</p>
@@ -4074,18 +4072,16 @@ const App = () => {
                 <line x1="39" y1="12" x2="39" y2="52" stroke="#383838" strokeWidth="2"/>
                 <line x1="12" y1="25" x2="52" y2="25" stroke="#383838" strokeWidth="2"/>
                 <line x1="12" y1="39" x2="52" y2="39" stroke="#383838" strokeWidth="2"/>
-                {/* Animated Cells - Row 1 */}
-                <rect x="12" y="12" width="13" height="13" className="animate-fill-cell-1" fill="white"/>
-                <rect x="25" y="12" width="14" height="13" className="animate-fill-cell-2" fill="white"/>
-                <rect x="39" y="12" width="13" height="13" className="animate-fill-cell-3" fill="white"/>
-                {/* Animated Cells - Row 2 */}
-                <rect x="12" y="25" width="13" height="14" className="animate-fill-cell-4" fill="white"/>
-                <rect x="25" y="25" width="14" height="14" className="animate-fill-cell-5" fill="white"/>
-                <rect x="39" y="25" width="13" height="14" className="animate-fill-cell-6" fill="white"/>
-                {/* Animated Cells - Row 3 */}
-                <rect x="12" y="39" width="13" height="13" className="animate-fill-cell-7" fill="white"/>
-                <rect x="25" y="39" width="14" height="13" className="animate-fill-cell-8" fill="white"/>
-                <rect x="39" y="39" width="13" height="13" className="animate-fill-cell-9" fill="white"/>
+                {/* Animated Cells - Diagonal Flow (1→5→9→5→1) */}
+                <rect x="12" y="12" width="13" height="13" className="animate-flow-cell-1" fill="#383838"/>
+                <rect x="25" y="12" width="14" height="13" className="animate-flow-cell-other" fill="white"/>
+                <rect x="39" y="12" width="13" height="13" className="animate-flow-cell-other" fill="white"/>
+                <rect x="12" y="25" width="13" height="14" className="animate-flow-cell-other" fill="white"/>
+                <rect x="25" y="25" width="14" height="14" className="animate-flow-cell-5" fill="white"/>
+                <rect x="39" y="25" width="13" height="14" className="animate-flow-cell-other" fill="white"/>
+                <rect x="12" y="39" width="13" height="13" className="animate-flow-cell-other" fill="white"/>
+                <rect x="25" y="39" width="14" height="13" className="animate-flow-cell-other" fill="white"/>
+                <rect x="39" y="39" width="13" height="13" className="animate-flow-cell-9" fill="white"/>
               </svg>
             </div>
             <div className="text-ink font-mono text-xl uppercase tracking-tight-mono font-medium">Loading patterns...</div>
