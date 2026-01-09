@@ -5,6 +5,7 @@ import { patternDefinitions, patternImplementations } from '../db/schema.js';
 import { eq, and } from 'drizzle-orm';
 import { getAuthenticatedUser } from '../lib/auth.js';
 import { cache } from '../lib/cache.js';
+import { CACHE_TTL } from '../lib/constants.js';
 
 /**
  * Pattern Catalog API
@@ -96,7 +97,7 @@ async function handleGet(req: VercelRequest, res: VercelResponse) {
     const categoryParam = category && typeof category === 'string' ? category.toUpperCase() : 'ALL';
     const shouldIncludeDeleted = includeDeleted === 'true';
     const cacheKey = `pattern:catalog:${categoryParam}:${shouldIncludeDeleted}:${userRole}`;
-    const cacheTTL = shouldIncludeDeleted ? 300 : 3600; // 5 min for admin, 1 hour for normal
+    const cacheTTL = shouldIncludeDeleted ? CACHE_TTL.PATTERN_CATALOG_ADMIN : CACHE_TTL.PATTERN_CATALOG;
 
     const cachedData = await cache.get<any>(cacheKey);
     if (cachedData) {

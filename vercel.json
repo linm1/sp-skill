@@ -1,8 +1,14 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
-  "buildCommand": "vite build",
+  "buildCommand": "npm run db:verify && vite build",
   "outputDirectory": "dist",
   "framework": "vite",
+  "build": {
+    "env": {
+      "TS_NODE_SKIP_IGNORE": "true",
+      "TS_NODE_TRANSPILE_ONLY": "true"
+    }
+  },
   "rewrites": [
     {
       "source": "/api/:path*",
