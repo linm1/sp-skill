@@ -160,6 +160,36 @@ const usePatterns = (refreshTrigger = 0) => {
 
 // --- Helper Functions ---
 
+// Reusable Loading Spinner Component
+const LoadingSpinner = ({ message }: { message: string }) => (
+  <div className="bg-white border-2 border-ink p-16 text-center shadow-brutal">
+    <div className="inline-block mb-4">
+      <svg width="48" height="48" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+        {/* Background Grid */}
+        <rect x="12" y="12" width="40" height="40" fill="white" stroke="#383838" strokeWidth="2"/>
+        {/* Grid Lines */}
+        <line x1="25" y1="12" x2="25" y2="52" stroke="#383838" strokeWidth="2"/>
+        <line x1="39" y1="12" x2="39" y2="52" stroke="#383838" strokeWidth="2"/>
+        <line x1="12" y1="25" x2="52" y2="25" stroke="#383838" strokeWidth="2"/>
+        <line x1="12" y1="39" x2="52" y2="39" stroke="#383838" strokeWidth="2"/>
+        {/* Animated Cells - Row 1 */}
+        <rect x="12" y="12" width="13" height="13" className="animate-fill-cell-1" fill="white"/>
+        <rect x="25" y="12" width="14" height="13" className="animate-fill-cell-2" fill="white"/>
+        <rect x="39" y="12" width="13" height="13" className="animate-fill-cell-3" fill="white"/>
+        {/* Animated Cells - Row 2 */}
+        <rect x="12" y="25" width="13" height="14" className="animate-fill-cell-4" fill="white"/>
+        <rect x="25" y="25" width="14" height="14" className="animate-fill-cell-5" fill="white"/>
+        <rect x="39" y="25" width="13" height="14" className="animate-fill-cell-6" fill="white"/>
+        {/* Animated Cells - Row 3 */}
+        <rect x="12" y="39" width="13" height="13" className="animate-fill-cell-7" fill="white"/>
+        <rect x="25" y="39" width="14" height="13" className="animate-fill-cell-8" fill="white"/>
+        <rect x="39" y="39" width="13" height="13" className="animate-fill-cell-9" fill="white"/>
+      </svg>
+    </div>
+    <p className="text-ink font-mono uppercase tracking-tight-mono">{message}</p>
+  </div>
+);
+
 const generateMarkdown = (def: PatternDefinition, impl: PatternImplementation): string => {
   return `# ${def.title} (${def.id})
 Author: ${impl.author}
@@ -1744,26 +1774,7 @@ const AdminReviewQueue = () => {
       )}
 
       {/* Loading State */}
-      {loading && (
-        <div className="bg-white border-2 border-ink p-16 text-center shadow-brutal">
-          <div className="inline-block animate-spin mb-4">
-            <svg width="48" height="48" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
-              {/* Background Grid */}
-              <rect x="12" y="12" width="40" height="40" fill="white" stroke="#383838" strokeWidth="2"/>
-              {/* Grid Lines */}
-              <line x1="25" y1="12" x2="25" y2="52" stroke="#383838" strokeWidth="2"/>
-              <line x1="39" y1="12" x2="39" y2="52" stroke="#383838" strokeWidth="2"/>
-              <line x1="12" y1="25" x2="52" y2="25" stroke="#383838" strokeWidth="2"/>
-              <line x1="12" y1="39" x2="52" y2="39" stroke="#383838" strokeWidth="2"/>
-              {/* Highlighted Cells */}
-              <rect x="12" y="12" width="13" height="13" fill="#383838"/>
-              <rect x="25" y="25" width="14" height="14" fill="#FFD700"/>
-              <rect x="39" y="39" width="13" height="13" fill="#FFD700"/>
-            </svg>
-          </div>
-          <p className="text-ink font-mono uppercase tracking-tight-mono">Loading pending submissions...</p>
-        </div>
-      )}
+      {loading && <LoadingSpinner message="Loading pending submissions..." />}
 
       {/* Grid Layout or Empty State */}
       {!loading && !error && filteredPending.length === 0 ? (
@@ -3014,26 +3025,7 @@ const AdminPatternManager = ({
       )}
 
       {/* Loading State */}
-      {loading && (
-        <div className="bg-white border-2 border-ink p-16 text-center shadow-brutal">
-          <div className="inline-block animate-spin mb-4">
-            <svg width="48" height="48" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
-              {/* Background Grid */}
-              <rect x="12" y="12" width="40" height="40" fill="white" stroke="#383838" strokeWidth="2"/>
-              {/* Grid Lines */}
-              <line x1="25" y1="12" x2="25" y2="52" stroke="#383838" strokeWidth="2"/>
-              <line x1="39" y1="12" x2="39" y2="52" stroke="#383838" strokeWidth="2"/>
-              <line x1="12" y1="25" x2="52" y2="25" stroke="#383838" strokeWidth="2"/>
-              <line x1="12" y1="39" x2="52" y2="39" stroke="#383838" strokeWidth="2"/>
-              {/* Highlighted Cells */}
-              <rect x="12" y="12" width="13" height="13" fill="#383838"/>
-              <rect x="25" y="25" width="14" height="14" fill="#FFD700"/>
-              <rect x="39" y="39" width="13" height="13" fill="#FFD700"/>
-            </svg>
-          </div>
-          <p className="text-ink font-mono uppercase tracking-tight-mono">Loading patterns...</p>
-        </div>
-      )}
+      {loading && <LoadingSpinner message="Loading patterns..." />}
 
       {/* Pattern Definitions Grid */}
       {!loading && activeTab === "definitions" && (
@@ -3079,24 +3071,7 @@ const AdminPatternManager = ({
       {/* Implementations Tab */}
       {activeTab === "implementations" && (
         implementationsLoading ? (
-          <div className="bg-white border-2 border-ink p-16 text-center shadow-brutal">
-            <div className="inline-block animate-spin mb-4">
-              <svg width="48" height="48" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
-                {/* Background Grid */}
-                <rect x="12" y="12" width="40" height="40" fill="white" stroke="#383838" strokeWidth="2"/>
-                {/* Grid Lines */}
-                <line x1="25" y1="12" x2="25" y2="52" stroke="#383838" strokeWidth="2"/>
-                <line x1="39" y1="12" x2="39" y2="52" stroke="#383838" strokeWidth="2"/>
-                <line x1="12" y1="25" x2="52" y2="25" stroke="#383838" strokeWidth="2"/>
-                <line x1="12" y1="39" x2="52" y2="39" stroke="#383838" strokeWidth="2"/>
-                {/* Highlighted Cells */}
-                <rect x="12" y="12" width="13" height="13" fill="#383838"/>
-                <rect x="25" y="25" width="14" height="14" fill="#FFD700"/>
-                <rect x="39" y="39" width="13" height="13" fill="#FFD700"/>
-              </svg>
-            </div>
-            <p className="text-ink font-mono uppercase tracking-tight-mono">Loading implementations...</p>
-          </div>
+          <LoadingSpinner message="Loading implementations..." />
         ) : filteredImplementations.length === 0 ? (
           <div className="bg-white border-2 border-ink p-16 text-center shadow-brutal">
             <i className="fas fa-folder-open text-ink/40 text-5xl mb-6"></i>
@@ -3316,26 +3291,7 @@ const MyContributions = ({
       )}
 
       {/* Loading State */}
-      {loading && (
-        <div className="bg-white border-2 border-ink p-16 text-center shadow-brutal">
-          <div className="inline-block animate-spin mb-4">
-            <svg width="48" height="48" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
-              {/* Background Grid */}
-              <rect x="12" y="12" width="40" height="40" fill="white" stroke="#383838" strokeWidth="2"/>
-              {/* Grid Lines */}
-              <line x1="25" y1="12" x2="25" y2="52" stroke="#383838" strokeWidth="2"/>
-              <line x1="39" y1="12" x2="39" y2="52" stroke="#383838" strokeWidth="2"/>
-              <line x1="12" y1="25" x2="52" y2="25" stroke="#383838" strokeWidth="2"/>
-              <line x1="12" y1="39" x2="52" y2="39" stroke="#383838" strokeWidth="2"/>
-              {/* Highlighted Cells */}
-              <rect x="12" y="12" width="13" height="13" fill="#383838"/>
-              <rect x="25" y="25" width="14" height="14" fill="#FFD700"/>
-              <rect x="39" y="39" width="13" height="13" fill="#FFD700"/>
-            </svg>
-          </div>
-          <p className="text-ink font-mono uppercase tracking-tight-mono">Loading your contributions...</p>
-        </div>
-      )}
+      {loading && <LoadingSpinner message="Loading your contributions..." />}
 
       {/* Contributions Grid */}
       {!loading && !error && filteredContributions.length === 0 ? (
@@ -4109,7 +4065,7 @@ const App = () => {
         <div className="bg-white border border-ink p-16 shadow-brutal">
           <div className="text-center">
             {/* Grid Pattern Spinner */}
-            <div className="inline-block animate-spin mb-6">
+            <div className="inline-block mb-6">
               <svg width="48" height="48" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
                 {/* Background Grid */}
                 <rect x="12" y="12" width="40" height="40" fill="white" stroke="#383838" strokeWidth="2"/>
@@ -4118,10 +4074,18 @@ const App = () => {
                 <line x1="39" y1="12" x2="39" y2="52" stroke="#383838" strokeWidth="2"/>
                 <line x1="12" y1="25" x2="52" y2="25" stroke="#383838" strokeWidth="2"/>
                 <line x1="12" y1="39" x2="52" y2="39" stroke="#383838" strokeWidth="2"/>
-                {/* Highlighted Cells */}
-                <rect x="12" y="12" width="13" height="13" fill="#383838"/>
-                <rect x="25" y="25" width="14" height="14" fill="#FFD700"/>
-                <rect x="39" y="39" width="13" height="13" fill="#FFD700"/>
+                {/* Animated Cells - Row 1 */}
+                <rect x="12" y="12" width="13" height="13" className="animate-fill-cell-1" fill="white"/>
+                <rect x="25" y="12" width="14" height="13" className="animate-fill-cell-2" fill="white"/>
+                <rect x="39" y="12" width="13" height="13" className="animate-fill-cell-3" fill="white"/>
+                {/* Animated Cells - Row 2 */}
+                <rect x="12" y="25" width="13" height="14" className="animate-fill-cell-4" fill="white"/>
+                <rect x="25" y="25" width="14" height="14" className="animate-fill-cell-5" fill="white"/>
+                <rect x="39" y="25" width="13" height="14" className="animate-fill-cell-6" fill="white"/>
+                {/* Animated Cells - Row 3 */}
+                <rect x="12" y="39" width="13" height="13" className="animate-fill-cell-7" fill="white"/>
+                <rect x="25" y="39" width="14" height="13" className="animate-fill-cell-8" fill="white"/>
+                <rect x="39" y="39" width="13" height="13" className="animate-fill-cell-9" fill="white"/>
               </svg>
             </div>
             <div className="text-ink font-mono text-xl uppercase tracking-tight-mono font-medium">Loading patterns...</div>

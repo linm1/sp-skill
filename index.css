@@ -47,3 +47,19 @@ body {
     font-family: 'Courier New', Courier, monospace;
     white-space: pre-wrap;
 }
+
+/* Cell-by-Cell Fill Animation */
+@keyframes fillCell {
+  0%, 100% { fill: white; }
+  20%, 80% { fill: #FFD700; }
+}
+
+.animate-fill-cell-1 { animation: fillCell 1.5s ease-in-out infinite; animation-delay: 0s; }
+.animate-fill-cell-2 { animation: fillCell 1.5s ease-in-out infinite; animation-delay: 0.15s; }
+.animate-fill-cell-3 { animation: fillCell 1.5s ease-in-out infinite; animation-delay: 0.3s; }
+.animate-fill-cell-4 { animation: fillCell 1.5s ease-in-out infinite; animation-delay: 0.45s; }
+.animate-fill-cell-5 { animation: fillCell 1.5s ease-in-out infinite; animation-delay: 0.6s; }
+.animate-fill-cell-6 { animation: fillCell 1.5s ease-in-out infinite; animation-delay: 0.75s; }
+.animate-fill-cell-7 { animation: fillCell 1.5s ease-in-out infinite; animation-delay: 0.9s; }
+.animate-fill-cell-8 { animation: fillCell 1.5s ease-in-out infinite; animation-delay: 1.05s; }
+.animate-fill-cell-9 { animation: fillCell 1.5s ease-in-out infinite; animation-delay: 1.2s; }
