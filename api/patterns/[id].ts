@@ -5,6 +5,7 @@ import { patternDefinitions, patternImplementations } from '../../db/schema.js';
 import { eq, and } from 'drizzle-orm';
 import { getAuthenticatedUser } from '../../lib/auth.js';
 import { cache } from '../../lib/cache.js';
+import { CACHE_TTL } from '../../lib/constants.js';
 
 /**
  * Pattern Detail API - Single Pattern Endpoint
@@ -168,8 +169,8 @@ async function handleGet(req: VercelRequest, res: VercelResponse) {
       }
     };
 
-    // Store in cache (TTL: 1800s = 30 minutes)
-    await cache.set(cacheKey, response, 1800);
+    // Store in cache (TTL: 30 minutes)
+    await cache.set(cacheKey, response, CACHE_TTL.PATTERN_DETAIL);
 
     return res.status(200).json(response);
 

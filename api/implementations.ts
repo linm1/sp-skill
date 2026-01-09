@@ -6,6 +6,7 @@ import { eq, and } from 'drizzle-orm';
 import { getAuthenticatedUser } from '../lib/auth.js';
 import { sendAdminNotification } from '../lib/email.js';
 import { cache } from '../lib/cache.js';
+import { CACHE_TTL } from '../lib/constants.js';
 
 /**
  * Pattern Implementations API
@@ -318,8 +319,8 @@ async function handleGet(req: VercelRequest, res: VercelResponse) {
         implementations: userImplementations
       };
 
-      // Store in cache (TTL: 600s = 10 minutes)
-      await cache.set(cacheKey, response, 600);
+      // Store in cache (TTL: 10 minutes)
+      await cache.set(cacheKey, response, CACHE_TTL.IMPLEMENTATION_QUERIES);
 
       return res.status(200).json(response);
     }
@@ -424,8 +425,8 @@ async function handleGet(req: VercelRequest, res: VercelResponse) {
         implementations: pendingImplementations
       };
 
-      // Store in cache (TTL: 120s = 2 minutes for pending items)
-      await cache.set(cacheKey, response, 120);
+      // Store in cache (TTL: 2 minutes for pending items)
+      await cache.set(cacheKey, response, CACHE_TTL.PENDING_IMPLEMENTATIONS);
 
       return res.status(200).json(response);
     }
@@ -518,8 +519,8 @@ async function handleGet(req: VercelRequest, res: VercelResponse) {
         implementations: patternImplementationsList
       };
 
-      // Store in cache (TTL: 600s = 10 minutes)
-      await cache.set(cacheKey, response, 600);
+      // Store in cache (TTL: 10 minutes)
+      await cache.set(cacheKey, response, CACHE_TTL.IMPLEMENTATION_QUERIES);
 
       return res.status(200).json(response);
     }
