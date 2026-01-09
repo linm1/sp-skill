@@ -1,104 +1,7 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { ai, AxAIGoogleGeminiModel, AxGen } from '@ax-llm/ax';
 import { getAuthenticatedUser } from '../lib/auth.js';
-
-// SAS syntax validation helpers
-function validateSASCode(code: string): true | string {
-  const trimmed = code.trim();
-
-  if (!trimmed) {
-    return "Code cannot be empty";
-  }
-
-  // Check for basic SAS structure
-  const hasDataStep = /\bdata\s+\w+/i.test(code);
-  const hasProcStep = /\bproc\s+\w+/i.test(code);
-
-  if (!hasDataStep && !hasProcStep) {
-    return "Code must contain at least one DATA step or PROC step";
-  }
-
-  // Check for RUN/QUIT statements
-  if (!code.includes(';')) {
-    return "SAS code must contain semicolons to terminate statements";
-  }
-
-  // Check for balanced quotes
-  const singleQuotes = (code.match(/'/g) || []).length;
-  const doubleQuotes = (code.match(/"/g) || []).length;
-
-  if (singleQuotes % 2 !== 0) {
-    return "Unbalanced single quotes detected";
-  }
-
-  if (doubleQuotes % 2 !== 0) {
-    return "Unbalanced double quotes detected";
-  }
-
-  // Check for obvious syntax errors
-  if (/\bdata\s*;/i.test(code)) {
-    return "DATA statement missing dataset name";
-  }
-
-  return true;
-}
-
-// R syntax validation helpers
-function validateRCode(code: string): true | string {
-  const trimmed = code.trim();
-
-  if (!trimmed) {
-    return "Code cannot be empty";
-  }
-
-  // Check for balanced brackets/parentheses
-  let parenCount = 0;
-  let bracketCount = 0;
-  let braceCount = 0;
-
-  for (const char of code) {
-    if (char === '(') parenCount++;
-    if (char === ')') parenCount--;
-    if (char === '[') bracketCount++;
-    if (char === ']') bracketCount--;
-    if (char === '{') braceCount++;
-    if (char === '}') braceCount--;
-  }
-
-  if (parenCount !== 0) {
-    return "Unbalanced parentheses detected";
-  }
-
-  if (bracketCount !== 0) {
-    return "Unbalanced square brackets detected";
-  }
-
-  if (braceCount !== 0) {
-    return "Unbalanced curly braces detected";
-  }
-
-  // Check for balanced quotes
-  const singleQuotes = (code.match(/(?<!\\)'/g) || []).length;
-  const doubleQuotes = (code.match(/(?<!\\)"/g) || []).length;
-
-  if (singleQuotes % 2 !== 0) {
-    return "Unbalanced single quotes detected";
-  }
-
-  if (doubleQuotes % 2 !== 0) {
-    return "Unbalanced double quotes detected";
-  }
-
-  // Check for basic R constructs
-  const hasAssignment = /<-|=|->/.test(code);
-  const hasFunctionCall = /\w+\(/.test(code);
-
-  if (!hasAssignment && !hasFunctionCall) {
-    return "Code must contain at least one assignment or function call";
-  }
-
-  return true;
-}
+import { validateSASCode, validateRCode } from '../lib/validators.js';
 
 // Request body interface
 interface ExtractCodeRequest {
@@ -129,19 +32,16 @@ export default async function handler(
   }
 
   // Check for API key
-  console.log('Raw env GEMINI_API_KEY:', process.env.GEMINI_API_KEY?.substring(0, 10));
-  console.log('All GEMINI env vars:', Object.keys(process.env).filter(k => k.includes('GEMINI')));
-
   const apiKey = process.env.GEMINI_API_KEY?.trim();
   if (!apiKey) {
     console.error('GEMINI_API_KEY not configured');
     return res.status(500).json({ error: 'API not configured' });
   }
 
-  // Log API key info (first/last 4 chars only for security)
-  console.log('API Key length:', apiKey.length);
-  console.log('API Key starts with:', apiKey.substring(0, 8));
-  console.log('API Key format check:', apiKey.substring(0, 4) + '...' + apiKey.substring(apiKey.length - 4));
+  // Development-only logging
+  if (process.env.NODE_ENV === 'development') {
+    console.log('API Key length:', apiKey.length);
+  }
 
   // Validate request body
   const { rawCode, language, patternTitle, problemStatement, whenToUse } = req.body as ExtractCodeRequest;
