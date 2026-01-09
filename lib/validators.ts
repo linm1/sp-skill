@@ -1,3 +1,5 @@
+// @ts-strict-local
+
 /**
  * Code Validation Utilities
  *

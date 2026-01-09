@@ -1,3 +1,5 @@
+// @ts-strict-local
+
 /**
  * Centralized application constants
  *
