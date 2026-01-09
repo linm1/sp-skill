@@ -162,7 +162,7 @@ const usePatterns = (refreshTrigger = 0) => {
 
 // Reusable Loading Spinner Component
 const LoadingSpinner = ({ message }: { message: string }) => (
-  <div className="bg-white border-2 border-ink p-16 text-center shadow-brutal">
+  <div className="bg-white border border-ink p-16 text-center shadow-brutal">
     <div className="inline-block mb-4">
       <svg width="48" height="48" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
         {/* Background Grid */}
@@ -535,7 +535,7 @@ const PatternCard: React.FC<PatternCardProps> = ({
   return (
     <div
       onClick={onClick}
-      className="bg-white border border-black overflow-hidden hover:-translate-y-1 hover:shadow-brutal-lg transition-transform duration-brutal flex flex-col h-full cursor-pointer group"
+      className="bg-white border border-ink overflow-hidden hover:-translate-y-1 hover:shadow-brutal-lg transition-transform duration-brutal flex flex-col h-full cursor-pointer group"
     >
       <div className="p-4 md:p-8 flex-grow">
         <div className="flex justify-between items-start mb-3">
@@ -658,7 +658,7 @@ const PendingImplementationCard: React.FC<PendingImplementationCardProps> = ({
   impl, onApprove, onReject, onViewCode
 }) => {
   return (
-    <div className="bg-white border-2 border-ink hover:-translate-y-1 hover:shadow-brutal-lg transition-transform duration-brutal h-full flex flex-col">
+    <div className="bg-white border border-ink hover:-translate-y-1 hover:shadow-brutal-lg transition-transform duration-brutal h-full flex flex-col">
       {/* Header: Pattern ID + Pending Badge */}
       <div className="flex justify-between items-center px-4 py-2 border-b border-ink">
         <span className="font-mono text-xs uppercase tracking-tight-mono text-ink">
@@ -857,7 +857,7 @@ const PatternDetail = ({
         <button onClick={onBack} className="text-sm text-ink hover:text-link-blue flex items-center mb-6 font-mono uppercase transition-colors duration-brutal">
           <i className="fas fa-arrow-left mr-2"></i> Back to Catalog
         </button>
-        <div className="bg-white border-2 border-ink p-8 text-center shadow-terminal">
+        <div className="bg-white border border-ink p-8 text-center shadow-terminal">
           <i className="fas fa-exclamation-circle text-4xl text-ink mb-4"></i>
           <h3 className="text-xl font-semibold font-mono uppercase text-ink mb-2">No Implementations Available</h3>
           <p className="text-ink">This pattern doesn't have any implementations yet. Contribute one to get started!</p>
@@ -904,7 +904,7 @@ const PatternDetail = ({
           </span>
         </div>
         <p className="text-ink text-lg mb-4">{def.problem}</p>
-        <div className="bg-white border-2 border-ink p-8">
+        <div className="bg-white border border-ink p-8">
              <h5 className="text-xs font-bold text-ink uppercase mb-2 font-mono tracking-tight-mono">When to Use</h5>
              <p className="text-sm text-ink">{def.whenToUse}</p>
         </div>
@@ -1003,7 +1003,7 @@ const PatternDetail = ({
             <div className="p-4 bg-white border-b border-ink flex justify-between items-center sticky top-0 shadow-terminal">
                <div className="flex items-center space-x-2">
                  <div className="w-3 h-3 rounded-full bg-terminal-red"></div>
-                 <div className="w-3 h-3 rounded-full bg-yellow-400"></div>
+                 <div className="w-3 h-3 rounded-full bg-duck-yellow"></div>
                  <div className="w-3 h-3 rounded-full bg-terminal-green"></div>
                  <span className="text-xs font-mono ml-4">{`${def.id}_${activeImpl?.author?.toLowerCase().replace(' ','-') ?? 'unknown'}.md`}</span>
                </div>
@@ -1060,9 +1060,9 @@ const MultiEntryField = ({
 
   return (
     <div>
-      <label className="block text-sm font-medium text-slate-700 mb-1">
+      <label className="block text-sm font-medium text-ink mb-1 font-mono uppercase">
         {label}
-        <span className="ml-2 text-xs text-slate-500">
+        <span className="ml-2 text-xs text-ink">
           ({value.length}/{maxEntries} entries)
         </span>
       </label>
@@ -1070,7 +1070,7 @@ const MultiEntryField = ({
       {/* Existing entries */}
       <div className="space-y-2 mb-2">
         {value.length === 0 && (
-          <p className="text-sm text-slate-400 italic">No entries yet. Click "Add Entry" to start.</p>
+          <p className="text-sm text-ink">No entries yet. Click "Add Entry" to start.</p>
         )}
         {value.map((entry, index) => (
           <div key={index} className="flex items-center space-x-2">
@@ -1079,16 +1079,16 @@ const MultiEntryField = ({
               value={entry}
               onChange={(e) => handleChange(index, e.target.value)}
               placeholder={placeholder}
-              className="flex-1 p-2 border border-slate-300 rounded-md text-sm"
+              className="flex-1 p-2 border border-ink text-sm bg-white focus:outline-none focus:border-2 focus:border-link-blue transition-all duration-brutal"
               autoFocus={index === value.length - 1}
             />
             <button
               type="button"
               onClick={() => handleRemove(index)}
-              className="text-red-600 hover:text-red-800 transition-colors"
+              className="w-6 h-6 flex items-center justify-center border border-ink text-terminal-red bg-white hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-brutal transition-all duration-brutal"
               title="Remove entry"
             >
-              <i className="fas fa-times"></i>
+              <i className="fas fa-times text-xs"></i>
             </button>
           </div>
         ))}
@@ -1102,7 +1102,7 @@ const MultiEntryField = ({
         className={`w-full p-2 border border-ink text-sm font-mono uppercase tracking-tight-mono transition-all duration-brutal ${
           canAdd
             ? "bg-white text-ink hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-brutal"
-            : "bg-canvas text-slate-400 cursor-not-allowed opacity-50"
+            : "bg-canvas text-ink cursor-not-allowed opacity-50"
         }`}
       >
         <i className="fas fa-plus mr-1"></i>
@@ -1282,7 +1282,7 @@ const SmartEtlForm = ({
   };
 
   return (
-    <div className="max-w-3xl mx-auto bg-white border-2 border-ink overflow-hidden shadow-terminal">
+    <div className="max-w-3xl mx-auto bg-white border border-ink overflow-hidden shadow-terminal">
       <div className="bg-ink px-6 py-4 flex justify-between items-center border-b border-white">
         <div>
            <h2 className="text-white font-bold text-lg font-mono uppercase tracking-tight-mono">{isEditMode ? "Edit Implementation" : "Contribute New Pattern Implementation"}</h2>
@@ -1401,7 +1401,7 @@ const SmartEtlForm = ({
 
         {/* Pattern Definition Fields (Read-only when pattern selected from dropdown) */}
         {currentPattern && (
-          <div className="bg-white border-2 border-ink p-6 space-y-4">
+          <div className="bg-white border border-ink p-6 space-y-4">
             <h3 className="text-sm font-semibold text-ink uppercase tracking-wide mb-2 font-mono">
               <i className="fas fa-info-circle mr-2"></i>Pattern Definition {!definition && <span className="text-xs text-ink font-normal">(Read-only)</span>}
             </h3>
@@ -1757,7 +1757,7 @@ const AdminReviewQueue = () => {
             placeholder="Search pending patterns..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-8 pr-4 py-3 border-2 border-ink font-mono text-sm focus:border-link-blue focus:outline-none transition-colors duration-brutal"
+            className="w-full pl-8 pr-4 py-3 border border-ink font-mono text-sm focus:border-link-blue focus:outline-none transition-colors duration-brutal"
           />
         </div>
       </div>
@@ -1776,7 +1776,7 @@ const AdminReviewQueue = () => {
 
       {/* Grid Layout or Empty State */}
       {!loading && !error && filteredPending.length === 0 ? (
-        <div className="bg-white border-2 border-ink p-16 text-center shadow-brutal">
+        <div className="bg-white border border-ink p-16 text-center shadow-brutal">
           <i className="fas fa-check-circle text-terminal-green text-5xl mb-6"></i>
           <h3 className="text-2xl font-bold font-mono uppercase text-ink mb-3 tracking-tight-mono">
             {pendingImplementations.length === 0 ? 'No Pending Submissions' : 'No Results Found'}
@@ -1807,7 +1807,7 @@ const AdminReviewQueue = () => {
       {/* Code Preview Modal */}
       {showCodeModal && selectedImpl && (
         <div className="fixed inset-0 bg-ink/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white border-2 border-ink shadow-terminal max-w-4xl w-full max-h-[90vh] overflow-auto">
+          <div className="bg-white border border-ink shadow-terminal max-w-4xl w-full max-h-[90vh] overflow-auto">
             {/* Modal Header */}
             <div className="bg-ink text-white px-6 py-4 flex justify-between items-center border-b-2 border-ink sticky top-0">
               <div>
@@ -2370,9 +2370,9 @@ const ImplementationsTable = ({
 }) => {
   if (implementations.length === 0) {
     return (
-      <div className="bg-white rounded-xl p-12 text-center">
-        <i className="fas fa-folder-open text-4xl text-slate-300 mb-4"></i>
-        <p className="text-slate-500">No implementations found.</p>
+      <div className="bg-white border border-ink p-12 text-center">
+        <i className="fas fa-folder-open text-4xl text-ink opacity-30 mb-4"></i>
+        <p className="text-ink">No implementations found.</p>
       </div>
     );
   }
@@ -2382,8 +2382,8 @@ const ImplementationsTable = ({
       {implementations.map((implementation) => (
         <div
           key={implementation.uuid}
-          className={`bg-white rounded-xl shadow-sm border border-slate-200 p-6 hover:shadow-md transition-shadow ${
-            implementation.isDeleted ? 'bg-slate-50 opacity-60' : ''
+          className={`bg-white border border-ink p-6 hover:-translate-y-1 hover:shadow-brutal-lg transition-all duration-brutal ${
+            implementation.isDeleted ? 'bg-canvas opacity-60' : ''
           }`}
         >
           <div className="flex items-start justify-between">
@@ -2391,26 +2391,26 @@ const ImplementationsTable = ({
             <div className="flex-grow">
               {/* Badges row */}
               <div className="flex items-center space-x-3 mb-2">
-                <span className="px-2 py-1 bg-slate-100 text-slate-700 text-xs font-mono rounded">
+                <span className="px-2 py-1 bg-canvas text-ink text-xs font-mono border border-ink">
                   {implementation.uuid.substring(0, 8)}...
                 </span>
-                <span className="px-2 py-1 bg-slate-100 text-slate-700 text-xs font-mono rounded">
+                <span className="px-2 py-1 bg-canvas text-ink text-xs font-mono border border-ink">
                   {implementation.patternId}
                 </span>
                 {implementation.patternCategory && (
-                  <span className="px-2 py-1 bg-indigo-100 text-indigo-700 text-xs font-semibold rounded">
+                  <span className="px-2 py-1 bg-duck-yellow text-ink text-xs font-semibold border border-ink">
                     {implementation.patternCategory}
                   </span>
                 )}
-                <span className={`px-2 py-1 text-xs font-semibold rounded ${
+                <span className={`px-2 py-1 text-xs font-semibold border border-ink ${
                   implementation.status === 'active'
-                    ? 'bg-green-100 text-green-700'
-                    : 'bg-yellow-100 text-yellow-700'
+                    ? 'bg-terminal-green text-white'
+                    : 'bg-duck-yellow text-ink'
                 }`}>
                   {implementation.status}
                 </span>
                 {implementation.isDeleted && (
-                  <span className="px-2 py-1 bg-red-100 text-red-700 text-xs font-semibold rounded">
+                  <span className="px-2 py-1 bg-terminal-red text-white text-xs font-semibold border border-ink">
                     Deleted
                   </span>
                 )}
@@ -2418,19 +2418,19 @@ const ImplementationsTable = ({
 
               {/* Title */}
               <h3 className={`text-lg font-bold ${
-                implementation.isDeleted ? 'line-through text-slate-400' : 'text-slate-900'
+                implementation.isDeleted ? 'line-through text-ink opacity-50' : 'text-ink'
               }`}>
                 {implementation.patternTitle || implementation.patternId}
               </h3>
 
               {/* Author & Date */}
               <div className="flex items-center space-x-4 mt-1">
-                <p className="text-sm text-slate-600">
+                <p className="text-sm text-ink">
                   <i className="fas fa-user mr-1"></i>
                   Author: {implementation.author}
                 </p>
                 {implementation.createdAt && (
-                  <p className="text-sm text-slate-500">
+                  <p className="text-sm text-ink opacity-70">
                     <i className="fas fa-clock mr-1"></i>
                     Submitted: {formatRelativeTime(implementation.createdAt)}
                   </p>
@@ -2443,7 +2443,7 @@ const ImplementationsTable = ({
               <div className="flex space-x-2 ml-4">
                 <button
                   onClick={() => onEdit(implementation)}
-                  className="bg-slate-600 hover:bg-slate-700 text-white px-4 py-2 rounded-lg text-sm transition-colors flex items-center"
+                  className="bg-ink text-white px-4 py-2 text-sm font-mono uppercase border border-ink hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-brutal transition-all duration-brutal flex items-center"
                 >
                   <i className="fas fa-edit mr-2"></i>
                   Edit
@@ -2454,7 +2454,7 @@ const ImplementationsTable = ({
                       onDelete(implementation.uuid);
                     }
                   }}
-                  className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg text-sm transition-colors flex items-center"
+                  className="bg-terminal-red text-white px-4 py-2 text-sm font-mono uppercase border border-ink hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-brutal transition-all duration-brutal flex items-center"
                 >
                   <i className="fas fa-trash mr-2"></i>
                   Delete
@@ -2479,9 +2479,9 @@ const PatternDefinitionsTable = ({
 }) => {
   if (patterns.length === 0) {
     return (
-      <div className="bg-white rounded-xl p-12 text-center">
-        <i className="fas fa-folder-open text-4xl text-slate-300 mb-4"></i>
-        <p className="text-slate-500">No patterns found.</p>
+      <div className="bg-white border border-ink p-12 text-center">
+        <i className="fas fa-folder-open text-4xl text-ink opacity-30 mb-4"></i>
+        <p className="text-ink">No patterns found.</p>
       </div>
     );
   }
@@ -2491,35 +2491,35 @@ const PatternDefinitionsTable = ({
       {patterns.map((pattern) => (
         <div
           key={pattern.id}
-          className={`bg-white rounded-xl shadow-sm border border-slate-200 p-6 hover:shadow-md transition-shadow ${
-            pattern.isDeleted ? 'bg-slate-50 opacity-60' : ''
+          className={`bg-white border border-ink p-6 hover:-translate-y-1 hover:shadow-brutal-lg transition-all duration-brutal ${
+            pattern.isDeleted ? 'bg-canvas opacity-60' : ''
           }`}
         >
           <div className="flex items-start justify-between">
             {/* Left: Pattern Info */}
             <div className="flex-grow">
               <div className="flex items-center space-x-3 mb-2">
-                <span className="px-2 py-1 bg-slate-100 text-slate-700 text-xs font-mono rounded">
+                <span className="px-2 py-1 bg-canvas text-ink text-xs font-mono border border-ink">
                   {pattern.id}
                 </span>
-                <span className="px-2 py-1 bg-indigo-100 text-indigo-700 text-xs font-semibold rounded">
+                <span className="px-2 py-1 bg-duck-yellow text-ink text-xs font-semibold border border-ink">
                   {pattern.category}
                 </span>
                 {pattern.isDeleted && (
-                  <span className="px-2 py-1 bg-red-100 text-red-700 text-xs font-semibold rounded">
+                  <span className="px-2 py-1 bg-terminal-red text-white text-xs font-semibold border border-ink">
                     Deleted
                   </span>
                 )}
               </div>
-              <h3 className={`text-lg font-bold ${pattern.isDeleted ? 'line-through text-slate-400' : 'text-slate-900'}`}>
+              <h3 className={`text-lg font-bold ${pattern.isDeleted ? 'line-through text-ink opacity-50' : 'text-ink'}`}>
                 {pattern.title}
               </h3>
               {pattern.createdAt && (
-                <p className="text-sm text-slate-500 mt-1">
+                <p className="text-sm text-ink opacity-70 mt-1">
                   Created: {formatRelativeTime(pattern.createdAt)}
                 </p>
               )}
-              <p className="text-sm text-slate-600 mt-2 line-clamp-2">
+              <p className="text-sm text-ink mt-2 line-clamp-2">
                 {pattern.problem}
               </p>
             </div>
@@ -2529,7 +2529,7 @@ const PatternDefinitionsTable = ({
               <div className="flex space-x-2 ml-4">
                 <button
                   onClick={() => onEdit(pattern)}
-                  className="bg-slate-600 hover:bg-slate-700 text-white px-4 py-2 rounded-lg text-sm transition-colors flex items-center"
+                  className="bg-ink text-white px-4 py-2 text-sm font-mono uppercase border border-ink hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-brutal transition-all duration-brutal flex items-center"
                 >
                   <i className="fas fa-edit mr-2"></i>
                   Edit
@@ -2540,7 +2540,7 @@ const PatternDefinitionsTable = ({
                       onDelete(pattern.id);
                     }
                   }}
-                  className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg text-sm transition-colors flex items-center"
+                  className="bg-terminal-red text-white px-4 py-2 text-sm font-mono uppercase border border-ink hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-brutal transition-all duration-brutal flex items-center"
                 >
                   <i className="fas fa-trash mr-2"></i>
                   Delete
@@ -2956,7 +2956,7 @@ const AdminPatternManager = ({
                 placeholder="Search by ID or title..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-8 pr-4 py-3 border-2 border-ink font-mono text-sm focus:border-link-blue focus:outline-none transition-colors duration-brutal"
+                className="w-full pl-8 pr-4 py-3 border border-ink font-mono text-sm focus:border-link-blue focus:outline-none transition-colors duration-brutal"
               />
             </div>
 
@@ -2995,7 +2995,7 @@ const AdminPatternManager = ({
                 placeholder="Search by Pattern ID, author, or title..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-8 pr-4 py-3 border-2 border-ink font-mono text-sm focus:border-link-blue focus:outline-none transition-colors duration-brutal"
+                className="w-full pl-8 pr-4 py-3 border border-ink font-mono text-sm focus:border-link-blue focus:outline-none transition-colors duration-brutal"
               />
             </div>
 
@@ -3028,7 +3028,7 @@ const AdminPatternManager = ({
       {/* Pattern Definitions Grid */}
       {!loading && activeTab === "definitions" && (
         filteredPatterns.length === 0 ? (
-          <div className="bg-white border-2 border-ink p-16 text-center shadow-brutal">
+          <div className="bg-white border border-ink p-16 text-center shadow-brutal">
             <i className="fas fa-folder-open text-ink/40 text-5xl mb-6"></i>
             <h3 className="text-2xl font-bold font-mono uppercase text-ink mb-3 tracking-tight-mono">No Patterns Found</h3>
             <p className="text-ink font-sans max-w-md mx-auto">
@@ -3071,7 +3071,7 @@ const AdminPatternManager = ({
         implementationsLoading ? (
           <LoadingSpinner message="Loading implementations..." />
         ) : filteredImplementations.length === 0 ? (
-          <div className="bg-white border-2 border-ink p-16 text-center shadow-brutal">
+          <div className="bg-white border border-ink p-16 text-center shadow-brutal">
             <i className="fas fa-folder-open text-ink/40 text-5xl mb-6"></i>
             <h3 className="text-2xl font-bold font-mono uppercase text-ink mb-3 tracking-tight-mono">No Implementations Found</h3>
             <p className="text-ink font-sans max-w-md mx-auto">
@@ -3203,7 +3203,7 @@ const MyContributions = ({
       case 'rejected':
         return 'bg-white text-ink border-2 border-terminal-red';
       default:
-        return 'bg-white text-ink border-2 border-ink';
+        return 'bg-white text-ink border border-ink';
     }
   };
 
@@ -3256,13 +3256,13 @@ const MyContributions = ({
               placeholder="Search by Pattern ID or title..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-8 pr-4 py-3 border-2 border-ink font-mono text-sm focus:border-link-blue focus:outline-none transition-colors duration-brutal"
+              className="w-full pl-8 pr-4 py-3 border border-ink font-mono text-sm focus:border-link-blue focus:outline-none transition-colors duration-brutal"
             />
           </div>
           <select
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value)}
-            className="px-4 py-3 border-2 border-ink font-mono text-sm focus:border-link-blue focus:outline-none transition-colors duration-brutal bg-white"
+            className="px-4 py-3 border border-ink font-mono text-sm focus:border-link-blue focus:outline-none transition-colors duration-brutal bg-white"
           >
             <option value="all">All Status</option>
             <option value="pending">Pending</option>
@@ -3293,7 +3293,7 @@ const MyContributions = ({
 
       {/* Contributions Grid */}
       {!loading && !error && filteredContributions.length === 0 ? (
-        <div className="bg-white border-2 border-ink p-16 text-center shadow-brutal">
+        <div className="bg-white border border-ink p-16 text-center shadow-brutal">
           <i className="fas fa-folder-open text-ink/40 text-5xl mb-6"></i>
           <h3 className="text-2xl font-bold font-mono uppercase text-ink mb-3 tracking-tight-mono">No Contributions Found</h3>
           <p className="text-ink font-sans max-w-md mx-auto mb-6">
@@ -3571,7 +3571,7 @@ const BasketView = ({
                   <button
                      onClick={() => setActiveCategory("ALL")}
                      className={`w-full text-left px-3 py-2 text-sm font-medium flex justify-between items-center font-mono uppercase transition-all duration-brutal ${
-                        activeCategory === "ALL" ? "bg-white border-2 border-ink text-link-blue" : "text-ink hover:bg-white/50"
+                        activeCategory === "ALL" ? "bg-white border border-ink text-link-blue" : "text-ink hover:bg-white/50"
                      }`}
                   >
                      <span>All Categories</span>
@@ -3582,7 +3582,7 @@ const BasketView = ({
                         key={cat.code}
                         onClick={() => setActiveCategory(cat.code)}
                         className={`w-full text-left px-3 py-2 text-sm font-medium flex justify-between items-center font-mono uppercase transition-all duration-brutal ${
-                           activeCategory === cat.code ? "bg-white border-2 border-ink text-link-blue" : "text-ink hover:bg-white/50"
+                           activeCategory === cat.code ? "bg-white border border-ink text-link-blue" : "text-ink hover:bg-white/50"
                         }`}
                      >
                         <div className="flex items-center">
