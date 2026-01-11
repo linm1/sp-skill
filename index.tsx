@@ -1223,31 +1223,34 @@ function CodeViewerModal({ isOpen, code, language, filename, onClose, onSave }: 
             {isEditing && <span className="text-xs opacity-75">(editing)</span>}
           </h3>
           <div className="flex gap-2 items-center">
-            {/* Theme Toggle - Always visible */}
+            {/* Theme Toggle - Responsive icon+text */}
             <button
               onClick={toggleTheme}
-              className="w-8 h-8 flex items-center justify-center hover:bg-white hover:text-ink transition-all duration-brutal border border-white"
+              className="px-2 md:px-3 py-1.5 md:py-2 flex items-center hover:bg-white hover:text-ink transition-all duration-brutal border border-white font-mono text-xs uppercase"
               title={codeTheme === 'light' ? 'Switch to dark theme' : 'Switch to light theme'}
               aria-label={codeTheme === 'light' ? 'Switch to dark theme' : 'Switch to light theme'}
             >
-              {codeTheme === 'light' ? '🌙' : '☀️'}
+              <i className={`fas ${codeTheme === 'light' ? 'fa-moon' : 'fa-sun'} md:mr-2`} style={{ fontFamily: '"Font Awesome 6 Free"' }}></i>
+              <span className="hidden md:inline">{codeTheme === 'light' ? 'Dark' : 'Light'}</span>
             </button>
 
             {!isEditing && (
               <button
                 onClick={() => setIsEditing(true)}
-                className="px-3 py-1.5 text-xs font-mono uppercase border border-white hover:-translate-x-0.5 hover:-translate-y-0.5 hover:bg-white hover:text-ink transition-all duration-brutal"
+                className="px-2 md:px-3 py-1.5 md:py-2 flex items-center border border-white hover:-translate-x-0.5 hover:-translate-y-0.5 hover:bg-white hover:text-ink transition-all duration-brutal font-mono text-xs uppercase"
                 title="Edit code"
               >
-                ✏️ Edit
+                <i className="fas fa-edit md:mr-2" style={{ fontFamily: '"Font Awesome 6 Free"' }}></i>
+                <span className="hidden md:inline">Edit</span>
               </button>
             )}
             <button
               onClick={onClose}
-              className="w-8 h-8 flex items-center justify-center hover:bg-white hover:text-ink transition-all duration-brutal border border-white"
+              className="px-2 md:px-3 py-1.5 md:py-2 flex items-center hover:bg-white hover:text-ink transition-all duration-brutal border border-white font-mono text-xs uppercase"
               title="Close"
             >
-              ✖
+              <i className="fas fa-times md:mr-2" style={{ fontFamily: '"Font Awesome 6 Free"' }}></i>
+              <span className="hidden md:inline">Close</span>
             </button>
           </div>
         </div>
