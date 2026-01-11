@@ -20,9 +20,9 @@ export async function initializeShiki(): Promise<Highlighter> {
     }
     const sasGrammar = await sasGrammarResponse.json();
 
-    // Create highlighter with GitHub Dark theme and custom SAS grammar
+    // Create highlighter with dual themes (light: ayu-light, dark: houston) and custom SAS grammar
     highlighterInstance = await createHighlighter({
-      themes: ['github-dark'],
+      themes: ['ayu-light', 'houston'],
       langs: [
         'r',  // R is built-in
         {
@@ -45,28 +45,36 @@ export async function initializeShiki(): Promise<Highlighter> {
  * Highlight code with Shiki syntax highlighting.
  * @param code - The source code to highlight
  * @param language - The language to use for highlighting ('sas' | 'r')
+ * @param theme - The theme to use ('light' | 'dark'), defaults to 'light'
  * @returns HTML string with inline styles
  */
 export async function highlightCode(
   code: string,
-  language: 'sas' | 'r'
+  language: 'sas' | 'r',
+  theme: 'light' | 'dark' = 'light'
 ): Promise<string> {
   try {
     const highlighter = await initializeShiki();
 
+    // Map user-friendly theme names to Shiki theme IDs
+    const shikiTheme = theme === 'light' ? 'ayu-light' : 'houston';
+
     return highlighter.codeToHtml(code, {
       lang: language,
-      theme: 'github-dark',
+      theme: shikiTheme,
     });
   } catch (error) {
     console.error('Failed to highlight code:', error);
 
-    // Fallback: Return plain text in <pre> tag with basic styling
+    // Fallback: Return plain text in <pre> tag with theme-appropriate styling
     const escapedCode = code
       .replace(/&/g, '&amp;')
       .replace(/</g, '&lt;')
       .replace(/>/g, '&gt;');
 
-    return `<pre style="background: #1e1e1e; color: #d4d4d4; padding: 1rem; overflow-x: auto; font-family: 'Courier New', monospace; font-size: 12px;">${escapedCode}</pre>`;
+    const bgColor = theme === 'light' ? '#fafafa' : '#1e1e1e';
+    const textColor = theme === 'light' ? '#383838' : '#d4d4d4';
+
+    return `<pre style="background: ${bgColor}; color: ${textColor}; padding: 1rem; overflow-x: auto; font-family: 'Courier New', monospace; font-size: 12px;">${escapedCode}</pre>`;
   }
 }

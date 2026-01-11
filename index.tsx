@@ -1130,16 +1130,46 @@ function CodeViewerModal({ isOpen, code, language, filename, onClose, onSave }: 
   const [highlightedHtml, setHighlightedHtml] = useState<string | null>(null);
   const [isLoadingHighlight, setIsLoadingHighlight] = useState(false);
 
-  // Reset state when modal opens or code changes
+  // Theme state with localStorage persistence
+  const [codeTheme, setCodeTheme] = useState<'light' | 'dark'>(() => {
+    // Initialize from localStorage or default to 'light'
+    if (typeof window !== 'undefined') {
+      try {
+        const savedTheme = localStorage.getItem('sp-code-viewer-theme');
+        return (savedTheme === 'dark' ? 'dark' : 'light') as 'light' | 'dark';
+      } catch (error) {
+        console.warn('localStorage unavailable, defaulting to light theme');
+        return 'light';
+      }
+    }
+    return 'light';
+  });
+
+  // Toggle theme and persist to localStorage
+  const toggleTheme = () => {
+    setCodeTheme((prev) => {
+      const newTheme = prev === 'light' ? 'dark' : 'light';
+      if (typeof window !== 'undefined') {
+        try {
+          localStorage.setItem('sp-code-viewer-theme', newTheme);
+        } catch (error) {
+          console.warn('Failed to save theme preference');
+        }
+      }
+      return newTheme;
+    });
+  };
+
+  // Reset state when modal opens or code/theme changes
   useEffect(() => {
     if (isOpen) {
       setEditedCode(code);
       setIsEditing(false);
       setHighlightedHtml(null);
 
-      // Load highlighted code asynchronously
+      // Load highlighted code asynchronously with current theme
       setIsLoadingHighlight(true);
-      highlightCode(code, language)
+      highlightCode(code, language, codeTheme)
         .then((html) => {
           setHighlightedHtml(html);
         })
@@ -1151,7 +1181,7 @@ function CodeViewerModal({ isOpen, code, language, filename, onClose, onSave }: 
           setIsLoadingHighlight(false);
         });
     }
-  }, [isOpen, code, language]);
+  }, [isOpen, code, language, codeTheme]);
 
   // Keyboard support: ESC to close
   useEffect(() => {
@@ -1193,6 +1223,16 @@ function CodeViewerModal({ isOpen, code, language, filename, onClose, onSave }: 
             {isEditing && <span className="text-xs opacity-75">(editing)</span>}
           </h3>
           <div className="flex gap-2 items-center">
+            {/* Theme Toggle - Always visible */}
+            <button
+              onClick={toggleTheme}
+              className="w-8 h-8 flex items-center justify-center hover:bg-white hover:text-ink transition-all duration-brutal border border-white"
+              title={codeTheme === 'light' ? 'Switch to dark theme' : 'Switch to light theme'}
+              aria-label={codeTheme === 'light' ? 'Switch to dark theme' : 'Switch to light theme'}
+            >
+              {codeTheme === 'light' ? '🌙' : '☀️'}
+            </button>
+
             {!isEditing && (
               <button
                 onClick={() => setIsEditing(true)}
