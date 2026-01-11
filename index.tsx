@@ -1236,7 +1236,7 @@ function CodeViewerModal({ isOpen, code, language, filename, onClose, onSave }: 
             {!isEditing && (
               <button
                 onClick={() => setIsEditing(true)}
-                className="px-3 py-1.5 text-xs font-mono uppercase border border-white hover:bg-white hover:text-ink transition-all duration-brutal"
+                className="px-3 py-1.5 text-xs font-mono uppercase border border-white hover:-translate-x-0.5 hover:-translate-y-0.5 hover:bg-white hover:text-ink transition-all duration-brutal"
                 title="Edit code"
               >
                 ✏️ Edit
@@ -1574,7 +1574,7 @@ const SmartEtlForm = ({
                 {!uploadedFile ? (
                   <label
                     htmlFor="file-upload-input"
-                    className="flex-1 px-6 py-3 bg-white border border-ink text-ink font-mono text-xs cursor-pointer hover:shadow-brutal transition-all duration-brutal text-center"
+                    className="flex-1 px-6 py-3 bg-white border border-ink text-ink font-mono text-xs cursor-pointer hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-brutal transition-all duration-brutal text-center"
                   >
                     Choose File
                   </label>
