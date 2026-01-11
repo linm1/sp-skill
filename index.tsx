@@ -1539,7 +1539,7 @@ const SmartEtlForm = ({
                     Choose File
                   </label>
                 ) : (
-                  <div className="flex-1 flex items-center gap-2 px-4 py-3 bg-canvas border border-ink">
+                  <div className="flex-1 flex items-center gap-2 px-6 py-3 bg-canvas border border-ink">
                     <span className="font-mono text-xs text-ink flex-1">
                       {uploadedFile.name} ({uploadedFile.content.split('\n').length} lines, {uploadedFile.language.toUpperCase()})
                     </span>
@@ -1549,7 +1549,7 @@ const SmartEtlForm = ({
                       className="w-6 h-6 flex items-center justify-center border border-ink bg-white text-ink hover:shadow-brutal transition-all duration-brutal"
                       title="View code"
                     >
-                      <i className="fas fa-eye text-xs"></i>
+                      <i className="fas fa-clipboard-check text-xs"></i>
                     </button>
                     <button
                       onClick={() => {
