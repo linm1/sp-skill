@@ -1539,7 +1539,7 @@ const SmartEtlForm = ({
                     Choose File
                   </label>
                 ) : (
-                  <div className="flex-1 flex items-center gap-2 px-6 py-3 bg-canvas border border-ink">
+                  <div className="flex-1 flex items-center gap-2 px-6 py-2 bg-canvas border border-ink">
                     <span className="font-mono text-xs text-ink flex-1">
                       {uploadedFile.name} ({uploadedFile.content.split('\n').length} lines, {uploadedFile.language.toUpperCase()})
                     </span>
