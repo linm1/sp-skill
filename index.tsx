@@ -1544,29 +1544,29 @@ const SmartEtlForm = ({
             </div>
           </div>
 
-          {/* File Badge with View/Clear Icons (Conditional) */}
+          {/* File Badge with View/Clear Icons Inline (Conditional) */}
           {uploadedFile && (
-            <div className="bg-canvas border border-ink px-4 py-2 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mt-4">
-              <span className="font-mono text-xs text-ink">
-                📄 {uploadedFile.name} ({uploadedFile.content.split('\n').length} lines, {uploadedFile.language.toUpperCase()})
-              </span>
-              <div className="flex gap-2">
+            <div className="bg-canvas border border-ink px-4 py-2 mt-4">
+              <div className="flex items-center gap-2 font-mono text-xs text-ink">
+                <span>Choose File:</span>
+                <span className="font-bold">{uploadedFile.name}</span>
+                <span className="text-ink/60">({uploadedFile.content.split('\n').length} lines, {uploadedFile.language.toUpperCase()})</span>
                 <button
                   onClick={() => setIsModalOpen(true)}
-                  className="px-3 py-1.5 text-xs font-mono uppercase border border-ink text-ink hover:shadow-brutal transition-all duration-brutal"
+                  className="ml-2 px-2 py-1 text-xs font-mono uppercase border border-ink bg-white text-ink hover:shadow-brutal transition-all duration-brutal"
                   title="View code"
                 >
-                  👁️ View
+                  VIEW
                 </button>
                 <button
                   onClick={() => {
                     setUploadedFile(null);
                     setRawInput('');
                   }}
-                  className="px-3 py-1.5 text-xs font-mono uppercase border border-ink text-terminal-red hover:shadow-brutal transition-all duration-brutal"
+                  className="px-2 py-1 text-xs font-mono uppercase border border-ink bg-white text-terminal-red hover:shadow-brutal transition-all duration-brutal"
                   title="Clear file"
                 >
-                  🗑️ Clear
+                  CLEAR
                 </button>
               </div>
             </div>
