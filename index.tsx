@@ -1583,13 +1583,14 @@ const SmartEtlForm = ({
                     <span className="font-mono text-xs text-ink flex-1">
                       {uploadedFile.name} ({uploadedFile.content.split('\n').length} lines, {uploadedFile.language.toUpperCase()})
                     </span>
-                    {/* Icon buttons - perfect size next to filename */}
+                    {/* Responsive icon+text buttons */}
                     <button
                       onClick={() => setIsModalOpen(true)}
-                      className="w-6 h-6 flex items-center justify-center border border-ink bg-white text-ink hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-brutal transition-all duration-brutal"
+                      className="px-2 md:px-3 py-1.5 md:py-2 flex items-center border border-ink bg-white text-ink hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-brutal transition-all duration-brutal font-mono text-xs uppercase"
                       title="View code"
                     >
-                      <i className="fas fa-clipboard-check text-xs" style={{ fontFamily: '"Font Awesome 6 Free"' }}></i>
+                      <i className="fas fa-clipboard-check md:mr-2" style={{ fontFamily: '"Font Awesome 6 Free"' }}></i>
+                      <span className="hidden md:inline">View</span>
                     </button>
                     <button
                       onClick={() => {
@@ -1598,10 +1599,11 @@ const SmartEtlForm = ({
                         const input = document.getElementById('file-upload-input') as HTMLInputElement;
                         if (input) input.value = '';
                       }}
-                      className="w-6 h-6 flex items-center justify-center border border-ink bg-white text-terminal-red hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-brutal transition-all duration-brutal"
+                      className="px-2 md:px-3 py-1.5 md:py-2 flex items-center border border-ink bg-white text-terminal-red hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-brutal transition-all duration-brutal font-mono text-xs uppercase"
                       title="Clear file"
                     >
-                      <i className="fas fa-times text-xs" style={{ fontFamily: '"Font Awesome 6 Free"' }}></i>
+                      <i className="fas fa-times md:mr-2" style={{ fontFamily: '"Font Awesome 6 Free"' }}></i>
+                      <span className="hidden md:inline">Clear</span>
                     </button>
                   </div>
                 )}
