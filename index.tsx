@@ -1505,14 +1505,16 @@ const SmartEtlForm = ({
 
           {/* Upload Section - Inline with Extract Button */}
           <div className="flex flex-col sm:flex-row sm:items-start gap-4">
-            {/* Left: Upload File with inline VIEW/CLEAR buttons */}
+            {/* Left: Upload File with inline icon buttons */}
             <div className="flex-1">
               <label className="block text-xs font-mono uppercase tracking-wide text-ink mb-2">
                 Upload Script File
               </label>
               <div className="flex items-center gap-2">
+                {/* Hidden native file input */}
                 <input
                   type="file"
+                  id="file-upload-input"
                   accept=".sas,.r,.txt"
                   onChange={async (e) => {
                     const file = e.target.files?.[0];
@@ -1525,28 +1527,43 @@ const SmartEtlForm = ({
                     setRawInput(content);
                     setExtractLanguage(language);
                   }}
-                  className="text-xs flex-1"
+                  className="hidden"
                 />
-                {uploadedFile && (
-                  <>
+
+                {/* Custom upload button or filename display */}
+                {!uploadedFile ? (
+                  <label
+                    htmlFor="file-upload-input"
+                    className="flex-1 px-4 py-2 bg-white border border-ink text-ink font-mono text-xs cursor-pointer hover:shadow-brutal transition-all duration-brutal text-center"
+                  >
+                    Choose File
+                  </label>
+                ) : (
+                  <div className="flex-1 flex items-center gap-2 px-4 py-2 bg-canvas border border-ink">
+                    <span className="font-mono text-xs text-ink flex-1">
+                      {uploadedFile.name} ({uploadedFile.content.split('\n').length} lines, {uploadedFile.language.toUpperCase()})
+                    </span>
+                    {/* Icon buttons - perfect size next to filename */}
                     <button
                       onClick={() => setIsModalOpen(true)}
-                      className="px-3 py-1.5 text-xs font-mono uppercase border border-ink bg-white text-ink hover:shadow-brutal transition-all duration-brutal whitespace-nowrap"
+                      className="w-6 h-6 flex items-center justify-center border border-ink bg-white text-ink hover:shadow-brutal transition-all duration-brutal"
                       title="View code"
                     >
-                      VIEW
+                      <i className="fas fa-eye text-xs"></i>
                     </button>
                     <button
                       onClick={() => {
                         setUploadedFile(null);
                         setRawInput('');
+                        const input = document.getElementById('file-upload-input') as HTMLInputElement;
+                        if (input) input.value = '';
                       }}
-                      className="px-3 py-1.5 text-xs font-mono uppercase border border-ink bg-white text-terminal-red hover:shadow-brutal transition-all duration-brutal whitespace-nowrap"
+                      className="w-6 h-6 flex items-center justify-center border border-ink bg-white text-terminal-red hover:shadow-brutal transition-all duration-brutal"
                       title="Clear file"
                     >
-                      CLEAR
+                      <i className="fas fa-times text-xs"></i>
                     </button>
-                  </>
+                  </div>
                 )}
               </div>
               <p className="text-xs text-ink/60 mt-1 font-mono">
