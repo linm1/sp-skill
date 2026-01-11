@@ -1233,17 +1233,6 @@ function CodeViewerModal({ isOpen, code, language, filename, onClose, onSave }: 
               <i className={`fas ${codeTheme === 'light' ? 'fa-moon' : 'fa-sun'}`} style={{ fontFamily: '"Font Awesome 6 Free"' }}></i>
             </button>
 
-            {/* Edit button (navigation) - responsive icon+text */}
-            {!isEditing && (
-              <button
-                onClick={() => setIsEditing(true)}
-                className="px-2 md:px-3 py-1.5 md:py-2 flex items-center border border-white hover:-translate-x-0.5 hover:-translate-y-0.5 hover:bg-white hover:text-ink transition-all duration-brutal font-mono text-xs uppercase"
-                title="Edit code"
-              >
-                <i className="fas fa-edit md:mr-2" style={{ fontFamily: '"Font Awesome 6 Free"' }}></i>
-                <span className="hidden md:inline">Edit</span>
-              </button>
-            )}
             {/* Close button (utility) - borderless icon-only */}
             <button
               onClick={onClose}
@@ -1252,6 +1241,17 @@ function CodeViewerModal({ isOpen, code, language, filename, onClose, onSave }: 
             >
               <i className="fas fa-times" style={{ fontFamily: '"Font Awesome 6 Free"' }}></i>
             </button>
+
+            {/* Edit button (utility in modal context) - borderless icon-only */}
+            {!isEditing && (
+              <button
+                onClick={() => setIsEditing(true)}
+                className="text-white hover:text-duck-yellow transition-colors duration-brutal"
+                title="Edit code"
+              >
+                <i className="fas fa-edit" style={{ fontFamily: '"Font Awesome 6 Free"' }}></i>
+              </button>
+            )}
           </div>
         </div>
 
@@ -1291,16 +1291,26 @@ function CodeViewerModal({ isOpen, code, language, filename, onClose, onSave }: 
                 onClick={handleSave}
                 className="px-4 py-2 text-xs font-mono uppercase bg-ink text-white border border-ink hover:shadow-brutal transition-all duration-brutal"
               >
-                💾 Save Changes
+                <i className="fas fa-save mr-2" style={{ fontFamily: '"Font Awesome 6 Free"' }}></i>
+                Save
               </button>
             </>
           ) : (
-            <button
-              onClick={onClose}
-              className="px-4 py-2 text-xs font-mono uppercase border border-ink text-ink hover:shadow-brutal transition-all duration-brutal"
-            >
-              Close
-            </button>
+            <>
+              <button
+                onClick={onClose}
+                className="px-4 py-2 text-xs font-mono uppercase border border-ink text-ink hover:shadow-brutal transition-all duration-brutal"
+              >
+                Close
+              </button>
+              <button
+                onClick={() => setIsEditing(true)}
+                className="px-4 py-2 text-xs font-mono uppercase bg-ink text-white border border-ink hover:shadow-brutal transition-all duration-brutal"
+              >
+                <i className="fas fa-edit mr-2" style={{ fontFamily: '"Font Awesome 6 Free"' }}></i>
+                Edit
+              </button>
+            </>
           )}
         </div>
       </div>
