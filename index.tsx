@@ -413,7 +413,7 @@ const Layout = ({
               }}
               className={`font-mono uppercase text-xs md:text-sm font-medium tracking-tight-mono hover:text-link-blue transition-colors duration-brutal flex items-center ${currentView === "catalog" ? "text-link-blue" : "text-ink"}`}
             >
-              <i className="fas fa-th sm:mr-2"></i>
+              <i className="fas fa-th sm:mr-2" style={{ fontFamily: '"Font Awesome 6 Free"' }}></i>
               <span className="hidden sm:inline">Catalog</span>
             </button>
             {isLoaded && isSignedIn && userRole !== 'guest' && (
@@ -427,8 +427,8 @@ const Layout = ({
                 }}
                 className={`font-mono uppercase text-xs md:text-sm font-medium tracking-tight-mono hover:text-link-blue transition-colors duration-brutal flex items-center ${currentView === "contribute" ? "text-link-blue" : "text-ink"}`}
               >
-                <i className="fas fa-plus-circle sm:mr-2"></i>
-                <span className="hidden sm:inline ml-0 sm:ml-0">Contribute</span>
+                <i className="fas fa-plus-circle sm:mr-2" style={{ fontFamily: '"Font Awesome 6 Free"' }}></i>
+                <span className="hidden sm:inline">Contribute</span>
               </button>
             )}
             {isLoaded && isSignedIn && userRole !== 'guest' && (
@@ -436,7 +436,7 @@ const Layout = ({
                 onClick={() => setView("my-contributions")}
                 className={`font-mono uppercase text-xs md:text-sm font-medium tracking-tight-mono hover:text-link-blue transition-colors duration-brutal flex items-center hidden sm:flex ${currentView === "my-contributions" ? "text-link-blue" : "text-ink"}`}
               >
-                <i className="fas fa-folder-open mr-2"></i>
+                <i className="fas fa-folder-open mr-2" style={{ fontFamily: '"Font Awesome 6 Free"' }}></i>
                 My Contributions
               </button>
             )}
@@ -446,14 +446,14 @@ const Layout = ({
                   onClick={() => setView("admin-review")}
                   className={`font-mono uppercase text-xs md:text-sm font-medium tracking-tight-mono hover:text-link-blue transition-colors duration-brutal flex items-center hidden sm:flex ${currentView === "admin-review" ? "text-link-blue" : "text-ink"}`}
                 >
-                  <i className="fas fa-clipboard-check mr-2"></i>
+                  <i className="fas fa-clipboard-check mr-2" style={{ fontFamily: '"Font Awesome 6 Free"' }}></i>
                   Admin Review
                 </button>
                 <button
                   onClick={() => setView("admin-patterns")}
                   className={`font-mono uppercase text-xs md:text-sm font-medium tracking-tight-mono hover:text-link-blue transition-colors duration-brutal flex items-center hidden sm:flex ${currentView === "admin-patterns" ? "text-link-blue" : "text-ink"}`}
                 >
-                  <i className="fas fa-cog mr-2"></i>
+                  <i className="fas fa-cog mr-2" style={{ fontFamily: '"Font Awesome 6 Free"' }}></i>
                   Admin Panel
                 </button>
               </>
@@ -462,7 +462,7 @@ const Layout = ({
               onClick={() => setView("basket")}
               className={`font-mono uppercase text-xs md:text-sm font-medium tracking-tight-mono hover:text-link-blue transition-colors duration-brutal flex items-center ${currentView === "basket" ? "text-link-blue" : "text-ink"}`}
             >
-              <i className="fas fa-suitcase sm:mr-2"></i>
+              <i className="fas fa-suitcase sm:mr-2" style={{ fontFamily: '"Font Awesome 6 Free"' }}></i>
               <span className="hidden sm:inline">Skill Basket</span>
               <span className="ml-2 bg-ink text-white text-xs font-bold px-2 py-1 border border-ink">{basketCount}</span>
             </button>
@@ -1089,7 +1089,7 @@ const MultiEntryField = ({
               className="w-6 h-6 flex items-center justify-center border border-ink text-terminal-red bg-white hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-brutal transition-all duration-brutal"
               title="Remove entry"
             >
-              <i className="fas fa-times text-xs"></i>
+              <i className="fas fa-times text-xs" style={{ fontFamily: '"Font Awesome 6 Free"' }}></i>
             </button>
           </div>
         ))}
@@ -1106,7 +1106,7 @@ const MultiEntryField = ({
             : "bg-canvas text-ink cursor-not-allowed opacity-50"
         }`}
       >
-        <i className="fas fa-plus mr-1"></i>
+        <i className="fas fa-plus mr-1" style={{ fontFamily: '"Font Awesome 6 Free"' }}></i>
         Add Entry {!canAdd && "(Max reached)"}
       </button>
     </div>
@@ -1496,7 +1496,7 @@ const SmartEtlForm = ({
       {!definition && !isEditMode && (
         <div className="p-6 bg-white border-b border-ink">
           <label className="block text-sm font-medium text-ink mb-2 font-mono uppercase">
-            <i className="fas fa-list-alt mr-2"></i>Select Pattern to Contribute To
+            <i className="fas fa-list-alt mr-2" style={{ fontFamily: '"Font Awesome 6 Free"' }}></i>Select Pattern to Contribute To
           </label>
           <select
             name="patternId"
@@ -1525,7 +1525,7 @@ const SmartEtlForm = ({
         <div className="p-6 bg-white border-b border-ink space-y-4">
           <div className="flex justify-between items-center mb-2">
             <label className="block text-xs font-bold text-ink uppercase font-mono">
-              <i className="fas fa-magic mr-1 text-link-blue"></i> AI Smart Fill
+              <i className="fas fa-magic mr-2 text-ink" style={{ fontFamily: '"Font Awesome 6 Free"' }}></i> AI Smart Fill
             </label>
 
             {/* Language Selector */}
@@ -1586,10 +1586,10 @@ const SmartEtlForm = ({
                     {/* Icon buttons - perfect size next to filename */}
                     <button
                       onClick={() => setIsModalOpen(true)}
-                      className="w-6 h-6 flex items-center justify-center border border-ink bg-white text-ink hover:shadow-brutal transition-all duration-brutal"
+                      className="w-6 h-6 flex items-center justify-center border border-ink bg-white text-ink hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-brutal transition-all duration-brutal"
                       title="View code"
                     >
-                      <i className="fas fa-clipboard-check text-xs"></i>
+                      <i className="fas fa-clipboard-check text-xs" style={{ fontFamily: '"Font Awesome 6 Free"' }}></i>
                     </button>
                     <button
                       onClick={() => {
@@ -1598,10 +1598,10 @@ const SmartEtlForm = ({
                         const input = document.getElementById('file-upload-input') as HTMLInputElement;
                         if (input) input.value = '';
                       }}
-                      className="w-6 h-6 flex items-center justify-center border border-ink bg-white text-terminal-red hover:shadow-brutal transition-all duration-brutal"
+                      className="w-6 h-6 flex items-center justify-center border border-ink bg-white text-terminal-red hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-brutal transition-all duration-brutal"
                       title="Clear file"
                     >
-                      <i className="fas fa-times text-xs"></i>
+                      <i className="fas fa-times text-xs" style={{ fontFamily: '"Font Awesome 6 Free"' }}></i>
                     </button>
                   </div>
                 )}
@@ -1619,9 +1619,9 @@ const SmartEtlForm = ({
               <button
                 onClick={handleExtract}
                 disabled={!rawInput || isAnalyzing || isSaving}
-                className="w-full sm:w-auto px-6 py-3 bg-ink text-white border border-ink font-mono text-xs uppercase tracking-wide hover:shadow-brutal transition-all duration-brutal disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                className="w-full sm:w-auto px-6 py-3 bg-ink text-white border border-ink font-mono text-xs uppercase tracking-wide hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-brutal transition-all duration-brutal disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
               >
-                <i className="fas fa-robot"></i>
+                <i className="fas fa-robot" style={{ fontFamily: '"Font Awesome 6 Free"' }}></i>
                 {isAnalyzing ? 'Extracting...' : 'Extract Code'}
               </button>
             </div>
@@ -1642,7 +1642,7 @@ const SmartEtlForm = ({
           {/* Helper Text */}
           {!currentPattern && (
             <p className="text-xs text-terminal-red font-mono">
-              <i className="fas fa-exclamation-triangle mr-1"></i> Select a pattern above before extracting code
+              <i className="fas fa-exclamation-triangle mr-1" style={{ fontFamily: '"Font Awesome 6 Free"' }}></i> Select a pattern above before extracting code
             </p>
           )}
         </div>
@@ -1654,7 +1654,7 @@ const SmartEtlForm = ({
         {currentPattern && (
           <div className="bg-white border border-ink p-6 space-y-4">
             <h3 className="text-sm font-semibold text-ink uppercase tracking-wide mb-2 font-mono">
-              <i className="fas fa-info-circle mr-2"></i>Pattern Definition {!definition && <span className="text-xs text-ink font-normal">(Read-only)</span>}
+              <i className="fas fa-info-circle mr-2" style={{ fontFamily: '"Font Awesome 6 Free"' }}></i>Pattern Definition {!definition && <span className="text-xs text-ink font-normal">(Read-only)</span>}
             </h3>
 
             <div>
@@ -1758,7 +1758,7 @@ const SmartEtlForm = ({
           >
             {isSaving ? (
               <>
-                <i className="fas fa-spinner fa-spin mr-2"></i>
+                <i className="fas fa-spinner fa-spin mr-2" style={{ fontFamily: '"Font Awesome 6 Free"' }}></i>
                 Saving...
               </>
             ) : (
