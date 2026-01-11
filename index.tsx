@@ -4,6 +4,7 @@ import { GoogleGenAI, Type } from "@google/genai";
 import JSZip from "jszip";
 import { ClerkProvider, SignInButton, SignUpButton, UserButton, useAuth, useUser } from "@clerk/clerk-react";
 import { formatRelativeTime } from "./lib/dateFormat";
+import { highlightCode } from "./lib/shiki-highlighter";
 import "./index.css";
 
 // --- Types & Constants ---
@@ -1112,6 +1113,158 @@ const MultiEntryField = ({
   );
 };
 
+// --- CodeViewerModal Component ---
+
+interface CodeViewerModalProps {
+  isOpen: boolean;
+  code: string;
+  language: 'sas' | 'r';
+  filename: string;
+  onClose: () => void;
+  onSave: (newCode: string) => void;
+}
+
+function CodeViewerModal({ isOpen, code, language, filename, onClose, onSave }: CodeViewerModalProps) {
+  const [isEditing, setIsEditing] = useState(false);
+  const [editedCode, setEditedCode] = useState(code);
+  const [highlightedHtml, setHighlightedHtml] = useState<string | null>(null);
+  const [isLoadingHighlight, setIsLoadingHighlight] = useState(false);
+
+  // Reset state when modal opens or code changes
+  useEffect(() => {
+    if (isOpen) {
+      setEditedCode(code);
+      setIsEditing(false);
+      setHighlightedHtml(null);
+
+      // Load highlighted code asynchronously
+      setIsLoadingHighlight(true);
+      highlightCode(code, language)
+        .then((html) => {
+          setHighlightedHtml(html);
+        })
+        .catch((error) => {
+          console.error('Failed to highlight code:', error);
+          setHighlightedHtml(`<pre>${code}</pre>`);
+        })
+        .finally(() => {
+          setIsLoadingHighlight(false);
+        });
+    }
+  }, [isOpen, code, language]);
+
+  // Keyboard support: ESC to close
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && isOpen) {
+        onClose();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isOpen, onClose]);
+
+  if (!isOpen) return null;
+
+  const handleSave = () => {
+    onSave(editedCode);
+    setIsEditing(false);
+  };
+
+  const handleCancel = () => {
+    setEditedCode(code);
+    setIsEditing(false);
+  };
+
+  return (
+    <div
+      className="fixed inset-0 bg-ink/50 flex items-center justify-center z-50 p-4"
+      onClick={onClose}
+    >
+      <div
+        className="bg-white border border-ink shadow-terminal max-w-6xl w-full h-[90vh] flex flex-col"
+        onClick={(e) => e.stopPropagation()}
+      >
+        {/* Header - Sticky */}
+        <div className="bg-ink text-white px-6 py-4 flex justify-between items-center border-b border-ink shrink-0">
+          <h3 className="font-mono text-sm sm:text-base flex items-center gap-2">
+            <span>📄</span>
+            <span className="truncate">{filename}</span>
+            {isEditing && <span className="text-xs opacity-75">(editing)</span>}
+          </h3>
+          <div className="flex gap-2 items-center">
+            {!isEditing && (
+              <button
+                onClick={() => setIsEditing(true)}
+                className="px-3 py-1.5 text-xs font-mono uppercase border border-white hover:bg-white hover:text-ink transition-all duration-brutal"
+                title="Edit code"
+              >
+                ✏️ Edit
+              </button>
+            )}
+            <button
+              onClick={onClose}
+              className="w-8 h-8 flex items-center justify-center hover:bg-white hover:text-ink transition-all duration-brutal border border-white"
+              title="Close"
+            >
+              ✖
+            </button>
+          </div>
+        </div>
+
+        {/* Body - Scrollable */}
+        <div className="flex-grow overflow-y-auto bg-white">
+          {isEditing ? (
+            <textarea
+              value={editedCode}
+              onChange={(e) => setEditedCode(e.target.value)}
+              className="w-full h-full font-mono text-xs sm:text-sm p-6 border-0 outline-none resize-none bg-canvas text-ink"
+              style={{ minHeight: '100%' }}
+              spellCheck={false}
+            />
+          ) : isLoadingHighlight ? (
+            <div className="flex items-center justify-center h-full">
+              <p className="text-ink font-mono text-sm">Loading syntax highlighting...</p>
+            </div>
+          ) : (
+            <div
+              className="p-6 overflow-x-auto shiki-code-container"
+              dangerouslySetInnerHTML={{ __html: highlightedHtml || '' }}
+            />
+          )}
+        </div>
+
+        {/* Footer - Sticky */}
+        <div className="bg-canvas border-t border-ink px-6 py-4 flex justify-end gap-2 shrink-0">
+          {isEditing ? (
+            <>
+              <button
+                onClick={handleCancel}
+                className="px-4 py-2 text-xs font-mono uppercase border border-ink text-ink hover:shadow-brutal transition-all duration-brutal"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleSave}
+                className="px-4 py-2 text-xs font-mono uppercase bg-ink text-white border border-ink hover:shadow-brutal transition-all duration-brutal"
+              >
+                💾 Save Changes
+              </button>
+            </>
+          ) : (
+            <button
+              onClick={onClose}
+              className="px-4 py-2 text-xs font-mono uppercase border border-ink text-ink hover:shadow-brutal transition-all duration-brutal"
+            >
+              Close
+            </button>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 const SmartEtlForm = ({
   definition,
   initialImpl,
@@ -1152,6 +1305,14 @@ const SmartEtlForm = ({
     whenToUse: definition?.whenToUse || "",
   });
 
+  // State for uploaded file tracking and modal control
+  const [uploadedFile, setUploadedFile] = useState<{
+    name: string;
+    content: string;
+    language: 'sas' | 'r';
+  } | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
   // Update defData when pattern selection changes
   useEffect(() => {
     if (currentPattern && !definition) {
@@ -1163,7 +1324,7 @@ const SmartEtlForm = ({
     }
   }, [currentPattern, definition]);
 
-  const analyzeWithGemini = async () => {
+  const handleExtract = async () => {
     if (!rawInput.trim() || !currentPattern) return;
 
     setIsAnalyzing(true);
@@ -1342,51 +1503,86 @@ const SmartEtlForm = ({
             </div>
           </div>
 
-          {/* File Upload Option */}
-          <div className="bg-canvas border border-ink p-4">
-            <label className="block text-xs font-medium text-ink mb-2 font-mono">
-              <i className="fas fa-file-upload mr-1"></i> Upload Script File
-            </label>
-            <input
-              type="file"
-              accept=".sas,.r,.txt"
-              onChange={async (e) => {
-                const file = e.target.files?.[0];
-                if (file) {
-                  const text = await file.text();
-                  setRawInput(text);
+          {/* Upload Section - Inline with Extract Button */}
+          <div className="flex flex-col sm:flex-row sm:items-start gap-4">
+            {/* Left: Upload File */}
+            <div className="flex-1">
+              <label className="block text-xs font-mono uppercase tracking-wide text-ink mb-2">
+                Upload Script File
+              </label>
+              <input
+                type="file"
+                accept=".sas,.r,.txt"
+                onChange={async (e) => {
+                  const file = e.target.files?.[0];
+                  if (!file) return;
 
-                  // Auto-detect language from file extension
-                  if (file.name.endsWith('.sas')) {
-                    setExtractLanguage('sas');
-                  } else if (file.name.endsWith('.r') || file.name.endsWith('.R')) {
-                    setExtractLanguage('r');
-                  }
-                }
-              }}
-              className="block w-full text-sm text-ink file:mr-4 file:py-2 file:px-4 file:border file:border-ink file:text-sm file:font-mono file:font-medium file:bg-white file:text-ink hover:file:bg-canvas file:cursor-pointer"
-            />
-            <p className="text-xs text-ink mt-2 font-mono">Supported: .sas, .r, .txt files</p>
+                  const content = await file.text();
+                  const language: 'sas' | 'r' = file.name.endsWith('.sas') ? 'sas' : 'r';
+
+                  setUploadedFile({ name: file.name, content, language });
+                  setRawInput(content);
+                  setExtractLanguage(language);
+                }}
+                className="text-xs w-full"
+              />
+              <p className="text-xs text-ink/60 mt-1 font-mono">
+                Supported: .sas, .r, .txt
+              </p>
+            </div>
+
+            {/* Right: Extract Button */}
+            <div className="sm:pt-5">
+              <button
+                onClick={handleExtract}
+                disabled={!rawInput || isAnalyzing || isSaving}
+                className="w-full sm:w-auto px-6 py-3 bg-ink text-white border border-ink font-mono text-xs uppercase tracking-wide hover:shadow-brutal transition-all duration-brutal disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+              >
+                <i className="fas fa-robot"></i>
+                {isAnalyzing ? 'Extracting...' : 'Extract Code'}
+              </button>
+            </div>
           </div>
+
+          {/* File Badge with View/Clear Icons (Conditional) */}
+          {uploadedFile && (
+            <div className="bg-canvas border border-ink px-4 py-2 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mt-4">
+              <span className="font-mono text-xs text-ink">
+                📄 {uploadedFile.name} ({uploadedFile.content.split('\n').length} lines, {uploadedFile.language.toUpperCase()})
+              </span>
+              <div className="flex gap-2">
+                <button
+                  onClick={() => setIsModalOpen(true)}
+                  className="px-3 py-1.5 text-xs font-mono uppercase border border-ink text-ink hover:shadow-brutal transition-all duration-brutal"
+                  title="View code"
+                >
+                  👁️ View
+                </button>
+                <button
+                  onClick={() => {
+                    setUploadedFile(null);
+                    setRawInput('');
+                  }}
+                  className="px-3 py-1.5 text-xs font-mono uppercase border border-ink text-terminal-red hover:shadow-brutal transition-all duration-brutal"
+                  title="Clear file"
+                >
+                  🗑️ Clear
+                </button>
+              </div>
+            </div>
+          )}
 
           {/* Text Input Option */}
-          <div className="flex gap-2">
-            <textarea
-              className="flex-grow p-3 text-sm border border-ink focus:outline-none focus:border-2 focus:border-link-blue font-mono transition-all duration-brutal"
-              rows={4}
-              placeholder="Or paste SAS/R code here to extract pattern-specific implementation..."
-              value={rawInput}
-              onChange={(e) => setRawInput(e.target.value)}
-            />
-            <button
-              onClick={analyzeWithGemini}
-              disabled={isAnalyzing || !rawInput || !currentPattern}
-              className="px-4 bg-ink hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-brutal disabled:bg-canvas disabled:text-ink disabled:border-ink text-white text-sm font-medium font-mono uppercase transition-all duration-brutal border border-ink flex flex-col justify-center items-center min-w-[100px]"
-            >
-              {isAnalyzing ? <i className="fas fa-spinner fa-spin mb-1"></i> : <i className="fas fa-robot mb-1"></i>}
-              {isAnalyzing ? "Extracting..." : "Extract Code"}
-            </button>
-          </div>
+          <textarea
+            value={rawInput}
+            onChange={(e) => setRawInput(e.target.value)}
+            disabled={uploadedFile !== null}
+            className={`w-full font-mono text-xs p-4 border border-ink ${
+              uploadedFile ? 'bg-canvas/50 opacity-50 cursor-not-allowed' : 'bg-white'
+            }`}
+            placeholder={uploadedFile ? 'Clear file to paste code' : 'Or paste SAS/R code here to extract pattern...'}
+            rows={4}
+          />
 
           {/* Helper Text */}
           {!currentPattern && (
@@ -1516,6 +1712,22 @@ const SmartEtlForm = ({
           </button>
         </div>
       </form>
+
+      {/* Code Viewer Modal */}
+      <CodeViewerModal
+        isOpen={isModalOpen}
+        code={uploadedFile?.content || ''}
+        language={uploadedFile?.language || 'sas'}
+        filename={uploadedFile?.name || ''}
+        onClose={() => setIsModalOpen(false)}
+        onSave={(newCode) => {
+          if (uploadedFile) {
+            setUploadedFile({ ...uploadedFile, content: newCode });
+            setRawInput(newCode);
+          }
+          setIsModalOpen(false);
+        }}
+      />
     </div>
   );
 };
