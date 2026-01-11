@@ -1505,27 +1505,50 @@ const SmartEtlForm = ({
 
           {/* Upload Section - Inline with Extract Button */}
           <div className="flex flex-col sm:flex-row sm:items-start gap-4">
-            {/* Left: Upload File */}
+            {/* Left: Upload File with inline VIEW/CLEAR buttons */}
             <div className="flex-1">
               <label className="block text-xs font-mono uppercase tracking-wide text-ink mb-2">
                 Upload Script File
               </label>
-              <input
-                type="file"
-                accept=".sas,.r,.txt"
-                onChange={async (e) => {
-                  const file = e.target.files?.[0];
-                  if (!file) return;
+              <div className="flex items-center gap-2">
+                <input
+                  type="file"
+                  accept=".sas,.r,.txt"
+                  onChange={async (e) => {
+                    const file = e.target.files?.[0];
+                    if (!file) return;
 
-                  const content = await file.text();
-                  const language: 'sas' | 'r' = file.name.endsWith('.sas') ? 'sas' : 'r';
+                    const content = await file.text();
+                    const language: 'sas' | 'r' = file.name.endsWith('.sas') ? 'sas' : 'r';
 
-                  setUploadedFile({ name: file.name, content, language });
-                  setRawInput(content);
-                  setExtractLanguage(language);
-                }}
-                className="text-xs w-full"
-              />
+                    setUploadedFile({ name: file.name, content, language });
+                    setRawInput(content);
+                    setExtractLanguage(language);
+                  }}
+                  className="text-xs flex-1"
+                />
+                {uploadedFile && (
+                  <>
+                    <button
+                      onClick={() => setIsModalOpen(true)}
+                      className="px-3 py-1.5 text-xs font-mono uppercase border border-ink bg-white text-ink hover:shadow-brutal transition-all duration-brutal whitespace-nowrap"
+                      title="View code"
+                    >
+                      VIEW
+                    </button>
+                    <button
+                      onClick={() => {
+                        setUploadedFile(null);
+                        setRawInput('');
+                      }}
+                      className="px-3 py-1.5 text-xs font-mono uppercase border border-ink bg-white text-terminal-red hover:shadow-brutal transition-all duration-brutal whitespace-nowrap"
+                      title="Clear file"
+                    >
+                      CLEAR
+                    </button>
+                  </>
+                )}
+              </div>
               <p className="text-xs text-ink/60 mt-1 font-mono">
                 Supported: .sas, .r, .txt
               </p>
@@ -1543,34 +1566,6 @@ const SmartEtlForm = ({
               </button>
             </div>
           </div>
-
-          {/* File Badge with View/Clear Icons Inline (Conditional) */}
-          {uploadedFile && (
-            <div className="bg-canvas border border-ink px-4 py-2 mt-4">
-              <div className="flex items-center gap-2 font-mono text-xs text-ink">
-                <span>Choose File:</span>
-                <span className="font-bold">{uploadedFile.name}</span>
-                <span className="text-ink/60">({uploadedFile.content.split('\n').length} lines, {uploadedFile.language.toUpperCase()})</span>
-                <button
-                  onClick={() => setIsModalOpen(true)}
-                  className="ml-2 px-2 py-1 text-xs font-mono uppercase border border-ink bg-white text-ink hover:shadow-brutal transition-all duration-brutal"
-                  title="View code"
-                >
-                  VIEW
-                </button>
-                <button
-                  onClick={() => {
-                    setUploadedFile(null);
-                    setRawInput('');
-                  }}
-                  className="px-2 py-1 text-xs font-mono uppercase border border-ink bg-white text-terminal-red hover:shadow-brutal transition-all duration-brutal"
-                  title="Clear file"
-                >
-                  CLEAR
-                </button>
-              </div>
-            </div>
-          )}
 
           {/* Text Input Option */}
           <textarea
