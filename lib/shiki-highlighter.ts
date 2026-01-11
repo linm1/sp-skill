@@ -20,9 +20,9 @@ export async function initializeShiki(): Promise<Highlighter> {
     }
     const sasGrammar = await sasGrammarResponse.json();
 
-    // Create highlighter with dual themes (light: github-light, dark: houston) and custom SAS grammar
+    // Create highlighter with dual themes (light: rose-pine-dawn, dark: rose-pine-moon) and custom SAS grammar
     highlighterInstance = await createHighlighter({
-      themes: ['github-light', 'houston'],
+      themes: ['rose-pine-dawn', 'rose-pine-moon'],
       langs: [
         'r',  // R is built-in
         {
@@ -57,7 +57,7 @@ export async function highlightCode(
     const highlighter = await initializeShiki();
 
     // Map user-friendly theme names to Shiki theme IDs
-    const shikiTheme = theme === 'light' ? 'github-light' : 'houston';
+    const shikiTheme = theme === 'light' ? 'rose-pine-dawn' : 'rose-pine-moon';
 
     return highlighter.codeToHtml(code, {
       lang: language,
