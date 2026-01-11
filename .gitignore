@@ -26,3 +26,4 @@ nul
 *.sw?
 .vercel
 .env*.local
+.claude/*
