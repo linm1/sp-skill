@@ -1241,17 +1241,6 @@ function CodeViewerModal({ isOpen, code, language, filename, onClose, onSave }: 
             >
               <i className="fas fa-times" style={{ fontFamily: '"Font Awesome 6 Free"' }}></i>
             </button>
-
-            {/* Edit button (utility in modal context) - borderless icon-only */}
-            {!isEditing && (
-              <button
-                onClick={() => setIsEditing(true)}
-                className="text-white hover:text-duck-yellow transition-colors duration-brutal"
-                title="Edit code"
-              >
-                <i className="fas fa-edit" style={{ fontFamily: '"Font Awesome 6 Free"' }}></i>
-              </button>
-            )}
           </div>
         </div>
 
