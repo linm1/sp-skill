@@ -377,6 +377,31 @@ Update `generateMarkdown()` function to change output format.
 
 **Reference**: See the "Tailwind CSS v4 Configuration" section above for complete details.
 
+### Design Language Inconsistencies
+
+**Symptom**: UI elements don't follow the Neo-Brutalist aesthetic - wrong fonts, rounded corners, blurred shadows, or incorrect colors.
+
+**Cause**: Not adhering to design tokens defined in style.md and index.css @theme block.
+
+**Solution**:
+1. **Typography**: Always use `font-mono` for headers/UI, `font-sans` for body text
+2. **Font weights**: Headers should be `font-normal` (400), not `font-bold`
+3. **Borders**: Use 0px radius (sharp edges) except for circular elements (50%)
+4. **Shadows**: Only use `shadow-brutal`, `shadow-brutal-lg`, or `shadow-terminal` (no blur)
+5. **Hover effects**: Standard pattern is `hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-brutal`
+6. **Colors**: Use design tokens (`text-ink`, `bg-canvas`, etc.) - never hardcode hex values
+7. **SVG styling**: Use CSS variables (`var(--svg-ink)`, `var(--svg-accent)`, `var(--svg-white)`) instead of hardcoded colors
+
+**Verification Checklist**:
+- [ ] No `rounded-md`, `rounded-lg` on containers (use `rounded-none` or omit)
+- [ ] No `font-bold` or `font-semibold` on section titles
+- [ ] All buttons have hover translate + shadow effect
+- [ ] All custom colors defined in index.css @theme block
+- [ ] SVG elements use CSS variables (not hardcoded colors)
+- [ ] Form inputs have consistent focus states (`focus:border-2 focus:border-link-blue transition-all duration-brutal`)
+
+**Reference**: See [style.md](./style.md) for complete design system specification.
+
 ## External Resources
 
 - [SKILL_MANIFEST.md](./docs/SKILL_MANIFEST.md) - Full folder structure reference

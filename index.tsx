@@ -167,22 +167,22 @@ const LoadingSpinner = ({ message }: { message: string }) => (
     <div className="inline-block mb-4">
       <svg width="48" height="48" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
         {/* Background Grid */}
-        <rect x="12" y="12" width="40" height="40" fill="white" stroke="#383838" strokeWidth="2"/>
+        <rect x="12" y="12" width="40" height="40" style={{ fill: 'var(--svg-white)' }} stroke="var(--svg-ink)" strokeWidth="2"/>
         {/* Grid Lines */}
-        <line x1="25" y1="12" x2="25" y2="52" stroke="#383838" strokeWidth="2"/>
-        <line x1="39" y1="12" x2="39" y2="52" stroke="#383838" strokeWidth="2"/>
-        <line x1="12" y1="25" x2="52" y2="25" stroke="#383838" strokeWidth="2"/>
-        <line x1="12" y1="39" x2="52" y2="39" stroke="#383838" strokeWidth="2"/>
+        <line x1="25" y1="12" x2="25" y2="52" stroke="var(--svg-ink)" strokeWidth="2"/>
+        <line x1="39" y1="12" x2="39" y2="52" stroke="var(--svg-ink)" strokeWidth="2"/>
+        <line x1="12" y1="25" x2="52" y2="25" stroke="var(--svg-ink)" strokeWidth="2"/>
+        <line x1="12" y1="39" x2="52" y2="39" stroke="var(--svg-ink)" strokeWidth="2"/>
         {/* Animated Cells - Diagonal Flow (1→5→9→5→1) */}
-        <rect x="12" y="12" width="13" height="13" className="animate-flow-cell-1" fill="#383838"/>
-        <rect x="25" y="12" width="14" height="13" className="animate-flow-cell-other" fill="white"/>
-        <rect x="39" y="12" width="13" height="13" className="animate-flow-cell-other" fill="white"/>
-        <rect x="12" y="25" width="13" height="14" className="animate-flow-cell-other" fill="white"/>
-        <rect x="25" y="25" width="14" height="14" className="animate-flow-cell-5" fill="white"/>
-        <rect x="39" y="25" width="13" height="14" className="animate-flow-cell-other" fill="white"/>
-        <rect x="12" y="39" width="13" height="13" className="animate-flow-cell-other" fill="white"/>
-        <rect x="25" y="39" width="14" height="13" className="animate-flow-cell-other" fill="white"/>
-        <rect x="39" y="39" width="13" height="13" className="animate-flow-cell-9" fill="white"/>
+        <rect x="12" y="12" width="13" height="13" className="animate-flow-cell-1" style={{ fill: 'var(--svg-ink)' }}/>
+        <rect x="25" y="12" width="14" height="13" className="animate-flow-cell-other" style={{ fill: 'var(--svg-white)' }}/>
+        <rect x="39" y="12" width="13" height="13" className="animate-flow-cell-other" style={{ fill: 'var(--svg-white)' }}/>
+        <rect x="12" y="25" width="13" height="14" className="animate-flow-cell-other" style={{ fill: 'var(--svg-white)' }}/>
+        <rect x="25" y="25" width="14" height="14" className="animate-flow-cell-5" style={{ fill: 'var(--svg-white)' }}/>
+        <rect x="39" y="25" width="13" height="14" className="animate-flow-cell-other" style={{ fill: 'var(--svg-white)' }}/>
+        <rect x="12" y="39" width="13" height="13" className="animate-flow-cell-other" style={{ fill: 'var(--svg-white)' }}/>
+        <rect x="25" y="39" width="14" height="13" className="animate-flow-cell-other" style={{ fill: 'var(--svg-white)' }}/>
+        <rect x="39" y="39" width="13" height="13" className="animate-flow-cell-9" style={{ fill: 'var(--svg-white)' }}/>
       </svg>
     </div>
     <p className="text-ink font-mono uppercase tracking-tight-mono">{message}</p>
@@ -386,20 +386,20 @@ const Layout = ({
             <div className="w-8 h-8 md:w-12 md:h-12 flex-shrink-0">
               <svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-full">
                 {/* Background Grid */}
-                <rect x="12" y="12" width="40" height="40" fill="white" stroke="#383838" strokeWidth="2"/>
+                <rect x="12" y="12" width="40" height="40" style={{ fill: 'var(--svg-white)' }} stroke="var(--svg-ink)" strokeWidth="2"/>
                 {/* Grid Lines */}
-                <line x1="25" y1="12" x2="25" y2="52" stroke="#383838" strokeWidth="2"/>
-                <line x1="39" y1="12" x2="39" y2="52" stroke="#383838" strokeWidth="2"/>
-                <line x1="12" y1="25" x2="52" y2="25" stroke="#383838" strokeWidth="2"/>
-                <line x1="12" y1="39" x2="52" y2="39" stroke="#383838" strokeWidth="2"/>
+                <line x1="25" y1="12" x2="25" y2="52" stroke="var(--svg-ink)" strokeWidth="2"/>
+                <line x1="39" y1="12" x2="39" y2="52" stroke="var(--svg-ink)" strokeWidth="2"/>
+                <line x1="12" y1="25" x2="52" y2="25" stroke="var(--svg-ink)" strokeWidth="2"/>
+                <line x1="12" y1="39" x2="52" y2="39" stroke="var(--svg-ink)" strokeWidth="2"/>
                 {/* Highlighted Cells */}
-                <rect x="12" y="12" width="13" height="13" fill="#383838"/>
-                <rect x="25" y="25" width="14" height="14" fill="#FFD700"/>
-                <rect x="39" y="39" width="13" height="13" fill="#FFD700"/>
+                <rect x="12" y="12" width="13" height="13" style={{ fill: 'var(--svg-ink)' }}/>
+                <rect x="25" y="25" width="14" height="14" style={{ fill: 'var(--svg-accent)' }}/>
+                <rect x="39" y="39" width="13" height="13" style={{ fill: 'var(--svg-accent)' }}/>
               </svg>
             </div>
             <div className="flex flex-col justify-left">
-              <h1 className="text-base md:text-xl font-bold font-mono tracking-tight-mono leading-tight">StatPatternHub</h1>
+              <h1 className="text-base md:text-xl font-normal font-mono tracking-tight-mono leading-tight">StatPatternHub</h1>
               <p className="text-[10px] md:text-xs text-ink leading-tight hidden sm:block">Clinical Programming Warehouse</p>
             </div>
           </div>
@@ -598,7 +598,7 @@ const PatternCardAdmin: React.FC<PatternCardAdminProps> = ({
         </div>
 
         {/* Title */}
-        <h3 className={`text-xl font-sans font-semibold text-ink mb-3 ${def.isDeleted ? 'line-through' : ''}`}>
+        <h3 className={`text-xl font-mono font-normal uppercase tracking-tight-mono text-ink mb-3 ${def.isDeleted ? 'line-through' : ''}`}>
           {def.title}
         </h3>
 
@@ -1503,7 +1503,7 @@ const SmartEtlForm = ({
             required
             value={selectedPatternId}
             onChange={(e) => setSelectedPatternId(e.target.value)}
-            className="w-full p-3 border border-ink text-sm focus:outline-none focus:border-2 focus:border-link-blue font-mono"
+            className="w-full p-3 border border-ink text-sm focus:outline-none focus:border-2 focus:border-link-blue transition-all duration-brutal font-mono"
           >
             <option value="">Choose a pattern...</option>
             {CATEGORIES.map(cat => (
@@ -1534,7 +1534,7 @@ const SmartEtlForm = ({
               <select
                 value={extractLanguage}
                 onChange={(e) => setExtractLanguage(e.target.value as 'sas' | 'r' | 'both')}
-                className="text-xs border border-ink px-2 py-1 focus:outline-none focus:border-link-blue font-mono"
+                className="text-xs border border-ink px-2 py-1 focus:outline-none focus:border-2 focus:border-link-blue transition-all duration-brutal font-mono"
               >
                 <option value="both">SAS & R</option>
                 <option value="sas">SAS Only</option>
@@ -2024,7 +2024,7 @@ const AdminReviewQueue = () => {
             placeholder="Search pending patterns..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-8 pr-4 py-3 border border-ink font-mono text-sm focus:border-link-blue focus:outline-none transition-colors duration-brutal"
+            className="w-full pl-8 pr-4 py-3 border border-ink font-mono text-sm focus:outline-none focus:border-2 focus:border-link-blue transition-all duration-brutal"
           />
         </div>
       </div>
@@ -3223,7 +3223,7 @@ const AdminPatternManager = ({
                 placeholder="Search by ID or title..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-8 pr-4 py-3 border border-ink font-mono text-sm focus:border-link-blue focus:outline-none transition-colors duration-brutal"
+                className="w-full pl-8 pr-4 py-3 border border-ink font-mono text-sm focus:outline-none focus:border-2 focus:border-link-blue transition-all duration-brutal"
               />
             </div>
 
@@ -3262,7 +3262,7 @@ const AdminPatternManager = ({
                 placeholder="Search by Pattern ID, author, or title..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-8 pr-4 py-3 border border-ink font-mono text-sm focus:border-link-blue focus:outline-none transition-colors duration-brutal"
+                className="w-full pl-8 pr-4 py-3 border border-ink font-mono text-sm focus:outline-none focus:border-2 focus:border-link-blue transition-all duration-brutal"
               />
             </div>
 
@@ -3523,7 +3523,7 @@ const MyContributions = ({
               placeholder="Search by Pattern ID or title..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-8 pr-4 py-3 border border-ink font-mono text-sm focus:border-link-blue focus:outline-none transition-colors duration-brutal"
+              className="w-full pl-8 pr-4 py-3 border border-ink font-mono text-sm focus:outline-none focus:border-2 focus:border-link-blue transition-all duration-brutal"
             />
           </div>
           <select

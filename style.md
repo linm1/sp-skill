@@ -143,41 +143,11 @@ Animations are fast and snappy, not floaty.
 
 ---
 
-## 9. Common Tailwind CSS Configuration
+## 9. Tailwind CSS v4 Configuration
 
-If you were implementing this in Tailwind, extend your `tailwind.config.js` as follows:
+**This project uses Tailwind CSS v4 with CSS-based configuration.** All custom tokens are defined in the `index.css` file using the `@theme` directive, not in a JavaScript configuration file.
 
-```javascript
-module.exports = {
-  theme: {
-    extend: {
-      colors: {
-        canvas: '#F4EFEA',
-        ink: '#383838',
-        'duck-yellow': '#FFD700',
-        'link-blue': '#007AFF',
-      },
-      fontFamily: {
-        mono: ['"Aeonik Mono"', 'ui-monospace', 'monospace'],
-        sans: ['Inter', 'sans-serif'],
-      },
-      boxShadow: {
-        'brutal': '2px 2px 0px #383838',
-        'brutal-lg': '4px 4px 0px rgba(0,0,0,0.1)',
-        'terminal': '6px 6px 0px rgba(0,0,0,0.1)',
-      },
-      letterSpacing: {
-        'tight-mono': '0.32px',
-        'wide-head': '1.44px',
-      },
-      fontSize: {
-        'mega': ['72px', '86.4px'], // The Hero H1
-        'card': ['20px', '28px'],   // The Card Body
-      }
-    }
-  }
-}
-```
+See the `index.css` `@theme` block for all custom colors, shadows, fonts, and other design tokens. The tokens defined there automatically generate Tailwind utility classes (e.g., `text-ink`, `bg-canvas`, `shadow-brutal`).
 
 ### Common Tailwind Class Strings
 *   **Hero Header:** `font-mono text-ink text-mega uppercase tracking-wide-head font-normal`
