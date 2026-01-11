@@ -1223,17 +1223,17 @@ function CodeViewerModal({ isOpen, code, language, filename, onClose, onSave }: 
             {isEditing && <span className="text-xs opacity-75">(editing)</span>}
           </h3>
           <div className="flex gap-2 items-center">
-            {/* Theme Toggle - Responsive icon+text */}
+            {/* Theme Toggle (utility) - borderless icon-only */}
             <button
               onClick={toggleTheme}
-              className="px-2 md:px-3 py-1.5 md:py-2 flex items-center hover:bg-white hover:text-ink transition-all duration-brutal border border-white font-mono text-xs uppercase"
+              className="text-white hover:text-duck-yellow transition-colors duration-brutal"
               title={codeTheme === 'light' ? 'Switch to dark theme' : 'Switch to light theme'}
               aria-label={codeTheme === 'light' ? 'Switch to dark theme' : 'Switch to light theme'}
             >
-              <i className={`fas ${codeTheme === 'light' ? 'fa-moon' : 'fa-sun'} md:mr-2`} style={{ fontFamily: '"Font Awesome 6 Free"' }}></i>
-              <span className="hidden md:inline">{codeTheme === 'light' ? 'Dark' : 'Light'}</span>
+              <i className={`fas ${codeTheme === 'light' ? 'fa-moon' : 'fa-sun'}`} style={{ fontFamily: '"Font Awesome 6 Free"' }}></i>
             </button>
 
+            {/* Edit button (navigation) - responsive icon+text */}
             {!isEditing && (
               <button
                 onClick={() => setIsEditing(true)}
@@ -1244,13 +1244,13 @@ function CodeViewerModal({ isOpen, code, language, filename, onClose, onSave }: 
                 <span className="hidden md:inline">Edit</span>
               </button>
             )}
+            {/* Close button (utility) - borderless icon-only */}
             <button
               onClick={onClose}
-              className="px-2 md:px-3 py-1.5 md:py-2 flex items-center hover:bg-white hover:text-ink transition-all duration-brutal border border-white font-mono text-xs uppercase"
+              className="text-white hover:text-terminal-red transition-colors duration-brutal"
               title="Close"
             >
-              <i className="fas fa-times md:mr-2" style={{ fontFamily: '"Font Awesome 6 Free"' }}></i>
-              <span className="hidden md:inline">Close</span>
+              <i className="fas fa-times" style={{ fontFamily: '"Font Awesome 6 Free"' }}></i>
             </button>
           </div>
         </div>
@@ -1586,7 +1586,7 @@ const SmartEtlForm = ({
                     <span className="font-mono text-xs text-ink flex-1">
                       {uploadedFile.name} ({uploadedFile.content.split('\n').length} lines, {uploadedFile.language.toUpperCase()})
                     </span>
-                    {/* Responsive icon+text buttons */}
+                    {/* View button (navigation) - responsive icon+text */}
                     <button
                       onClick={() => setIsModalOpen(true)}
                       className="px-2 md:px-3 py-1.5 md:py-2 flex items-center border border-ink bg-white text-ink hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-brutal transition-all duration-brutal font-mono text-xs uppercase"
@@ -1595,6 +1595,7 @@ const SmartEtlForm = ({
                       <i className="fas fa-clipboard-check md:mr-2" style={{ fontFamily: '"Font Awesome 6 Free"' }}></i>
                       <span className="hidden md:inline">View</span>
                     </button>
+                    {/* Clear button (utility/remove) - borderless icon-only */}
                     <button
                       onClick={() => {
                         setUploadedFile(null);
@@ -1602,11 +1603,10 @@ const SmartEtlForm = ({
                         const input = document.getElementById('file-upload-input') as HTMLInputElement;
                         if (input) input.value = '';
                       }}
-                      className="px-2 md:px-3 py-1.5 md:py-2 flex items-center border border-ink bg-white text-terminal-red hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-brutal transition-all duration-brutal font-mono text-xs uppercase"
+                      className="text-terminal-red hover:text-ink transition-colors duration-brutal"
                       title="Clear file"
                     >
-                      <i className="fas fa-times md:mr-2" style={{ fontFamily: '"Font Awesome 6 Free"' }}></i>
-                      <span className="hidden md:inline">Clear</span>
+                      <i className="fas fa-times" style={{ fontFamily: '"Font Awesome 6 Free"' }}></i>
                     </button>
                   </div>
                 )}
