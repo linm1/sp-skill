@@ -1585,14 +1585,13 @@ const SmartEtlForm = ({
                     <span className="font-mono text-xs text-ink flex-1">
                       {uploadedFile.name} ({uploadedFile.content.split('\n').length} lines, {uploadedFile.language.toUpperCase()})
                     </span>
-                    {/* View button (navigation) - responsive icon+text */}
+                    {/* View button - borderless icon-only */}
                     <button
                       onClick={() => setIsModalOpen(true)}
-                      className="px-2 md:px-3 py-1.5 md:py-2 flex items-center border border-ink bg-white text-ink hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-brutal transition-all duration-brutal font-mono text-xs uppercase"
+                      className="text-ink hover:text-link-blue transition-colors duration-brutal"
                       title="View code"
                     >
-                      <i className="fas fa-clipboard-check md:mr-2" style={{ fontFamily: '"Font Awesome 6 Free"' }}></i>
-                      <span className="hidden md:inline">View</span>
+                      <i className="fas fa-clipboard-check" style={{ fontFamily: '"Font Awesome 6 Free"' }}></i>
                     </button>
                     {/* Clear button (utility/remove) - borderless icon-only */}
                     <button
