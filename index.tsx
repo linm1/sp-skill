@@ -1534,12 +1534,12 @@ const SmartEtlForm = ({
                 {!uploadedFile ? (
                   <label
                     htmlFor="file-upload-input"
-                    className="flex-1 px-4 py-2 bg-white border border-ink text-ink font-mono text-xs cursor-pointer hover:shadow-brutal transition-all duration-brutal text-center"
+                    className="flex-1 px-6 py-3 bg-white border border-ink text-ink font-mono text-xs cursor-pointer hover:shadow-brutal transition-all duration-brutal text-center"
                   >
                     Choose File
                   </label>
                 ) : (
-                  <div className="flex-1 flex items-center gap-2 px-4 py-2 bg-canvas border border-ink">
+                  <div className="flex-1 flex items-center gap-2 px-4 py-3 bg-canvas border border-ink">
                     <span className="font-mono text-xs text-ink flex-1">
                       {uploadedFile.name} ({uploadedFile.content.split('\n').length} lines, {uploadedFile.language.toUpperCase()})
                     </span>
