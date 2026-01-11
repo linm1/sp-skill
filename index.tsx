@@ -1572,7 +1572,10 @@ const SmartEtlForm = ({
             </div>
 
             {/* Right: Extract Button */}
-            <div className="sm:pt-5">
+            <div className="flex flex-col">
+              <label className="block text-xs font-mono uppercase tracking-wide text-ink mb-2 opacity-0 pointer-events-none">
+                Align
+              </label>
               <button
                 onClick={handleExtract}
                 disabled={!rawInput || isAnalyzing || isSaving}
