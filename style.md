@@ -351,7 +351,273 @@ When implementing responsive features:
 
 ---
 
-## 11. Reference Component Code
+## 11. Button Design Patterns
+
+The project uses **two distinct button patterns** based on context and purpose. All buttons MUST use **Font Awesome icons** - emojis are strictly prohibited for icon usage.
+
+### Icon Requirement
+
+**MANDATORY: All button icons must use Font Awesome.**
+
+```tsx
+// ✅ CORRECT: Font Awesome icon
+<i className="fas fa-edit" style={{ fontFamily: '"Font Awesome 6 Free"' }}></i>
+
+// ❌ WRONG: Emoji icons
+✏️ 💾 ✖ 🌙
+```
+
+**Why Font Awesome?**
+- Consistent rendering across all browsers and operating systems
+- Precise control over size, color, and spacing
+- Semantic meaning through icon classes
+- Professional appearance aligned with Neo-Brutalist design system
+- Reliable hover state transitions
+
+**Font Awesome Override:**
+All Font Awesome icons require the `style={{ fontFamily: '"Font Awesome 6 Free"' }}` attribute to ensure proper rendering.
+
+### Pattern A: Borderless Icon-Only
+
+**Used for:** Utility actions, compact contexts, universal icons
+
+**Characteristics:**
+- No border
+- No shadow
+- No translate effect
+- Color change only on hover
+- Minimal visual footprint
+- Icon-only (no text at any breakpoint)
+
+**When to Use:**
+- Utility actions: copy, close, remove, delete, theme toggle
+- Compact contexts: modal headers, inline controls, tight layouts
+- Universal icons: × (close), 🗑️ (delete), 📋 (copy), 🌙 (theme)
+- Secondary actions that should be available but not visually dominant
+
+**Code Example:**
+
+```tsx
+// Pattern: Borderless icon-only with color transition
+<button
+  onClick={handleAction}
+  className="text-ink hover:text-link-blue transition-colors duration-brutal"
+  title="Action description"
+>
+  <i className="fas fa-copy" style={{ fontFamily: '"Font Awesome 6 Free"' }}></i>
+</button>
+```
+
+**Color Variants:**
+
+```tsx
+// Light background (default)
+className="text-ink hover:text-link-blue transition-colors duration-brutal"
+
+// Dark background (modal headers)
+className="text-white hover:text-terminal-red transition-colors duration-brutal"
+className="text-white hover:text-duck-yellow transition-colors duration-brutal"
+
+// Destructive action
+className="text-terminal-red hover:text-ink transition-colors duration-brutal"
+```
+
+**Common Icons:**
+- `fa-times` - Close button
+- `fa-copy` - Copy to clipboard
+- `fa-trash` - Delete/remove
+- `fa-moon` / `fa-sun` - Theme toggle
+- `fa-chevron-left` / `fa-chevron-right` - Navigation
+
+**Real-World Examples:**
+```tsx
+// Copy button in code preview
+<button
+  onClick={copyToClipboard}
+  className="text-ink hover:text-link-blue transition-colors duration-brutal"
+  title="Copy to clipboard"
+>
+  <i className="fas fa-copy" style={{ fontFamily: '"Font Awesome 6 Free"' }}></i>
+</button>
+
+// Modal close button
+<button
+  onClick={onClose}
+  className="text-white hover:text-terminal-red transition-colors duration-brutal"
+  title="Close"
+>
+  <i className="fas fa-times" style={{ fontFamily: '"Font Awesome 6 Free"' }}></i>
+</button>
+
+// Theme toggle
+<button
+  onClick={toggleTheme}
+  className="text-white hover:text-duck-yellow transition-colors duration-brutal"
+  title="Toggle theme"
+>
+  <i className={`fas ${theme === 'light' ? 'fa-moon' : 'fa-sun'}`} style={{ fontFamily: '"Font Awesome 6 Free"' }}></i>
+</button>
+
+// Remove item in list
+<button
+  onClick={() => handleRemove(id)}
+  className="text-terminal-red hover:text-ink transition-colors duration-brutal"
+  title="Remove entry"
+>
+  <i className="fas fa-times" style={{ fontFamily: '"Font Awesome 6 Free"' }}></i>
+</button>
+```
+
+---
+
+### Pattern B: Responsive Icon+Text
+
+**Used for:** Primary actions, navigation, actions that benefit from labels
+
+**Characteristics:**
+- Border with brutal shadow on hover
+- Translate effect (`-translate-x-0.5 -translate-y-0.5`)
+- Text label visible on desktop, hidden on mobile
+- Icon always visible at all breakpoints
+- More visual prominence
+
+**When to Use:**
+- Primary actions: submit, save, extract, export
+- Navigation: view, edit, contribute, settings
+- Actions that benefit from text labels for clarity
+- Main CTAs (Call to Action) that should stand out
+
+**Code Example:**
+
+```tsx
+// Pattern: Responsive icon+text with brutal shadow hover
+<button className="
+  px-2 md:px-3
+  py-1.5 md:py-2
+  flex items-center
+  border border-ink
+  bg-white text-ink
+  hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-brutal
+  transition-all duration-brutal
+  font-mono text-xs uppercase
+">
+  <i className="fas fa-edit md:mr-2" style={{ fontFamily: '"Font Awesome 6 Free"' }}></i>
+  <span className="hidden md:inline">Edit</span>
+</button>
+```
+
+**Key Styling Rules:**
+1. **Icon margin:** Use `md:mr-2` (8px gap on desktop, no gap on mobile)
+2. **Text visibility:** Use `hidden md:inline` (hide on mobile, show on desktop)
+3. **Typography:** Always `font-mono text-xs uppercase`
+4. **Padding:** Responsive `px-2 md:px-3 py-1.5 md:py-2`
+5. **Border:** Always `border border-ink` (or `border-white` on dark backgrounds)
+6. **Hover:** `-translate-x-0.5 -translate-y-0.5 shadow-brutal`
+
+**Responsive Behavior:**
+- **Mobile (<768px):** Icon only, compact padding
+- **Desktop (≥768px):** Icon + text with 8px gap, more generous padding
+
+**Color Variants:**
+
+```tsx
+// Default (white background, dark text)
+className="border border-ink bg-white text-ink hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-brutal"
+
+// Primary action (dark background, white text)
+className="border border-ink bg-ink text-white hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-brutal"
+
+// On dark background (modal headers)
+className="border border-white bg-transparent text-white hover:bg-white hover:text-ink hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-brutal"
+```
+
+**Common Icons:**
+- `fa-edit` - Edit action
+- `fa-save` - Save changes
+- `fa-clipboard-check` - View/review
+- `fa-plus-circle` - Add/create
+- `fa-download` - Export/download
+- `fa-upload` - Upload/import
+- `fa-cog` - Settings
+
+**Real-World Examples:**
+
+```tsx
+// View code button (navigation)
+<button
+  onClick={() => setIsModalOpen(true)}
+  className="px-2 md:px-3 py-1.5 md:py-2 flex items-center border border-ink bg-white text-ink hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-brutal transition-all duration-brutal font-mono text-xs uppercase"
+  title="View code"
+>
+  <i className="fas fa-clipboard-check md:mr-2" style={{ fontFamily: '"Font Awesome 6 Free"' }}></i>
+  <span className="hidden md:inline">View</span>
+</button>
+
+// Save button (primary action)
+<button
+  onClick={handleSave}
+  className="px-4 py-2 text-xs font-mono uppercase bg-ink text-white border border-ink hover:shadow-brutal transition-all duration-brutal"
+>
+  <i className="fas fa-save mr-2" style={{ fontFamily: '"Font Awesome 6 Free"' }}></i>
+  Save
+</button>
+
+// Edit button (primary action in footer)
+<button
+  onClick={() => setIsEditing(true)}
+  className="px-4 py-2 text-xs font-mono uppercase bg-ink text-white border border-ink hover:shadow-brutal transition-all duration-brutal"
+>
+  <i className="fas fa-edit mr-2" style={{ fontFamily: '"Font Awesome 6 Free"' }}></i>
+  Edit
+</button>
+
+// Contribute button (navigation)
+<button className="
+  px-2 md:px-4
+  py-1.5 md:py-2
+  flex items-center
+  border border-ink
+  bg-white text-ink
+  hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-brutal
+  transition-all duration-brutal
+  font-mono text-xs md:text-sm uppercase
+">
+  <i className="fas fa-plus-circle sm:mr-2" style={{ fontFamily: '"Font Awesome 6 Free"' }}></i>
+  <span className="hidden sm:inline">Contribute</span>
+</button>
+```
+
+---
+
+### Decision Matrix: Which Pattern to Use?
+
+| Question | Borderless Icon-Only | Responsive Icon+Text |
+|----------|---------------------|---------------------|
+| Is it a utility action (copy, close, delete)? | ✅ Yes | ❌ No |
+| Is it in a compact context (modal header, inline)? | ✅ Yes | ❌ No |
+| Is the icon universally recognized (×, 🌙)? | ✅ Yes | ❌ No |
+| Is it a primary action (save, submit, export)? | ❌ No | ✅ Yes |
+| Is it navigation (view, edit, settings)? | ❌ No | ✅ Yes |
+| Does it benefit from a text label? | ❌ No | ✅ Yes |
+| Should it be visually prominent? | ❌ No | ✅ Yes |
+
+---
+
+### Implementation Checklist
+
+**Before implementing any button:**
+- [ ] ✅ Use Font Awesome icon (NOT emoji)
+- [ ] Add `style={{ fontFamily: '"Font Awesome 6 Free"' }}` to icon
+- [ ] Choose correct pattern (borderless vs responsive)
+- [ ] Add `title` attribute for accessibility tooltip
+- [ ] Use appropriate color variant for background context
+- [ ] Test on mobile (375px) and desktop (1024px+)
+- [ ] Verify hover state transitions smoothly
+- [ ] Ensure tap target is at least 44x44px on mobile
+
+---
+
+## 12. Reference Component Code
 
 Here is a reference snippet for a **"Feature Card"** that encapsulates the core logic of the system:
 
