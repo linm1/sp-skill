@@ -4,6 +4,7 @@ import { db } from '../db/index.js';
 import { users } from '../db/schema.js';
 import { eq } from 'drizzle-orm';
 import { cache } from './cache.js';
+import { sendError } from './api-response.js';
 
 // Initialize Clerk client
 const clerkClient = createClerkClient({
@@ -147,4 +148,76 @@ export function requireRole(role: string, handler: (req: VercelRequest & { user?
     req.user = user;
     return handler(req, res);
   };
+}
+
+/**
+ * Check if user has admin role and send error response if not
+ *
+ * This is a guard function that validates admin access and automatically sends
+ * a standardized error response if the user is not an admin.
+ *
+ * @param user - Authenticated user object (from getAuthenticatedUser)
+ * @param res - Vercel response object
+ * @param customMessage - Optional custom error message (defaults to "Admin access required")
+ * @returns true if user is admin, false otherwise (error response already sent)
+ *
+ * @example
+ * ```typescript
+ * const user = await getAuthenticatedUser(req);
+ * if (!requireAdmin(user, res, 'Admin access required to create patterns')) return;
+ *
+ * // Continue with admin-only logic
+ * ```
+ */
+export function requireAdminGuard(
+  user: typeof users.$inferSelect | null,
+  res: VercelResponse,
+  customMessage?: string
+): boolean {
+  if (!user || user.role !== 'admin') {
+    sendError(
+      res,
+      403,
+      'Forbidden',
+      customMessage || 'Admin access required'
+    );
+    return false;
+  }
+  return true;
+}
+
+/**
+ * Check if user is authenticated and send error response if not
+ *
+ * This is a guard function that validates authentication and automatically sends
+ * a standardized error response if the user is not authenticated.
+ *
+ * @param user - Authenticated user object (from getAuthenticatedUser)
+ * @param res - Vercel response object
+ * @param customMessage - Optional custom error message (defaults to "Authentication required")
+ * @returns true if authenticated, false otherwise (error response already sent)
+ *
+ * @example
+ * ```typescript
+ * const user = await getAuthenticatedUser(req);
+ * if (!requireAuthGuard(user, res)) return;
+ *
+ * // Continue with authenticated logic
+ * ```
+ */
+export function requireAuthGuard(
+  user: typeof users.$inferSelect | null,
+  res: VercelResponse,
+  customMessage?: string
+): boolean {
+  if (!user) {
+    sendError(
+      res,
+      401,
+      'Unauthorized',
+      customMessage || 'Authentication required'
+    );
+    return false;
+  }
+  return true;
 }

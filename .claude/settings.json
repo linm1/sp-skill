@@ -1,7 +1,10 @@
 {
-    "description": "Claude Code settings for StatPatternHub project",
-    "project": {
-        "name": "StatPatternHub",
-        "description": "Knowledge management platform for clinical programming patterns (SAS/R)"
-    }
+  "description": "Claude Code settings for StatPatternHub project",
+  "project": {
+    "name": "StatPatternHub",
+    "description": "Knowledge management platform for clinical programming patterns (SAS/R)"
+  },
+  "enabledPlugins": {
+    "code-simplifier@claude-plugins-official": true
+  }
 }

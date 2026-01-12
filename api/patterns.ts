@@ -3,9 +3,13 @@ import { z } from 'zod';
 import { db } from '../db/index.js';
 import { patternDefinitions, patternImplementations } from '../db/schema.js';
 import { eq, and } from 'drizzle-orm';
-import { getAuthenticatedUser } from '../lib/auth.js';
+import { getAuthenticatedUser, requireAdminGuard } from '../lib/auth.js';
 import { cache } from '../lib/cache.js';
-import { CACHE_TTL } from '../lib/constants.js';
+import { CACHE_TTL, PATTERN_ID_REGEX, PATTERN_ID_ERROR_MESSAGE, VALID_CATEGORIES } from '../lib/constants.js';
+import { isSoftDeleteColumnMissing } from '../lib/db-utils.js';
+import { sendError, sendSuccess } from '../lib/api-response.js';
+import { validateWithZod } from '../lib/validation.js';
+import { invalidatePatternCatalog } from '../lib/cache-invalidation.js';
 
 /**
  * Pattern Catalog API
@@ -35,14 +39,11 @@ import { CACHE_TTL } from '../lib/constants.js';
  * }
  */
 
-// Valid pattern categories
-const VALID_CATEGORIES = ['IMP', 'DER', 'DAT', 'RSH', 'AGG', 'MRG', 'CAT', 'FLG', 'SRT', 'FMT', 'VAL', 'CDS', 'STA', 'OPT'] as const;
-
 // Zod schema for POST request validation
 const createPatternSchema = z.object({
-  id: z.string().regex(/^[A-Z]{3}-\d{3}$/, 'Pattern ID must match format XXX-NNN (e.g., IMP-001)'),
+  id: z.string().regex(PATTERN_ID_REGEX, PATTERN_ID_ERROR_MESSAGE),
   category: z.enum(VALID_CATEGORIES, {
-    errorMap: () => ({ message: `Category must be one of: ${VALID_CATEGORIES.join(', ')}` })
+    message: `Category must be one of: ${VALID_CATEGORIES.join(', ')}`
   }),
   title: z.string().min(1, 'Title is required'),
   problem: z.string().min(1, 'Problem description is required'),
@@ -74,13 +75,8 @@ async function handleGet(req: VercelRequest, res: VercelResponse) {
     let userRole = 'guest'; // Default role for non-authenticated users
     if (includeDeleted === 'true') {
       const user = await getAuthenticatedUser(req);
-      if (!user || user.role !== 'admin') {
-        return res.status(403).json({
-          error: 'Forbidden',
-          message: 'Admin role required to view deleted patterns'
-        });
-      }
-      userRole = user.role;
+      if (!requireAdminGuard(user, res, 'Admin role required to view deleted patterns')) return;
+      userRole = user!.role; // Type assertion safe after guard check
     } else {
       // Try to get user role for cache key (non-blocking)
       try {
@@ -105,7 +101,7 @@ async function handleGet(req: VercelRequest, res: VercelResponse) {
     }
 
     // Base query - get all pattern definitions
-    let patterns;
+    let patterns: any[] = [];
 
     try {
       // Try to query with soft-delete filter first
@@ -143,11 +139,7 @@ async function handleGet(req: VercelRequest, res: VercelResponse) {
 
       // Check if it's a column missing error (migration not applied)
       // If so, retry without soft-delete filtering
-      const isColumnError =
-        dbError.message?.includes('column') &&
-        (dbError.message?.includes('does not exist') || dbError.message?.includes('isDeleted') || dbError.message?.includes('is_deleted'));
-
-      if (isColumnError) {
+      if (isSoftDeleteColumnMissing(dbError)) {
         console.warn('Soft-delete columns not found, querying without isDeleted filter (migration not applied yet)');
 
         // Retry query without soft-delete filter
@@ -166,12 +158,13 @@ async function handleGet(req: VercelRequest, res: VercelResponse) {
         }
       } else if (dbError.message?.includes('connection') || dbError.code === 'ECONNREFUSED') {
         // Check if it's a connection error
-        return res.status(500).json({
-          success: false,
-          error: 'Database connection failed',
-          message: 'Unable to connect to database. Please verify POSTGRES_URL environment variable is set correctly.',
-          details: dbError.message
-        });
+        return sendError(
+          res,
+          500,
+          'Database connection failed',
+          'Unable to connect to database. Please verify POSTGRES_URL environment variable is set correctly.',
+          [{ message: dbError.message }]
+        );
       } else {
         // Generic database error
         throw dbError;
@@ -193,7 +186,7 @@ async function handleGet(req: VercelRequest, res: VercelResponse) {
     const enrichedPatterns = await Promise.all(
       patterns.map(async (pattern) => {
         // Get only active implementations for this pattern (and exclude soft-deleted unless includeDeleted)
-        let implementations;
+        let implementations: any[] = [];
         try {
           if (shouldIncludeDeleted) {
             implementations = await db
@@ -221,11 +214,7 @@ async function handleGet(req: VercelRequest, res: VercelResponse) {
           console.error(`Error fetching implementations for pattern ${pattern.id}:`, implError);
 
           // Check if it's a column missing error for isDeleted
-          const isColumnError =
-            implError.message?.includes('column') &&
-            (implError.message?.includes('does not exist') || implError.message?.includes('isDeleted') || implError.message?.includes('is_deleted'));
-
-          if (isColumnError) {
+          if (isSoftDeleteColumnMissing(implError)) {
             console.warn(`Soft-delete columns not found in implementations table, querying without isDeleted filter`);
             // Retry without soft-delete filter
             try {
@@ -309,11 +298,12 @@ async function handleGet(req: VercelRequest, res: VercelResponse) {
   } catch (error) {
     console.error('Error fetching patterns:', error);
 
-    return res.status(500).json({
-      success: false,
-      error: error instanceof Error ? error.message : String(error),
-      message: 'Failed to fetch patterns'
-    });
+    return sendError(
+      res,
+      500,
+      error instanceof Error ? error.message : String(error),
+      'Failed to fetch patterns'
+    );
   }
 }
 
@@ -325,37 +315,21 @@ async function handlePost(req: VercelRequest, res: VercelResponse) {
   try {
     // 1. Authenticate user and check admin role
     const user = await getAuthenticatedUser(req);
-    if (!user || user.role !== 'admin') {
-      return res.status(403).json({
-        error: 'Forbidden',
-        message: 'Admin access required to create patterns'
-      });
-    }
+    if (!requireAdminGuard(user, res, 'Admin access required to create patterns')) return;
 
     // 2. Validate request body with Zod
-    let validated: CreatePatternRequest;
-    try {
-      validated = createPatternSchema.parse(req.body);
-    } catch (error) {
-      if (error instanceof z.ZodError) {
-        return res.status(400).json({
-          error: 'Validation failed',
-          details: error.issues.map(e => ({
-            field: e.path.join('.'),
-            message: e.message
-          }))
-        });
-      }
-      throw error;
-    }
+    const validated = validateWithZod(createPatternSchema, req.body, res);
+    if (!validated) return; // Error already sent
 
     // 3. Validate that pattern ID's category prefix matches the category field
     const idPrefix = validated.id.split('-')[0];
     if (idPrefix !== validated.category) {
-      return res.status(400).json({
-        error: 'Validation failed',
-        message: `Pattern ID prefix '${idPrefix}' must match category '${validated.category}'`
-      });
+      return sendError(
+        res,
+        400,
+        'Validation failed',
+        `Pattern ID prefix '${idPrefix}' must match category '${validated.category}'`
+      );
     }
 
     // 4. Check for duplicate pattern ID
@@ -366,11 +340,13 @@ async function handlePost(req: VercelRequest, res: VercelResponse) {
       .limit(1);
 
     if (existingPattern.length > 0) {
-      return res.status(409).json({
-        error: 'Duplicate pattern ID',
-        message: `Pattern with ID '${validated.id}' already exists`,
-        patternId: validated.id
-      });
+      return sendError(
+        res,
+        409,
+        'Duplicate pattern ID',
+        `Pattern with ID '${validated.id}' already exists`,
+        [{ field: 'patternId', message: validated.id }]
+      );
     }
 
     // 5. Insert new pattern definition
@@ -386,7 +362,7 @@ async function handlePost(req: VercelRequest, res: VercelResponse) {
       .returning();
 
     // 6. Invalidate pattern catalog cache
-    await cache.invalidatePattern('pattern:catalog:*');
+    await invalidatePatternCatalog();
 
     // 7. Return success response
     return res.status(201).json({
@@ -397,9 +373,11 @@ async function handlePost(req: VercelRequest, res: VercelResponse) {
 
   } catch (error) {
     console.error('[API /patterns] POST error:', error);
-    return res.status(500).json({
-      error: 'Internal server error',
-      message: error instanceof Error ? error.message : 'Failed to create pattern'
-    });
+    return sendError(
+      res,
+      500,
+      'Internal server error',
+      error instanceof Error ? error.message : 'Failed to create pattern'
+    );
   }
 }

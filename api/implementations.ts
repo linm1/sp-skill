@@ -3,10 +3,15 @@ import { z } from 'zod';
 import { db } from '../db/index.js';
 import { patternDefinitions, patternImplementations } from '../db/schema.js';
 import { eq, and } from 'drizzle-orm';
-import { getAuthenticatedUser } from '../lib/auth.js';
+import { getAuthenticatedUser, requireAuthGuard, requireAdminGuard } from '../lib/auth.js';
 import { sendAdminNotification } from '../lib/email.js';
 import { cache } from '../lib/cache.js';
-import { CACHE_TTL } from '../lib/constants.js';
+import { CACHE_TTL, PATTERN_ID_REGEX, PATTERN_ID_ERROR_MESSAGE } from '../lib/constants.js';
+import { isSoftDeleteColumnMissing } from '../lib/db-utils.js';
+import { IMPLEMENTATION_WITH_PATTERN_FIELDS } from '../lib/db-selects.js';
+import { sendError } from '../lib/api-response.js';
+import { validateWithZod } from '../lib/validation.js';
+import { invalidateAllPatternCaches, invalidatePendingImplementations } from '../lib/cache-invalidation.js';
 
 /**
  * Pattern Implementations API
@@ -34,8 +39,7 @@ import { CACHE_TTL } from '../lib/constants.js';
 
 // Zod schema for POST request validation
 const createImplementationSchema = z.object({
-  patternId: z.string()
-    .regex(/^[A-Z]{3}-\d{3}$/, 'Pattern ID must match format XXX-NNN (e.g., IMP-001)'),
+  patternId: z.string().regex(PATTERN_ID_REGEX, PATTERN_ID_ERROR_MESSAGE),
   sasCode: z.string().optional(),
   rCode: z.string().optional(),
   considerations: z.array(z.string()).optional().default([]),
@@ -76,29 +80,11 @@ async function handlePost(req: VercelRequest, res: VercelResponse) {
   try {
     // 1. Authenticate user
     const user = await getAuthenticatedUser(req);
-    if (!user) {
-      return res.status(401).json({
-        error: 'Unauthorized',
-        message: 'Please log in to submit an implementation'
-      });
-    }
+    if (!requireAuthGuard(user, res, 'Please log in to submit an implementation')) return;
 
     // 2. Validate request body with Zod
-    let validated: CreateImplementationRequest;
-    try {
-      validated = createImplementationSchema.parse(req.body);
-    } catch (error) {
-      if (error instanceof z.ZodError) {
-        return res.status(400).json({
-          error: 'Validation failed',
-          details: error.issues.map(e => ({
-            field: e.path.join('.'),
-            message: e.message
-          }))
-        });
-      }
-      throw error;
-    }
+    const validated = validateWithZod(createImplementationSchema, req.body, res);
+    if (!validated) return; // Error already sent
 
     // 3. Check that pattern ID exists in pattern_definitions table and fetch pattern details
     const patternExists = await db
@@ -125,8 +111,8 @@ async function handlePost(req: VercelRequest, res: VercelResponse) {
       .insert(patternImplementations)
       .values({
         patternId: validated.patternId,
-        authorId: user.id,
-        authorName: user.name || user.email.split('@')[0], // Fallback to email prefix if no name
+        authorId: user!.id, // Safe after guard check
+        authorName: user!.name || user!.email.split('@')[0], // Fallback to email prefix if no name
         sasCode: validated.sasCode || null,
         rCode: validated.rCode || null,
         considerations: validated.considerations || [],
@@ -167,9 +153,8 @@ async function handlePost(req: VercelRequest, res: VercelResponse) {
     }
 
     // 6. Invalidate caches
-    await cache.invalidatePattern('impl:pending:*');
-    await cache.del(`pattern:detail:${implementation.patternId}`);
-    await cache.invalidatePattern('pattern:catalog:*');
+    await invalidateAllPatternCaches(implementation.patternId);
+    await invalidatePendingImplementations();
 
     // 7. Return success response with created implementation
     return res.status(201).json({
@@ -210,29 +195,19 @@ async function handleGet(req: VercelRequest, res: VercelResponse) {
   try {
     // 1. Authenticate user
     const user = await getAuthenticatedUser(req);
-    if (!user) {
-      return res.status(401).json({
-        error: 'Unauthorized',
-        message: 'Please log in to view implementations'
-      });
-    }
+    if (!requireAuthGuard(user, res, 'Please log in to view implementations')) return;
 
     // 2. Validate query parameters
     const { author_id, status, patternId, includeDeleted } = req.query;
 
     // Check if includeDeleted is requested (admin-only)
     const shouldIncludeDeleted = includeDeleted === 'true';
-    if (shouldIncludeDeleted && user.role !== 'admin') {
-      return res.status(403).json({
-        error: 'Forbidden',
-        message: 'Admin role required to view deleted implementations'
-      });
-    }
+    if (shouldIncludeDeleted && !requireAdminGuard(user, res, 'Admin role required to view deleted implementations')) return;
 
     // Route 1: Get user's own implementations (author_id=me)
     if (author_id === 'me') {
       // Check cache before DB query
-      const cacheKey = `impl:user:${user.id}:${shouldIncludeDeleted}`;
+      const cacheKey = `impl:user:${user!.id}:${shouldIncludeDeleted}`; // Safe after guard check
       const cachedData = await cache.get<any>(cacheKey);
       if (cachedData) {
         return res.status(200).json(cachedData);
@@ -242,22 +217,7 @@ async function handleGet(req: VercelRequest, res: VercelResponse) {
 
       try {
         userImplementations = await db
-          .select({
-            // Implementation fields
-            uuid: patternImplementations.uuid,
-            patternId: patternImplementations.patternId,
-            authorName: patternImplementations.authorName,
-            sasCode: patternImplementations.sasCode,
-            rCode: patternImplementations.rCode,
-            considerations: patternImplementations.considerations,
-            variations: patternImplementations.variations,
-            status: patternImplementations.status,
-            createdAt: patternImplementations.createdAt,
-            updatedAt: patternImplementations.updatedAt,
-            // Pattern definition fields (joined)
-            patternTitle: patternDefinitions.title,
-            patternCategory: patternDefinitions.category,
-          })
+          .select(IMPLEMENTATION_WITH_PATTERN_FIELDS)
           .from(patternImplementations)
           .innerJoin(
             patternDefinitions,
@@ -265,9 +225,9 @@ async function handleGet(req: VercelRequest, res: VercelResponse) {
           )
           .where(
             shouldIncludeDeleted
-              ? eq(patternImplementations.authorId, user.id)
+              ? eq(patternImplementations.authorId, user!.id) // Safe after guard check
               : and(
-                  eq(patternImplementations.authorId, user.id),
+                  eq(patternImplementations.authorId, user!.id), // Safe after guard check
                   eq(patternImplementations.isDeleted, false)
                 )
           );
@@ -275,37 +235,18 @@ async function handleGet(req: VercelRequest, res: VercelResponse) {
         console.error('Database query error for user implementations:', dbError);
 
         // Check if it's a column missing error (migration not applied)
-        const isColumnError =
-          dbError.message?.includes('column') &&
-          (dbError.message?.includes('does not exist') || dbError.message?.includes('isDeleted') || dbError.message?.includes('is_deleted'));
-
-        if (isColumnError) {
+        if (isSoftDeleteColumnMissing(dbError)) {
           console.warn('Soft-delete columns not found in implementations table, querying without isDeleted filter');
 
           // Retry without soft-delete filter
           userImplementations = await db
-            .select({
-              // Implementation fields
-              uuid: patternImplementations.uuid,
-              patternId: patternImplementations.patternId,
-              authorName: patternImplementations.authorName,
-              sasCode: patternImplementations.sasCode,
-              rCode: patternImplementations.rCode,
-              considerations: patternImplementations.considerations,
-              variations: patternImplementations.variations,
-              status: patternImplementations.status,
-              createdAt: patternImplementations.createdAt,
-              updatedAt: patternImplementations.updatedAt,
-              // Pattern definition fields (joined)
-              patternTitle: patternDefinitions.title,
-              patternCategory: patternDefinitions.category,
-            })
+            .select(IMPLEMENTATION_WITH_PATTERN_FIELDS)
             .from(patternImplementations)
             .innerJoin(
               patternDefinitions,
               eq(patternImplementations.patternId, patternDefinitions.id)
             )
-            .where(eq(patternImplementations.authorId, user.id));
+            .where(eq(patternImplementations.authorId, user!.id)); // Safe after guard check
         } else {
           // Re-throw if different error
           throw dbError;
@@ -328,12 +269,7 @@ async function handleGet(req: VercelRequest, res: VercelResponse) {
     // Route 2: Get pending implementations for admin review (status=pending)
     if (status === 'pending') {
       // Check if user has admin role
-      if (user.role !== 'admin') {
-        return res.status(403).json({
-          error: 'Forbidden',
-          message: 'Admin role required to view pending implementations'
-        });
-      }
+      if (!requireAdminGuard(user, res, 'Admin role required to view pending implementations')) return;
 
       // Check cache before DB query
       const cacheKey = `impl:pending:${shouldIncludeDeleted}`;
@@ -346,23 +282,7 @@ async function handleGet(req: VercelRequest, res: VercelResponse) {
 
       try {
         pendingImplementations = await db
-          .select({
-            // Implementation fields
-            uuid: patternImplementations.uuid,
-            patternId: patternImplementations.patternId,
-            authorId: patternImplementations.authorId,
-            authorName: patternImplementations.authorName,
-            sasCode: patternImplementations.sasCode,
-            rCode: patternImplementations.rCode,
-            considerations: patternImplementations.considerations,
-            variations: patternImplementations.variations,
-            status: patternImplementations.status,
-            createdAt: patternImplementations.createdAt,
-            updatedAt: patternImplementations.updatedAt,
-            // Pattern definition fields (joined)
-            patternTitle: patternDefinitions.title,
-            patternCategory: patternDefinitions.category,
-          })
+          .select(IMPLEMENTATION_WITH_PATTERN_FIELDS)
           .from(patternImplementations)
           .innerJoin(
             patternDefinitions,
@@ -380,32 +300,12 @@ async function handleGet(req: VercelRequest, res: VercelResponse) {
         console.error('Database query error for pending implementations:', dbError);
 
         // Check if it's a column missing error (migration not applied)
-        const isColumnError =
-          dbError.message?.includes('column') &&
-          (dbError.message?.includes('does not exist') || dbError.message?.includes('isDeleted') || dbError.message?.includes('is_deleted'));
-
-        if (isColumnError) {
+        if (isSoftDeleteColumnMissing(dbError)) {
           console.warn('Soft-delete columns not found in implementations table, querying without isDeleted filter');
 
           // Retry without soft-delete filter
           pendingImplementations = await db
-            .select({
-              // Implementation fields
-              uuid: patternImplementations.uuid,
-              patternId: patternImplementations.patternId,
-              authorId: patternImplementations.authorId,
-              authorName: patternImplementations.authorName,
-              sasCode: patternImplementations.sasCode,
-              rCode: patternImplementations.rCode,
-              considerations: patternImplementations.considerations,
-              variations: patternImplementations.variations,
-              status: patternImplementations.status,
-              createdAt: patternImplementations.createdAt,
-              updatedAt: patternImplementations.updatedAt,
-              // Pattern definition fields (joined)
-              patternTitle: patternDefinitions.title,
-              patternCategory: patternDefinitions.category,
-            })
+            .select(IMPLEMENTATION_WITH_PATTERN_FIELDS)
             .from(patternImplementations)
             .innerJoin(
               patternDefinitions,
@@ -434,12 +334,7 @@ async function handleGet(req: VercelRequest, res: VercelResponse) {
     // Route 3: Get implementations by pattern ID (admin only)
     if (patternId && typeof patternId === 'string') {
       // Check if user has admin role
-      if (user.role !== 'admin') {
-        return res.status(403).json({
-          error: 'Forbidden',
-          message: 'Admin role required to query implementations by pattern ID'
-        });
-      }
+      if (!requireAdminGuard(user, res, 'Admin role required to query implementations by pattern ID')) return;
 
       // Check cache before DB query
       const cacheKey = `impl:pattern:${patternId}:${shouldIncludeDeleted}`;

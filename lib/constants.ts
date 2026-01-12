@@ -42,3 +42,28 @@ export const RATE_LIMITS = {
   /** Admin users: unlimited (set high value) */
   ADMIN_DAILY: 999999,
 } as const;
+
+/**
+ * Pattern ID validation regex
+ * Format: XXX-NNN (e.g., IMP-001)
+ */
+export const PATTERN_ID_REGEX = /^[A-Z]{3}-\d{3}$/;
+
+/**
+ * Pattern ID validation error message
+ */
+export const PATTERN_ID_ERROR_MESSAGE = 'Pattern ID must match format XXX-NNN (e.g., IMP-001)';
+
+/**
+ * Valid pattern category codes
+ */
+export const VALID_CATEGORIES = [
+  'IMP', 'DER', 'DAT', 'RSH', 'AGG', 'MRG',
+  'CAT', 'FLG', 'SRT', 'FMT', 'VAL', 'CDS',
+  'STA', 'OPT'
+] as const;
+
+/**
+ * Pattern category type derived from VALID_CATEGORIES
+ */
+export type PatternCategory = typeof VALID_CATEGORIES[number];
