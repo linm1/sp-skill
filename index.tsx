@@ -1562,6 +1562,23 @@ const SmartEtlForm = ({
                     const file = e.target.files?.[0];
                     if (!file) return;
 
+                    // Security: File size validation (500KB limit) to prevent browser memory exhaustion
+                    const MAX_FILE_SIZE = 500000; // 500KB
+                    if (file.size > MAX_FILE_SIZE) {
+                      alert('File too large (max 500KB). Please upload a smaller file.');
+                      e.target.value = ''; // Clear the file input
+                      return;
+                    }
+
+                    // Security: MIME type and extension validation to prevent malicious file uploads
+                    const validMimeTypes = ['text/plain', 'application/x-sas', 'text/x-r'];
+                    const validExtensionPattern = /\.(sas|r|txt)$/i;
+                    if (!validMimeTypes.includes(file.type) && !file.name.match(validExtensionPattern)) {
+                      alert('Invalid file type. Please upload a .sas, .r, or .txt file.');
+                      e.target.value = ''; // Clear the file input
+                      return;
+                    }
+
                     const content = await file.text();
                     const language: 'sas' | 'r' = file.name.endsWith('.sas') ? 'sas' : 'r';
 

@@ -1,9 +1,38 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
+import { z } from 'zod';
 import { db } from '../../db/index.js';
 import { patternImplementations } from '../../db/schema.js';
 import { eq } from 'drizzle-orm';
 import { getAuthenticatedUser } from '../../lib/auth.js';
 import { cache } from '../../lib/cache.js';
+
+/**
+ * Zod schema for PUT request validation
+ *
+ * Security considerations:
+ * - sasCode/rCode: Max 100KB to prevent DoS attacks via large payloads
+ * - considerations/variations: Max 50 items, 500 chars each to prevent array-based DoS
+ * - isPremium: Boolean type enforcement prevents type coercion attacks
+ * - status: Optional string for admin status override
+ *
+ * OWASP Reference: A03:2021 - Injection (input validation)
+ */
+const putImplementationSchema = z.object({
+  sasCode: z.string()
+    .min(1, 'SAS code is required')
+    .max(100000, 'SAS code too large (max 100KB)'),
+  rCode: z.string()
+    .min(1, 'R code is required')
+    .max(100000, 'R code too large (max 100KB)'),
+  considerations: z.array(
+    z.string().max(500, 'Consideration item too long (max 500 chars)')
+  ).max(50, 'Too many considerations (max 50)').optional(),
+  variations: z.array(
+    z.string().max(500, 'Variation item too long (max 500 chars)')
+  ).max(50, 'Too many variations (max 50)').optional(),
+  isPremium: z.boolean().optional(),
+  status: z.string().optional()
+});
 
 /**
  * Pattern Implementation Update Endpoint
@@ -246,7 +275,19 @@ async function handlePut(req: VercelRequest, res: VercelResponse) {
       });
     }
 
-    // 3. Extract update fields from request body
+    // 3. Validate request body with Zod schema
+    const validation = putImplementationSchema.safeParse(req.body);
+
+    if (!validation.success) {
+      return res.status(400).json({
+        error: 'Validation failed',
+        details: validation.error.issues.map(err => ({
+          field: err.path.join('.'),
+          message: err.message
+        }))
+      });
+    }
+
     const {
       sasCode,
       rCode,
@@ -254,16 +295,9 @@ async function handlePut(req: VercelRequest, res: VercelResponse) {
       variations,
       isPremium,
       status: requestedStatus
-    } = req.body;
+    } = validation.data;
 
-    // 4. Validate required fields
-    if (!sasCode || !rCode) {
-      return res.status(400).json({
-        error: 'Both sasCode and rCode are required'
-      });
-    }
-
-    // 5. Determine new status based on business rules
+    // 4. Determine new status based on business rules
     let newStatus = implementation.status;
 
     if (isAdmin && requestedStatus) {
@@ -277,7 +311,7 @@ async function handlePut(req: VercelRequest, res: VercelResponse) {
     // - Admins can edit without changing status (if not explicitly provided)
     // - Editing pending/rejected implementations keeps same status
 
-    // 6. Update implementation in database
+    // 5. Update implementation in database
     const updated = await db
       .update(patternImplementations)
       .set({
@@ -292,7 +326,7 @@ async function handlePut(req: VercelRequest, res: VercelResponse) {
       .where(eq(patternImplementations.uuid, uuid))
       .returning();
 
-    // 7. Invalidate caches
+    // 6. Invalidate caches
     const patternId = updated[0].patternId;
     const authorId = updated[0].authorId;
     await cache.invalidatePattern(`impl:user:${authorId}:*`);
@@ -300,7 +334,7 @@ async function handlePut(req: VercelRequest, res: VercelResponse) {
     await cache.invalidatePattern('pattern:catalog:*');
     await cache.invalidatePattern(`impl:pattern:${patternId}:*`);
 
-    // 8. Return success response
+    // 7. Return success response
     return res.status(200).json({
       success: true,
       message: newStatus !== implementation.status
